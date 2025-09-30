@@ -1,5 +1,5 @@
 import type { IKeyring } from "@/types/Keyring";
-import { WalletService } from "./WalletService";
+import { WalletService } from "@/services/WalletService";
 import { HDKeyring } from "@/types/HDKeyring";
 
 export class KeyringController {
