@@ -31,6 +31,8 @@ export default function WalletHome() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-24">
+      {/* Container with max width for large screens */}
+      <div className="max-w-2xl mx-auto">
       {/* Top Bar */}
       <header className="px-8 pt-8 pb-6">
         <div className="flex items-center justify-between mb-8">
@@ -141,8 +143,8 @@ export default function WalletHome() {
             </button>
           </div>
 
-          {/* Portfolio Cards Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Portfolio Cards Grid - Responsive: 2 cols mobile, 3 cols tablet, 4 cols desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {/* Bitcoin Card */}
             <div className="bg-gradient-to-br from-purple-900/40 to-purple-950/40 backdrop-blur-xl rounded-3xl p-5 border border-purple-800/20">
               <div className="flex items-center gap-2 mb-4">
@@ -187,7 +189,7 @@ export default function WalletHome() {
                 </div>
                 <div>
                   <div className="text-white font-medium text-sm">Ethereum</div>
-                  <div className="text-gray-400 text-xs">BTC</div>
+                  <div className="text-gray-400 text-xs">ETH</div>
                 </div>
               </div>
 
@@ -211,6 +213,78 @@ export default function WalletHome() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                   </svg>
                   <span>4.75%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cardano Card */}
+            <div className="bg-gradient-to-br from-cyan-900/40 to-cyan-950/40 backdrop-blur-xl rounded-3xl p-5 border border-cyan-800/20">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  ₳
+                </div>
+                <div>
+                  <div className="text-white font-medium text-sm">Cardano</div>
+                  <div className="text-gray-400 text-xs">ADA</div>
+                </div>
+              </div>
+
+              {/* Simple chart line */}
+              <div className="h-12 mb-4 flex items-end">
+                <svg viewBox="0 0 100 30" className="w-full h-full">
+                  <path
+                    d="M 0,18 Q 15,14 25,20 T 50,15 T 75,12 T 100,8"
+                    fill="none"
+                    stroke="#06B6D4"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="flex items-end justify-between">
+                <div className="text-white font-semibold text-lg">$892.45</div>
+                <div className="flex items-center gap-1 text-green-400 text-xs">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  <span>8.32%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Solana Card */}
+            <div className="bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 backdrop-blur-xl rounded-3xl p-5 border border-emerald-800/20">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  ◎
+                </div>
+                <div>
+                  <div className="text-white font-medium text-sm">Solana</div>
+                  <div className="text-gray-400 text-xs">SOL</div>
+                </div>
+              </div>
+
+              {/* Simple chart line */}
+              <div className="h-12 mb-4 flex items-end">
+                <svg viewBox="0 0 100 30" className="w-full h-full">
+                  <path
+                    d="M 0,22 Q 15,18 25,12 T 50,15 T 75,10 T 100,14"
+                    fill="none"
+                    stroke="#10B981"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="flex items-end justify-between">
+                <div className="text-white font-semibold text-lg">$324.80</div>
+                <div className="flex items-center gap-1 text-red-400 text-xs">
+                  <svg className="w-3 h-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  <span>2.15%</span>
                 </div>
               </div>
             </div>
@@ -253,8 +327,8 @@ export default function WalletHome() {
             ))}
           </div>
 
-          {/* Market Items */}
-          <div className="space-y-3">
+          {/* Market Items - Responsive Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Cardano */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -362,10 +436,118 @@ export default function WalletHome() {
                 </div>
               </div>
             </div>
+
+            {/* Polkadot */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                  ●
+                </div>
+                <div>
+                  <div className="text-white font-medium">Polkadot</div>
+                  <div className="text-gray-400 text-xs">DOT</div>
+                </div>
+              </div>
+
+              {/* Mini chart */}
+              <div className="flex-1 mx-4 h-8">
+                <svg viewBox="0 0 80 20" className="w-full h-full">
+                  <path
+                    d="M 0,16 Q 15,12 25,8 T 50,12 T 80,10"
+                    fill="none"
+                    stroke="#EC4899"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="text-right">
+                <div className="text-white font-medium">$45.23</div>
+                <div className="text-green-400 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  6.82%
+                </div>
+              </div>
+            </div>
+
+            {/* Chainlink */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                  ⬡
+                </div>
+                <div>
+                  <div className="text-white font-medium">Chainlink</div>
+                  <div className="text-gray-400 text-xs">LINK</div>
+                </div>
+              </div>
+
+              {/* Mini chart */}
+              <div className="flex-1 mx-4 h-8">
+                <svg viewBox="0 0 80 20" className="w-full h-full">
+                  <path
+                    d="M 0,14 Q 15,16 25,12 T 50,14 T 80,8"
+                    fill="none"
+                    stroke="#3B82F6"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="text-right">
+                <div className="text-white font-medium">$28.94</div>
+                <div className="text-green-400 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  9.54%
+                </div>
+              </div>
+            </div>
+
+            {/* Avalanche */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                  ▲
+                </div>
+                <div>
+                  <div className="text-white font-medium">Avalanche</div>
+                  <div className="text-gray-400 text-xs">AVAX</div>
+                </div>
+              </div>
+
+              {/* Mini chart */}
+              <div className="flex-1 mx-4 h-8">
+                <svg viewBox="0 0 80 20" className="w-full h-full">
+                  <path
+                    d="M 0,10 Q 15,14 25,18 T 50,16 T 80,12"
+                    fill="none"
+                    stroke="#EF4444"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="text-right">
+                <div className="text-white font-medium">$67.32</div>
+                <div className="text-red-400 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  3.24%
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
-
+      </div>
     </div>
   );
 }
