@@ -24,47 +24,50 @@ export default function Welcome() {
           <LanguageSwitcher />
         </div>
 
-        {/* Logo */}
-        <div className="mb-16">
-          <img src="/images/ic-unicorn.png" alt="Unicorn Wallet" className="w-32 h-32" />
-        </div>
+        {/* Container with max width for large screens */}
+        <div className="max-w-2xl mx-auto w-full flex flex-col items-center">
+          {/* Logo */}
+          <div className="mb-16">
+            <img src="/images/ic_logo.png" alt="Unicorn Wallet" className="w-32 h-32" />
+          </div>
 
-        {/* Title */}
-        <div className="text-center mb-20">
-          <h1 className="text-4xl font-bold mb-4">{t('welcome.title')}</h1>
-          <p className="text-gray-400 text-base">{t('welcome.subtitle')}</p>
-        </div>
+          {/* Title */}
+          <div className="text-center mb-20">
+            <h1 className="text-4xl font-bold mb-4">{t('welcome.title')}</h1>
+            <p className="text-gray-400 text-base">{t('welcome.subtitle')}</p>
+          </div>
 
-        {/* Main Actions */}
-        <div className="w-full max-w-sm space-y-6">
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="w-full bg-white text-black py-5 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors"
-          >
-            {t('welcome.createWallet')}
-          </button>
+          {/* Main Actions */}
+          <div className="w-full max-w-sm space-y-6">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="w-full bg-white text-black py-5 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors"
+            >
+              {t('welcome.createWallet')}
+            </button>
 
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="w-full border border-gray-600 text-white py-5 rounded-full font-semibold text-lg hover:border-gray-500 transition-colors"
-          >
-            {t('welcome.importWallet')}
-          </button>
-        </div>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="w-full border border-gray-600 text-white py-5 rounded-full font-semibold text-lg hover:border-gray-500 transition-colors"
+            >
+              {t('welcome.importWallet')}
+            </button>
+          </div>
 
-        {/* Footer Links */}
-        <div className="mt-16 text-center">
-          <p className="text-gray-500 text-sm mb-4">{t('welcome.firstTime')}</p>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              alert(t('welcome.helpDev'));
-            }}
-            className="text-green-500 hover:text-green-400 text-sm transition-colors"
-          >
-            {t('welcome.learnMore')}
-          </a>
+          {/* Footer Links */}
+          <div className="mt-16 text-center">
+            <p className="text-gray-500 text-sm mb-4">{t('welcome.firstTime')}</p>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                alert(t('welcome.helpDev'));
+              }}
+              className="text-green-500 hover:text-green-400 text-sm transition-colors"
+            >
+              {t('welcome.learnMore')}
+            </a>
+          </div>
         </div>
       </div>
 

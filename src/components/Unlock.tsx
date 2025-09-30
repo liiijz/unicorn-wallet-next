@@ -39,17 +39,11 @@ export default function Unlock() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
+      {/* Container with max width for large screens */}
+      <div className="max-w-2xl mx-auto w-full flex flex-col items-center">
       {/* Logo */}
       <div className="mb-12">
-        <div className="relative">
-          <div className="absolute inset-0 bg-green-400 blur-2xl opacity-40 rounded-2xl transform scale-125"></div>
-          <div className="relative grid grid-cols-2 gap-1 p-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-sm"></div>
-            <div className="w-10 h-10 bg-gradient-to-br from-green-300 to-green-400 rounded-sm"></div>
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-sm"></div>
-            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-sm"></div>
-          </div>
-        </div>
+        <img src="/images/ic_lock.png" alt="Unlock Wallet" className="w-32 h-32" />
       </div>
 
       {/* Title */}
@@ -157,6 +151,7 @@ export default function Unlock() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
