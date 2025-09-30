@@ -26,18 +26,7 @@ export default function Welcome() {
 
         {/* Logo */}
         <div className="mb-16">
-          <div className="relative">
-            {/* Glowing effect background */}
-            <div className="absolute inset-0 bg-green-400 blur-2xl opacity-40 rounded-2xl transform scale-125"></div>
-
-            {/* Main logo grid */}
-            <div className="relative grid grid-cols-2 gap-1 p-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-sm"></div>
-              <div className="w-10 h-10 bg-gradient-to-br from-green-300 to-green-400 rounded-sm"></div>
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-sm"></div>
-              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-sm"></div>
-            </div>
-          </div>
+          <img src="/images/ic-unicorn.png" alt="Unicorn Wallet" className="w-32 h-32" />
         </div>
 
         {/* Title */}
