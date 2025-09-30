@@ -1,0 +1,115 @@
+{
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "ok": "OK",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "welcome": {
+    "title": "Your Gateway to Web3",
+    "subtitle": "Wallet · Trade · NFT · Earn · DApp",
+    "createWallet": "Create New Wallet",
+    "importWallet": "Import Existing Wallet",
+    "firstTime": "First time using a wallet?",
+    "learnMore": "Learn How to Use",
+    "helpDev": "Help documentation is under development...\n\nTip: Select 'Create New Wallet' to get started."
+  },
+  "createWallet": {
+    "title": "Create New Wallet",
+    "password": "Set Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Enter password again",
+    "agreeTerms": "I have read and agree to the",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "createButton": "Create Wallet",
+    "creating": "Creating...",
+    "successMessage": "Wallet created successfully!\n\nPlease save your recovery phrase:\n\n{{mnemonic}}\n\n⚠️ Make sure to back up your recovery phrase. This is the only way to recover your wallet!",
+    "errors": {
+      "allFieldsRequired": "Please fill in all fields",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "mustAgreeTerms": "Please agree to the terms of service"
+    }
+  },
+  "importWallet": {
+    "title": "Import Existing Wallet",
+    "mnemonic": "Recovery Phrase",
+    "mnemonicPlaceholder": "Enter 12-word recovery phrase separated by spaces",
+    "password": "Set New Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Enter password again",
+    "importButton": "Import Wallet",
+    "importing": "Importing...",
+    "errors": {
+      "allFieldsRequired": "Please fill in all fields",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "unlock": {
+    "title": "Welcome Back",
+    "subtitle": "Enter your password to unlock your wallet",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "unlockButton": "Unlock Wallet",
+    "unlocking": "Unlocking...",
+    "forgotPassword": "Forgot Password?",
+    "forgotPasswordMessage": "Forgot password feature is under development...\n\nTip: If you forgot your password, you need to re-import your wallet using the recovery phrase.",
+    "securityTip": {
+      "title": "Security Tip",
+      "message": "Please keep your password and recovery phrase safe. Unicorn Wallet does not store your password. If you forget your password, you will need to re-import your wallet using the recovery phrase."
+    },
+    "errors": {
+      "passwordRequired": "Please enter your password",
+      "wrongPassword": "Incorrect password"
+    }
+  },
+  "home": {
+    "lockWallet": "Lock Wallet",
+    "addAccount": "Add Account",
+    "addAccountDev": "Add account feature is under development...",
+    "send": "Send",
+    "receive": "Receive",
+    "swap": "Swap",
+    "assets": "Assets",
+    "manage": "Manage",
+    "activity": "Activity",
+    "viewAll": "View All",
+    "noAssets": "No other assets",
+    "noActivity": "No transaction history",
+    "addressCopied": "Address copied to clipboard"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "currency": "Currency",
+    "network": "Network",
+    "about": "About",
+    "logout": "Logout"
+  },
+  "errors": {
+    "unknown": "Unknown error occurred",
+    "networkError": "Network error",
+    "walletInitFailed": "Failed to initialize wallet",
+    "walletUnlockFailed": "Failed to unlock wallet",
+    "walletLockFailed": "Failed to lock wallet",
+    "walletCreateFailed": "Failed to create wallet",
+    "walletImportFailed": "Failed to import wallet",
+    "accountSwitchFailed": "Failed to switch account",
+    "dataRefreshFailed": "Failed to refresh data"
+  }
+}
