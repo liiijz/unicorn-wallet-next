@@ -2,6 +2,7 @@ import { HDKeyringOptions } from './../types/HDKeyring';
 import type { IKeyring } from "@/types/Keyring";
 import { WalletService } from "@/services/WalletService";
 import { HDKeyring } from "@/types/HDKeyring";
+import { walletEventBus } from "@/events/WalletEvents";
 
 export class KeyringController {
   private keyrings: IKeyring[] = [];
@@ -22,6 +23,7 @@ export class KeyringController {
   createNew(): string {
     // 1. 生成助记词
     const mnemonic = this.walletService.generateMnemonic();
+    
     // 2. 创建 HD Keyring
     const opts:HDKeyringOptions = {
       mnemonic,
@@ -29,7 +31,12 @@ export class KeyringController {
     };
     const hdKeyring = new HDKeyring(opts);
     this.keyrings.push(hdKeyring);
-    // 3. 加密并保存
+
+    // 3. 发布事件：钱包已创建
+    walletEventBus.emit('keyring:created', {
+      keyrings: this.getKeyrings(),
+    });
+
     return mnemonic;
   }
 
@@ -43,6 +50,11 @@ export class KeyringController {
     };
     const hdKeyring = new HDKeyring(opts);
     this.keyrings.push(hdKeyring);
+
+    // 发布事件：钱包已导入
+    walletEventBus.emit('keyring:imported', {
+      keyrings: this.getKeyrings(),
+    });
   }
 
   /**
@@ -89,9 +101,49 @@ export class KeyringController {
       keyring.deserialize(kr);
       this.keyrings.push(keyring);
     });
+
+    // 发布事件：钱包已恢复
+    walletEventBus.emit('keyring:restored', {
+      keyrings: this.getKeyrings(),
+    });
   }
 
   getKeyrings(): IKeyring[] {
     return this.keyrings;
+  }
+
+  /**
+   * 添加账户到指定的 keyring
+   */
+  async addAccountToKeyring(keyringIndex: number = 0): Promise<string[]> {
+    const keyring = this.keyrings[keyringIndex];
+    if (!keyring) {
+      throw new Error(`Keyring at index ${keyringIndex} not found`);
+    }
+
+    // 派生新账户
+    const newAddresses = await keyring.addAccounts(1);
+
+    // 持久化
+    this.persistVault();
+
+    // 发布事件：账户已添加
+    walletEventBus.emit('keyring:accountAdded', {
+      keyringIndex,
+      addresses: newAddresses,
+    });
+
+    return newAddresses;
+  }
+
+  /**
+   * 锁定钱包
+   */
+  lock(): void {
+    this.keyrings = [];
+    this.password = undefined;
+
+    // 发布事件：钱包已锁定
+    walletEventBus.emit('keyring:locked');
   }
 }
