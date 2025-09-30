@@ -85,7 +85,7 @@ export class KeyringController {
     const keyrings = JSON.parse(decrypted);
     console.log("keyrings:", keyrings);
     keyrings.forEach((kr: any) => {
-      const keyring: IKeyring = new HDKeyring(undefined, kr.id);
+      const keyring: IKeyring = new HDKeyring();
       keyring.deserialize(kr);
       this.keyrings.push(keyring);
     });
