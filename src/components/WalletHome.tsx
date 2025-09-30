@@ -34,7 +34,7 @@ export default function WalletHome() {
       {/* Container with max width for large screens */}
       <div className="max-w-2xl mx-auto">
       {/* Top Bar */}
-      <header className="px-8 pt-8 pb-6">
+      <header className="px-8 pt-8 pb-6 relative">
         <div className="flex items-center justify-between mb-8">
           {/* Avatar - Square with rounded corners */}
           <button
@@ -92,7 +92,7 @@ export default function WalletHome() {
 
         {/* Account Selector Dropdown */}
         {showAccountSelector && (
-          <div className="absolute top-20 left-8 right-8 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
+          <div className="absolute top-20 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
             <div className="p-4 space-y-2">
               {allAccounts.map((account: Account) => (
                 <button
