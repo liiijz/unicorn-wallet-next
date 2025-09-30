@@ -137,6 +137,7 @@ export const useWallet = () => {
     createWallet,
     importExistingWallet,
     switchAccount,
+    setCurrentAccount,
     refresh,
   };
 };
