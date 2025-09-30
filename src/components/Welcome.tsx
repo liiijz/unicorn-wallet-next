@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWallet } from '@/hooks/useWallet';
 import { useUIStore } from '@/stores/uiStore';
+import LanguageSwitcher from './LanguageSwitcher';
 
 /**
  * Welcome 组件 - 欢迎页面
@@ -10,12 +12,18 @@ import { useUIStore } from '@/stores/uiStore';
  * 首次使用钱包时显示，提供创建或导入钱包的选项
  */
 export default function Welcome() {
+  const { t } = useTranslation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
   return (
     <>
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 relative">
+        {/* Language Switcher - Top Right */}
+        <div className="absolute top-6 right-6">
+          <LanguageSwitcher />
+        </div>
+
         {/* Logo */}
         <div className="mb-16">
           <div className="relative">
@@ -34,8 +42,8 @@ export default function Welcome() {
 
         {/* Title */}
         <div className="text-center mb-20">
-          <h1 className="text-4xl font-bold mb-4">Web3 入口，一个就够</h1>
-          <p className="text-gray-400 text-base">钱包 · 交易 · NFT · 赚币 · DApp</p>
+          <h1 className="text-4xl font-bold mb-4">{t('welcome.title')}</h1>
+          <p className="text-gray-400 text-base">{t('welcome.subtitle')}</p>
         </div>
 
         {/* Main Actions */}
@@ -44,29 +52,29 @@ export default function Welcome() {
             onClick={() => setShowCreateModal(true)}
             className="w-full bg-white text-black py-5 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors"
           >
-            创建新钱包
+            {t('welcome.createWallet')}
           </button>
 
           <button
             onClick={() => setShowImportModal(true)}
             className="w-full border border-gray-600 text-white py-5 rounded-full font-semibold text-lg hover:border-gray-500 transition-colors"
           >
-            导入已有钱包
+            {t('welcome.importWallet')}
           </button>
         </div>
 
         {/* Footer Links */}
         <div className="mt-16 text-center">
-          <p className="text-gray-500 text-sm mb-4">首次使用钱包？</p>
+          <p className="text-gray-500 text-sm mb-4">{t('welcome.firstTime')}</p>
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              alert('帮助文档开发中...\n\n提示：选择"创建新钱包"以开始使用。');
+              alert(t('welcome.helpDev'));
             }}
             className="text-green-500 hover:text-green-400 text-sm transition-colors"
           >
-            了解如何使用
+            {t('welcome.learnMore')}
           </a>
         </div>
       </div>
@@ -88,6 +96,7 @@ export default function Welcome() {
  * CreateWalletModal - 创建钱包模态框
  */
 function CreateWalletModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
@@ -100,29 +109,29 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
     setLocalError(null);
 
     if (!password || !confirmPassword) {
-      setLocalError('请填写所有字段');
+      setLocalError(t('createWallet.errors.allFieldsRequired'));
       return;
     }
 
     if (password.length < 8) {
-      setLocalError('密码至少需要8个字符');
+      setLocalError(t('createWallet.errors.passwordTooShort'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setLocalError('两次输入的密码不一致');
+      setLocalError(t('createWallet.errors.passwordMismatch'));
       return;
     }
 
     if (!agreed) {
-      setLocalError('请同意服务条款');
+      setLocalError(t('createWallet.errors.mustAgreeTerms'));
       return;
     }
 
     const mnemonic = await createWallet(password);
     if (mnemonic) {
       // TODO: 显示助记词备份页面
-      alert(`钱包创建成功！\n\n请妥善保存您的助记词：\n\n${mnemonic}\n\n⚠️ 请务必备份助记词，这是恢复钱包的唯一方式！`);
+      alert(t('createWallet.successMessage', { mnemonic }));
       onClose();
     }
   };
@@ -132,7 +141,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
       <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">创建新钱包</h2>
+          <h2 className="text-2xl font-bold">{t('createWallet.title')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-300 transition-colors"
@@ -156,7 +165,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">设置密码</label>
+            <label className="block text-sm text-gray-400 mb-2">{t('createWallet.password')}</label>
             <input
               type="password"
               value={password}
@@ -164,14 +173,14 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
                 setPassword(e.target.value);
                 setLocalError(null);
               }}
-              placeholder="至少8个字符"
+              placeholder={t('createWallet.passwordPlaceholder')}
               disabled={isLoading}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">确认密码</label>
+            <label className="block text-sm text-gray-400 mb-2">{t('createWallet.confirmPassword')}</label>
             <input
               type="password"
               value={confirmPassword}
@@ -179,7 +188,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
                 setConfirmPassword(e.target.value);
                 setLocalError(null);
               }}
-              placeholder="再次输入密码"
+              placeholder={t('createWallet.confirmPasswordPlaceholder')}
               disabled={isLoading}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -195,7 +204,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
               className="mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <label htmlFor="agree" className="text-sm text-gray-400">
-              我已阅读并同意 <a href="#" className="text-green-500 hover:text-green-400">服务条款</a> 和 <a href="#" className="text-green-500 hover:text-green-400">隐私政策</a>
+              {t('createWallet.agreeTerms')} <a href="#" className="text-green-500 hover:text-green-400">{t('createWallet.termsOfService')}</a> {t('createWallet.and')} <a href="#" className="text-green-500 hover:text-green-400">{t('createWallet.privacyPolicy')}</a>
             </label>
           </div>
 
@@ -210,10 +219,10 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span>创建中...</span>
+                <span>{t('createWallet.creating')}</span>
               </span>
             ) : (
-              '创建钱包'
+              t('createWallet.createButton')
             )}
           </button>
         </form>
@@ -226,6 +235,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
  * ImportWalletModal - 导入钱包模态框
  */
 function ImportWalletModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const [mnemonic, setMnemonic] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -238,17 +248,17 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
     setLocalError(null);
 
     if (!mnemonic || !password || !confirmPassword) {
-      setLocalError('请填写所有字段');
+      setLocalError(t('importWallet.errors.allFieldsRequired'));
       return;
     }
 
     if (password.length < 8) {
-      setLocalError('密码至少需要8个字符');
+      setLocalError(t('importWallet.errors.passwordTooShort'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setLocalError('两次输入的密码不一致');
+      setLocalError(t('importWallet.errors.passwordMismatch'));
       return;
     }
 
@@ -263,7 +273,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
       <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">导入已有钱包</h2>
+          <h2 className="text-2xl font-bold">{t('importWallet.title')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-300 transition-colors"
@@ -287,14 +297,14 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">助记词</label>
+            <label className="block text-sm text-gray-400 mb-2">{t('importWallet.mnemonic')}</label>
             <textarea
               value={mnemonic}
               onChange={(e) => {
                 setMnemonic(e.target.value);
                 setLocalError(null);
               }}
-              placeholder="输入12个助记词，用空格分隔"
+              placeholder={t('importWallet.mnemonicPlaceholder')}
               rows={3}
               disabled={isLoading}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -302,7 +312,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">设置新密码</label>
+            <label className="block text-sm text-gray-400 mb-2">{t('importWallet.password')}</label>
             <input
               type="password"
               value={password}
@@ -310,14 +320,14 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
                 setPassword(e.target.value);
                 setLocalError(null);
               }}
-              placeholder="至少8个字符"
+              placeholder={t('importWallet.passwordPlaceholder')}
               disabled={isLoading}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">确认密码</label>
+            <label className="block text-sm text-gray-400 mb-2">{t('importWallet.confirmPassword')}</label>
             <input
               type="password"
               value={confirmPassword}
@@ -325,7 +335,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
                 setConfirmPassword(e.target.value);
                 setLocalError(null);
               }}
-              placeholder="再次输入密码"
+              placeholder={t('importWallet.confirmPasswordPlaceholder')}
               disabled={isLoading}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -342,10 +352,10 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span>导入中...</span>
+                <span>{t('importWallet.importing')}</span>
               </span>
             ) : (
-              '导入钱包'
+              t('importWallet.importButton')
             )}
           </button>
         </form>
