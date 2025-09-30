@@ -1,5 +1,5 @@
 import { Wallet } from "@/types/Wallet";
-import bip39 from "bip39";
+import * as bip39 from "bip39";
 import CryptoJS from "crypto-js";
 
 /**

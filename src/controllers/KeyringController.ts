@@ -1,3 +1,4 @@
+import { HDKeyringOptions } from './../types/HDKeyring';
 import type { IKeyring } from "@/types/Keyring";
 import { WalletService } from "@/services/WalletService";
 import { HDKeyring } from "@/types/HDKeyring";
@@ -22,8 +23,11 @@ export class KeyringController {
     // 1. 生成助记词
     const mnemonic = this.walletService.generateMnemonic();
     // 2. 创建 HD Keyring
-    const hdKeyring = new HDKeyring(mnemonic);
-    hdKeyring.addAccounts(1);
+    const opts:HDKeyringOptions = {
+      mnemonic,
+      numberOfAccounts: 1,
+    };
+    const hdKeyring = new HDKeyring(opts);
     this.keyrings.push(hdKeyring);
     // 3. 加密并保存
     return mnemonic;
@@ -33,7 +37,11 @@ export class KeyringController {
    * 导入钱包（从助记词）
    */
   importFromMnemonic(mnemonic: string): void {
-    const hdKeyring = new HDKeyring(mnemonic);
+    const opts:HDKeyringOptions = {
+      mnemonic,
+      numberOfAccounts: 1,
+    };
+    const hdKeyring = new HDKeyring(opts);
     this.keyrings.push(hdKeyring);
   }
 
