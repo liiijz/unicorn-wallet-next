@@ -12,7 +12,7 @@ import type { Account } from '@/types/Account';
 export default function WalletHome() {
   const { currentAccount, allAccounts, lockWallet, setCurrentAccount } = useWallet();
   const [showAccountSelector, setShowAccountSelector] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
 
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
@@ -30,44 +30,67 @@ export default function WalletHome() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 bg-black/80 backdrop-blur-lg border-b border-gray-800 z-50">
-        <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Account Selector */}
+    <div className="min-h-screen bg-black text-white pb-24">
+      {/* Top Bar */}
+      <header className="px-8 pt-8 pb-6">
+        <div className="flex items-center justify-between mb-8">
+          {/* Avatar - Square with rounded corners */}
           <button
             onClick={() => setShowAccountSelector(!showAccountSelector)}
-            className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-full transition-colors"
+            className="relative"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-sm font-bold">
+            <div className="w-[42px] h-[42px] rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-400 flex items-center justify-center text-sm font-bold overflow-hidden">
               {currentAccount?.name?.charAt(0) || 'A'}
             </div>
-            <span className="font-medium">{currentAccount?.name || 'Account 1'}</span>
-            <svg
-              className={`w-4 h-4 transition-transform ${showAccountSelector ? 'rotate-180' : ''}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+          </button>
+
+          {/* Network Dropdown */}
+          <button className="flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
+            <span className="text-sm font-medium">Ethereum Main</span>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
+        </div>
 
-          {/* Settings Button */}
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 hover:bg-gray-900 rounded-full transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        {/* Balance Display - Centered */}
+        <div className="text-center mb-8">
+          <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            {currentAccount?.balance || '0.0000'} ETH
+          </div>
+          <div className="flex items-center justify-center gap-2 text-gray-400">
+            <span className="text-lg">${currentAccount?.balance ? (parseFloat(currentAccount.balance) * 2000).toFixed(2) : '0.00'}</span>
+            <span className="text-green-400 text-sm">+0.7%</span>
+          </div>
+        </div>
+
+        {/* Action Buttons - Send, Receive, Buy */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
+            <span className="font-medium">Sent</span>
+          </button>
+
+          <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span className="font-medium">Receive</span>
+          </button>
+
+          <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span className="font-medium">Buy</span>
           </button>
         </div>
 
         {/* Account Selector Dropdown */}
         {showAccountSelector && (
-          <div className="absolute top-full left-0 right-0 bg-gray-900 border-t border-gray-800 shadow-xl max-w-md mx-auto">
+          <div className="absolute top-20 left-8 right-8 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
             <div className="p-4 space-y-2">
               {allAccounts.map((account: Account) => (
                 <button
@@ -78,12 +101,12 @@ export default function WalletHome() {
                   }}
                   className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                     currentAccount?.id === account.id
-                      ? 'bg-green-500/20 border border-green-500/50'
+                      ? 'bg-[#00F4C8]/20 border border-[#00F4C8]/50'
                       : 'bg-gray-800 hover:bg-gray-700'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-sm font-bold">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-lg flex items-center justify-center text-sm font-bold">
                       {account.name.charAt(0)}
                     </div>
                     <div className="text-left">
@@ -92,161 +115,257 @@ export default function WalletHome() {
                     </div>
                   </div>
                   {currentAccount?.id === account.id && (
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-[#00F4C8]" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   )}
                 </button>
               ))}
-              <button
-                onClick={() => {
-                  setShowAccountSelector(false);
-                  // TODO: 实现添加账户功能
-                  alert('添加账户功能开发中...');
-                }}
-                className="w-full flex items-center justify-center gap-2 p-3 border border-dashed border-gray-700 rounded-lg hover:border-gray-600 hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-300"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>添加账户</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Settings Dropdown */}
-        {showSettings && (
-          <div className="absolute top-full right-0 bg-gray-900 border-t border-gray-800 shadow-xl w-64 mr-6">
-            <div className="p-2">
-              <button
-                onClick={() => {
-                  setShowSettings(false);
-                  lockWallet();
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-left text-red-400 hover:text-red-300"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>锁定钱包</span>
-              </button>
             </div>
           </div>
         )}
       </header>
 
       {/* Main Content */}
-      <main className="max-w-md mx-auto px-6 pb-6">
-        {/* Balance Section */}
-        <section className="py-8 text-center">
-          {/* Address */}
-          <button
-            onClick={copyAddress}
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-gray-300 mb-6 transition-colors group"
-          >
-            <span className="text-sm">{formatAddress(currentAccount?.address || '')}</span>
-            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </button>
+      <main className="px-8 space-y-8">
 
-          {/* Main Balance */}
-          <div className="mb-2">
-            <h2 className="text-5xl font-bold">{currentAccount?.balance || '0.00'}</h2>
-            <span className="text-2xl text-gray-400 ml-2">ETH</span>
-          </div>
-
-          {/* USD Value */}
-          <div className="text-gray-400 text-lg">
-            ≈ $0.00 USD
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section className="mb-8">
-          <div className="grid grid-cols-3 gap-4">
-            <button className="flex flex-col items-center gap-3 bg-gray-900 hover:bg-gray-800 py-6 rounded-2xl transition-colors">
-              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">发送</span>
-            </button>
-
-            <button className="flex flex-col items-center gap-3 bg-gray-900 hover:bg-gray-800 py-6 rounded-2xl transition-colors">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">接收</span>
-            </button>
-
-            <button className="flex flex-col items-center gap-3 bg-gray-900 hover:bg-gray-800 py-6 rounded-2xl transition-colors">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">交换</span>
-            </button>
-          </div>
-        </section>
-
-        {/* Assets Section */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold">资产</h3>
-            <button className="text-sm text-gray-400 hover:text-gray-300 transition-colors">
-              管理
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            {/* ETH Token */}
-            <div className="bg-gray-900 hover:bg-gray-800 p-4 rounded-xl transition-colors cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full"></div>
-                  <div>
-                    <div className="font-medium">Ethereum</div>
-                    <div className="text-sm text-gray-400">ETH</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium">{currentAccount?.balance || '0.00'}</div>
-                  <div className="text-sm text-gray-400">$0.00</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Empty State */}
-            <div className="text-center py-8 text-gray-500 text-sm">
-              暂无其他资产
-            </div>
-          </div>
-        </section>
-
-        {/* Activity Section */}
+        {/* My Portfolio Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold">活动</h3>
-            <button className="text-sm text-gray-400 hover:text-gray-300 transition-colors">
-              查看全部
+            <h3 className="text-white text-lg font-medium">My Portfolio</h3>
+            <button className="flex items-center gap-1 text-[#00F4C8] text-sm">
+              <span>Monthly</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
           </div>
 
-          {/* Empty State */}
-          <div className="bg-gray-900 rounded-xl p-12 text-center">
-            <svg className="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-gray-500 text-sm">暂无交易记录</p>
+          {/* Portfolio Cards Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Bitcoin Card */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-purple-950/40 backdrop-blur-xl rounded-3xl p-5 border border-purple-800/20">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  ₿
+                </div>
+                <div>
+                  <div className="text-white font-medium text-sm">Bitcoin</div>
+                  <div className="text-gray-400 text-xs">BTC</div>
+                </div>
+              </div>
+
+              {/* Simple chart line */}
+              <div className="h-12 mb-4 flex items-end">
+                <svg viewBox="0 0 100 30" className="w-full h-full">
+                  <path
+                    d="M 0,20 Q 15,25 25,15 T 50,18 T 75,8 T 100,12"
+                    fill="none"
+                    stroke="#A855F7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="flex items-end justify-between">
+                <div className="text-white font-semibold text-lg">$6780</div>
+                <div className="flex items-center gap-1 text-green-400 text-xs">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  <span>11.75%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Ethereum Card */}
+            <div className="bg-gradient-to-br from-blue-900/40 to-blue-950/40 backdrop-blur-xl rounded-3xl p-5 border border-blue-800/20">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  Ξ
+                </div>
+                <div>
+                  <div className="text-white font-medium text-sm">Ethereum</div>
+                  <div className="text-gray-400 text-xs">BTC</div>
+                </div>
+              </div>
+
+              {/* Simple chart line */}
+              <div className="h-12 mb-4 flex items-end">
+                <svg viewBox="0 0 100 30" className="w-full h-full">
+                  <path
+                    d="M 0,15 Q 15,10 25,18 T 50,12 T 75,16 T 100,10"
+                    fill="none"
+                    stroke="#3B82F6"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="flex items-end justify-between">
+                <div className="text-white font-semibold text-lg">$1478.10</div>
+                <div className="flex items-center gap-1 text-green-400 text-xs">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  <span>4.75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Refer Rewards Banner */}
+        {/* <section>
+          <div className="relative bg-gradient-to-r from-[#00F4C8] to-[#00D4B8] rounded-3xl p-6 overflow-hidden">
+            <button className="absolute top-4 right-4 text-black/60 hover:text-black">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="relative z-10">
+              <div className="text-black/70 text-sm font-medium mb-1">Refer Rewards</div>
+              <div className="text-black text-xl font-bold mb-2">Earn 5$ rewards on every<br />successfull refers</div>
+            </div>
+            <div className="absolute -right-2 -bottom-2 text-6xl">👌</div>
+          </div>
+        </section> */}
+
+        {/* Market Statistics */}
+        <section>
+          <h3 className="text-white text-lg font-medium mb-4">Market Statistics</h3>
+
+          {/* Filter Tabs */}
+          <div className="flex gap-2 mb-4 overflow-x-auto">
+            {['24 hrs', 'Hot', 'Profit', 'Rising', 'Loss', 'Top Gain'].map((tab, index) => (
+              <button
+                key={tab}
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                  index === 0
+                    ? 'bg-gray-800 text-white'
+                    : 'bg-transparent text-gray-400 hover:bg-gray-800/50'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Market Items */}
+          <div className="space-y-3">
+            {/* Cardano */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                  ₳
+                </div>
+                <div>
+                  <div className="text-white font-medium">Cardano</div>
+                  <div className="text-gray-400 text-xs">ADA</div>
+                </div>
+              </div>
+
+              {/* Mini chart */}
+              <div className="flex-1 mx-4 h-8">
+                <svg viewBox="0 0 80 20" className="w-full h-full">
+                  <path
+                    d="M 0,12 Q 15,8 25,14 T 50,10 T 80,6"
+                    fill="none"
+                    stroke="#3B82F6"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="text-right">
+                <div className="text-white font-medium">$123.77</div>
+                <div className="text-green-400 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  11.75%
+                </div>
+              </div>
+            </div>
+
+            {/* Uniswap */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+                  🦄
+                </div>
+                <div>
+                  <div className="text-white font-medium">Uniswap</div>
+                  <div className="text-gray-400 text-xs">LTC</div>
+                </div>
+              </div>
+
+              {/* Mini chart */}
+              <div className="flex-1 mx-4 h-8">
+                <svg viewBox="0 0 80 20" className="w-full h-full">
+                  <path
+                    d="M 0,8 Q 15,12 25,6 T 50,10 T 80,14"
+                    fill="none"
+                    stroke="#EC4899"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="text-right">
+                <div className="text-white font-medium">$16.96</div>
+                <div className="text-red-400 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  11.75%
+                </div>
+              </div>
+            </div>
+
+            {/* Tether */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold">
+                  ₮
+                </div>
+                <div>
+                  <div className="text-white font-medium">Tether</div>
+                  <div className="text-gray-400 text-xs">USDT</div>
+                </div>
+              </div>
+
+              {/* Mini chart */}
+              <div className="flex-1 mx-4 h-8">
+                <svg viewBox="0 0 80 20" className="w-full h-full">
+                  <path
+                    d="M 0,10 Q 15,10 25,10 T 50,10 T 80,10"
+                    fill="none"
+                    stroke="#10B981"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+
+              <div className="text-right">
+                <div className="text-white font-medium">$0.98</div>
+                <div className="text-green-400 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  0.05%
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
+
     </div>
   );
 }
