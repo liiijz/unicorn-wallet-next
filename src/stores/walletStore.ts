@@ -1,10 +1,13 @@
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import { KeyringController } from '@/controllers/KeyringController';
-import { AccountController } from '@/controllers/AccountController';
-import { walletEventBus } from '@/events/WalletEvents';
-import type { IKeyring } from '@/types/Keyring';
-import type { Account } from '@/types/Account';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
+
+import { AccountController } from "@/controllers/AccountController";
+import { KeyringController } from "@/controllers/KeyringController";
+import { walletEventBus } from "@/events/WalletEvents";
+import type { Account } from "@/types/Account";
+import type { IKeyring } from "@/types/Keyring";
+
+import { NetworkController } from "../controllers/NetworkController";
 
 interface WalletState {
   // 认证状态
@@ -19,6 +22,7 @@ interface WalletState {
   // Controller 实例
   keyringController: KeyringController;
   accountController: AccountController;
+  networkController: NetworkController;
 }
 
 interface WalletActions {
@@ -49,6 +53,8 @@ const keyringController = new KeyringController();
 // 创建 AccountController 实例（不再需要传递 keyringController）
 const accountController = new AccountController();
 
+const networkController = new NetworkController();
+
 export const useWalletStore = create<WalletStore>()(
   devtools(
     persist(
@@ -61,10 +67,11 @@ export const useWalletStore = create<WalletStore>()(
         currentAccount: null,
         keyringController,
         accountController,
+        networkController,
 
         // 初始化钱包
         initializeWallet: () => {
-          const hasVault = localStorage.getItem('KeyringController');
+          const hasVault = localStorage.getItem("KeyringController");
           set({ isInitialized: !!hasVault });
         },
 
@@ -87,18 +94,18 @@ export const useWalletStore = create<WalletStore>()(
                 });
 
                 // 取消订阅
-                walletEventBus.off('account:synced', handleAccountSynced);
+                walletEventBus.off("account:synced", handleAccountSynced);
                 resolve(true);
               };
 
-              walletEventBus.on('account:synced', handleAccountSynced);
+              walletEventBus.on("account:synced", handleAccountSynced);
 
               // restoreVault 会触发 keyring:restored 事件
               // AccountController 会自动响应并同步账户
               keyringController.restoreVault();
             });
           } catch (error) {
-            console.error('Failed to unlock wallet:', error);
+            console.error("Failed to unlock wallet:", error);
             return false;
           }
         },
@@ -138,10 +145,10 @@ export const useWalletStore = create<WalletStore>()(
               });
 
               // 取消订阅
-              walletEventBus.off('account:synced', handleAccountSynced);
+              walletEventBus.off("account:synced", handleAccountSynced);
             };
 
-            walletEventBus.on('account:synced', handleAccountSynced);
+            walletEventBus.on("account:synced", handleAccountSynced);
 
             // createNew 会触发 keyring:created 事件
             // AccountController 会自动响应并同步账户
@@ -171,11 +178,11 @@ export const useWalletStore = create<WalletStore>()(
               });
 
               // 取消订阅
-              walletEventBus.off('account:synced', handleAccountSynced);
+              walletEventBus.off("account:synced", handleAccountSynced);
               resolve();
             };
 
-            walletEventBus.on('account:synced', handleAccountSynced);
+            walletEventBus.on("account:synced", handleAccountSynced);
 
             // importFromMnemonic 会触发 keyring:imported 事件
             // AccountController 会自动响应并同步账户
@@ -205,19 +212,19 @@ export const useWalletStore = create<WalletStore>()(
               set({ accounts });
 
               // 取消订阅
-              walletEventBus.off('account:synced', handleAccountSynced);
+              walletEventBus.off("account:synced", handleAccountSynced);
 
               // 返回最后添加的账户
               resolve(accounts[accounts.length - 1] || null);
             };
 
-            walletEventBus.on('account:synced', handleAccountSynced);
+            walletEventBus.on("account:synced", handleAccountSynced);
 
             // addAccountToKeyring 会触发 keyring:accountAdded 事件
             // AccountController 会自动响应并同步账户
             keyringController.addAccountToKeyring(0).catch((error) => {
-              console.error('Failed to add account:', error);
-              walletEventBus.off('account:synced', handleAccountSynced);
+              console.error("Failed to add account:", error);
+              walletEventBus.off("account:synced", handleAccountSynced);
               resolve(null);
             });
           });
@@ -244,7 +251,7 @@ export const useWalletStore = create<WalletStore>()(
           const keyrings = keyringController.getKeyrings();
 
           // 触发 keyring:updated 事件（需要先添加这个事件）
-          walletEventBus.emit('keyring:updated', {
+          walletEventBus.emit("keyring:updated", {
             keyrings,
           });
 
@@ -259,7 +266,7 @@ export const useWalletStore = create<WalletStore>()(
         },
       }),
       {
-        name: 'wallet-storage',
+        name: "wallet-storage",
         partialize: (state) => ({
           isInitialized: state.isInitialized,
           // 只持久化基本状态，敏感数据通过 KeyringController 加密存储
@@ -267,7 +274,7 @@ export const useWalletStore = create<WalletStore>()(
       }
     ),
     {
-      name: 'wallet-store',
+      name: "wallet-store",
     }
   )
 );
