@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
           {/* Menu */}
           <div className="absolute top-full right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-lg shadow-xl z-50 overflow-hidden">
             {Object.entries(SUPPORTED_LANGUAGES).map(([code, name]) => (
-              <button key={code} onClick={() => changeLanguage(code as SupportedLanguage)} className={`w-full px-4 py-3 text-left transition-colors flex items-center justify-between ${currentLanguage === code ? "bg-green-500/20 text-green-400" : "hover:bg-gray-800 text-white"}`}>
+              <button key={code} onClick={() => changeLanguage(code as SupportedLanguage)} className={`w-full px-4 py-3 text-left transition-colors flex items-center justify-between ${currentLanguage === code ? "bg-primary text-black" : "hover:bg-gray-800 text-white"}`}>
                 <span>{name}</span>
                 {currentLanguage === code && (
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
