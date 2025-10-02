@@ -41,7 +41,7 @@ export default function Welcome() {
           <div className="w-full max-w-sm space-y-6">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="w-full bg-primary text-black h-[52px] rounded-2xl font-semibold text-lg hover:bg-primary-hover transition-colors flex items-center justify-center gap-2"
+              className="cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold text-lg hover:bg-primary-hover transition-colors flex items-center justify-center gap-2"
             >
               <span>{t('welcome.createWallet')}</span>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -51,7 +51,7 @@ export default function Welcome() {
 
             <button
               onClick={() => setShowImportModal(true)}
-              className="w-full bg-primary text-black h-[52px] rounded-2xl font-semibold text-lg hover:bg-primary-hover transition-colors flex items-center justify-center gap-2"
+              className="cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold text-lg hover:bg-primary-hover transition-colors flex items-center justify-center gap-2"
             >
               <span>{t('welcome.importWallet')}</span>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -209,7 +209,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary text-black h-[52px] rounded-2xl font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isLoading && (
               <svg aria-hidden="true" role="status" className="inline w-4 h-4 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -343,7 +343,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary text-black h-[52px] rounded-2xl font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isLoading && (
               <svg aria-hidden="true" role="status" className="inline w-4 h-4 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

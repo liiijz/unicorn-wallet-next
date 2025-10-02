@@ -1,6 +1,8 @@
-import mitt, { Emitter } from 'mitt';
-import type { IKeyring } from '@/types/Keyring';
-import type { Account } from '@/types/Account';
+import mitt, { Emitter } from "mitt";
+import type { IKeyring } from "@/types/Keyring";
+import type { Account } from "@/types/Account";
+import type { Network } from "@/types/Network";
+import { ethers } from "ethers";
 
 /**
  * 钱包事件类型定义
@@ -22,50 +24,53 @@ export type WalletEvents = {
   // ========== KeyringController 事件 ==========
 
   /** 钱包创建事件 */
-  'keyring:created': {
+  "keyring:created": {
     keyrings: IKeyring[];
   };
 
   /** 钱包导入事件 */
-  'keyring:imported': {
+  "keyring:imported": {
     keyrings: IKeyring[];
   };
 
   /** 钱包恢复/解锁事件 */
-  'keyring:restored': {
+  "keyring:restored": {
     keyrings: IKeyring[];
   };
 
   /** 账户添加事件 */
-  'keyring:accountAdded': {
+  "keyring:accountAdded": {
     keyringIndex: number;
     addresses: string[];
   };
 
   /** 钱包锁定事件 */
-  'keyring:locked': void;
+  "keyring:locked": void;
 
   /** Keyring 更新事件 */
-  'keyring:updated': {
+  "keyring:updated": {
     keyrings: IKeyring[];
   };
 
   // ========== AccountController 事件 ==========
 
   /** 账户同步完成事件 */
-  'account:synced': {
+  "account:synced": {
     accounts: Account[];
   };
 
   /** 新增账户事件 */
-  'account:added': {
+  "account:added": {
     account: Account;
   };
 
   /** 账户更新事件 */
-  'account:updated': {
+  "account:updated": {
     account: Account;
   };
+
+  "network:changed": { network: Network };
+  "keyring:providerUpdated": { network: Network; provider: ethers.JsonRpcProvider };
 };
 
 /**
