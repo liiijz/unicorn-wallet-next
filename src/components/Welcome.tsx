@@ -69,7 +69,7 @@ export default function Welcome() {
                 e.preventDefault();
                 alert(t('welcome.helpDev'));
               }}
-              className="text-green-500 hover:text-green-400 text-sm transition-colors"
+              className="text-primary text-sm transition-colors"
             >
               {t('welcome.learnMore')}
             </a>
