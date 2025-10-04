@@ -19,6 +19,7 @@ export const useWallet = () => {
     importWallet,
     setCurrentAccount,
     getAllAccounts,
+    addNewAccount,
     refreshWalletData,
   } = useWalletStore();
 
@@ -122,6 +123,29 @@ export const useWallet = () => {
     }
   }, [refreshWalletData, setError]);
 
+  // 添加新账户
+  const addAccount = useCallback(async () => {
+    setLoading(true, '正在创建新账户...');
+    clearError();
+
+    try {
+      const newAccount = await addNewAccount();
+      if (newAccount) {
+        setCurrentAccount(newAccount);
+        return newAccount;
+      } else {
+        setError('账户创建失败');
+        return null;
+      }
+    } catch (error) {
+      console.error('Failed to add account:', error);
+      setError('账户创建失败');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [addNewAccount, setCurrentAccount, setLoading, setError, clearError]);
+
   return {
     // 状态
     isUnlocked,
@@ -138,6 +162,7 @@ export const useWallet = () => {
     importExistingWallet,
     switchAccount,
     setCurrentAccount,
+    addAccount,
     refresh,
   };
 };
