@@ -100,6 +100,8 @@ export default function WalletHome() {
           {/* Account Selector Dropdown */}
           {showAccountSelector && (
             <>
+             {/* Backdrop */}
+              <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowAccountSelector(false)} />
               {/* Dropdown */}
               <div className="absolute top-20 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
                 <div className="p-4 space-y-2">
