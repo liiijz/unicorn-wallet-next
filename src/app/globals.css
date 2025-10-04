@@ -26,3 +26,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+button {
+  @apply cursor-pointer;
+}
+
+
+.base-button {
+  @apply cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold text-lg hover:bg-primary-hover transition-colors flex items-center justify-center gap-2;
+}
