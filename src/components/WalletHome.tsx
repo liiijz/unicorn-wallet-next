@@ -11,7 +11,7 @@ import Avatar from "./Avatar";
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, allAccounts, lockWallet, setCurrentAccount } = useWallet();
+  const { currentAccount, allAccounts, lockWallet, setCurrentAccount, addAccount } = useWallet();
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
@@ -28,6 +28,16 @@ export default function WalletHome() {
       navigator.clipboard.writeText(currentAccount.address);
       // TODO: 显示提示消息
       alert("地址已复制到剪贴板");
+    }
+  };
+
+  // 处理添加以太坊账户
+  const handleAddEthereumAccount = async () => {
+    setShowAddAccountModal(false);
+    const newAccount = await addAccount();
+    if (newAccount) {
+      // 账户已自动设置为当前账户
+      console.log("New account created:", newAccount);
     }
   };
 
@@ -102,7 +112,7 @@ export default function WalletHome() {
                       }}
                       className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${currentAccount?.id === account.id ? "bg-[#00F4C8]/20 border border-[#00F4C8]/50" : "bg-gray-800 hover:bg-gray-700"}`}>
                       <div className="flex items-center gap-3">
-                        <Avatar address={currentAccount?.address || ""}></Avatar>
+                        <Avatar address={account?.address || ""}></Avatar>
                         <div className="text-left">
                           <div className="font-medium">{account.name}</div>
                           <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
@@ -156,7 +166,7 @@ export default function WalletHome() {
                   </button>
 
                   {/* 以太坊账户 */}
-                  <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
+                  <button onClick={handleAddEthereumAccount} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
                     <div className="w-6 h-6 flex items-center justify-center text-[#00F4C8]">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
