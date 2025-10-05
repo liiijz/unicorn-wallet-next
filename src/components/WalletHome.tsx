@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import type { Account } from "@/types/Account";
 import Avatar from "./Avatar";
+import { ethers } from "ethers";
 
 /**
  * WalletHome 组件 - 主钱包界面
@@ -11,9 +12,13 @@ import Avatar from "./Avatar";
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, allAccounts, lockWallet, setCurrentAccount, addAccount } = useWallet();
+  const { currentAccount, allAccounts, lockWallet, setCurrentAccount, addAccount, networkController } = useWallet();
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showNetworkSelector, setShowNetworkSelector] = useState(false);
+  const [currentNetwork, setCurrentNetwork] = useState(networkController.getCurrentNetwork());
+  const [balance, setBalance] = useState<string>("0.0000");
+  const [balanceUSD, setBalanceUSD] = useState<string>("0.00");
   const [activeTab, setActiveTab] = useState("home");
 
   // 格式化地址显示（显示前6位和后4位）
@@ -41,6 +46,51 @@ export default function WalletHome() {
     }
   };
 
+  // 处理网络切换
+  const handleNetworkSwitch = async (networkId: string) => {
+    try {
+      await networkController.switchNetwork(networkId);
+      setCurrentNetwork(networkController.getCurrentNetwork());
+      setShowNetworkSelector(false);
+      // 切换网络后重新获取余额
+      fetchBalance();
+    } catch (error) {
+      console.error("Failed to switch network:", error);
+    }
+  };
+
+  // 获取账户余额
+  const fetchBalance = async () => {
+    if (!currentAccount?.address) return;
+
+    try {
+      const provider = new ethers.JsonRpcProvider(currentNetwork.rpcUrl);
+      const balanceWei = await provider.getBalance(currentAccount.address);
+      const balanceEth = ethers.formatEther(balanceWei);
+
+      // 格式化为4位小数
+      const formattedBalance = parseFloat(balanceEth).toFixed(4);
+      setBalance(formattedBalance);
+
+      // 简单的USD估算（这里使用固定汇率，实际应该从API获取）
+      const ethPriceUSD = 2000; // 示例价格
+      const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
+      setBalanceUSD(usdValue);
+    } catch (error) {
+      console.error("Failed to fetch balance:", error);
+      setBalance("0.0000");
+      setBalanceUSD("0.00");
+    }
+  };
+
+  // 当账户或网络变化时获取余额
+  useEffect(() => {
+    fetchBalance();
+    // 设置定时刷新余额（每30秒）
+    const interval = setInterval(fetchBalance, 30000);
+    return () => clearInterval(interval);
+  }, [currentAccount?.address, currentNetwork.id]);
+
   return (
     <div className="min-h-screen bg-black text-white pb-24">
       {/* Container with max width for large screens */}
@@ -56,8 +106,8 @@ export default function WalletHome() {
             </button>
 
             {/* Network Dropdown */}
-            <button className="flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
-              <span className="text-sm font-medium">Ethereum Main</span>
+            <button onClick={() => setShowNetworkSelector(!showNetworkSelector)} className="relative flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
+              <span className="text-sm font-medium">{currentNetwork.name}</span>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
@@ -66,9 +116,9 @@ export default function WalletHome() {
 
           {/* Balance Display - Centered */}
           <div className="text-center mb-8">
-            <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{currentAccount?.balance || "0.0000"} ETH</div>
+            <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{balance} {currentNetwork.symbol}</div>
             <div className="flex items-center justify-center gap-2 text-gray-400">
-              <span className="text-lg">${currentAccount?.balance ? (parseFloat(currentAccount.balance) * 2000).toFixed(2) : "0.00"}</span>
+              <span className="text-lg">${balanceUSD}</span>
               <span className="text-green-400 text-sm">+0.7%</span>
             </div>
           </div>
@@ -191,6 +241,45 @@ export default function WalletHome() {
                     </div>
                     <div className="text-white font-medium">私钥助记词</div>
                   </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Network Selector Dropdown */}
+          {showNetworkSelector && (
+            <>
+              {/* Backdrop */}
+              <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowNetworkSelector(false)} />
+              {/* Dropdown */}
+              <div className="absolute top-20 right-8 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-[60] min-w-[240px]">
+                <div className="p-4 space-y-2">
+                  {networkController.getAllNetworks().map((network) => (
+                    <button
+                      key={network.id}
+                      onClick={() => handleNetworkSwitch(network.id)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        currentNetwork.id === network.id
+                          ? "bg-[#00F4C8]/20 border border-[#00F4C8]/50"
+                          : "bg-gray-800 hover:bg-gray-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-xs font-bold">
+                          {network.symbol.charAt(0)}
+                        </div>
+                        <div className="text-left">
+                          <div className="font-medium text-sm">{network.name}</div>
+                          <div className="text-xs text-gray-400">Chain ID: {network.chainId}</div>
+                        </div>
+                      </div>
+                      {currentNetwork.id === network.id && (
+                        <svg className="w-5 h-5 text-[#00F4C8]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
             </>
