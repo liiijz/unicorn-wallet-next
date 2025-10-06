@@ -5,12 +5,14 @@ import { useWallet } from "@/hooks/useWallet";
 import type { Account } from "@/types/Account";
 import Avatar from "./Avatar";
 import { ethers } from "ethers";
+import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 
 // Market Data Types
 interface MarketData {
   symbol: string;
   name: string;
   code: string;
+  icon?: string;
   price: number;
   change24h: number;
   changeRate: number;
@@ -48,27 +50,12 @@ export default function WalletHome() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // 生成价格历史图表路径
-  const generateChartPath = (priceHistory: number[]): string => {
-    if (!priceHistory || priceHistory.length === 0) return "";
-
-    const width = 80;
-    const height = 20;
-    const points = priceHistory.length;
-
-    // 找出最大值和最小值以进行归一化
-    const max = Math.max(...priceHistory);
+  // 准备图表数据
+  const prepareChartData = (priceHistory: number[]) => {
     const min = Math.min(...priceHistory);
-    const range = max - min || 1;
-
-    // 生成路径点
-    const pathPoints = priceHistory.map((price, index) => {
-      const x = (index / (points - 1)) * width;
-      const y = height - ((price - min) / range) * (height - 4) - 2; // 留2px边距
-      return `${x},${y}`;
-    });
-
-    return `M ${pathPoints.join(" L ")}`;
+    const max = Math.max(...priceHistory);
+    const data = priceHistory.map((price, index) => ({ index, price }));
+    return { data, yDomain: [min, max] };
   };
 
   // 格式化价格显示
@@ -404,33 +391,55 @@ export default function WalletHome() {
             </div>
 
             {/* Market Items - Responsive Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {isLoadingMarket ? (
-                <div className="col-span-2 text-center py-8 text-gray-400">Loading market data...</div>
+                <div className="col-span-2 flex justify-center items-center py-8">
+                  <div className="w-8 h-8 border-4 border-gray-600 border-t-cyan-400 rounded-full animate-spin"></div>
+                </div>
               ) : marketData.length === 0 ? (
                 <div className="col-span-2 text-center py-8 text-gray-400">No market data available</div>
               ) : (
                 marketData.map((item) => {
                   const isPositive = item.changeRate >= 0;
                   const chartColor = isPositive ? "#10B981" : "#EF4444";
+                  const { data, yDomain } = prepareChartData(item.priceHistory);
 
                   return (
                     <div key={item.code} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                          {item.code.charAt(0)}
-                        </div>
+                        {item.icon ? (
+                          <div className="w-10 h-10 overflow-hidden flex items-center justify-center">
+                            <img src={item.icon} alt={item.code} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {item.code.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div>
                           <div className="text-white font-medium">{item.name}</div>
-                          <div className="text-gray-400 text-xs">{item.code}</div>
+                          <div className="text-gray-400 text-xs">{item.code.toUpperCase()}</div>
                         </div>
                       </div>
 
-                      {/* Mini chart */}
+                      {/* Mini chart - Recharts version */}
                       <div className="flex-1 mx-4 h-8">
-                        <svg viewBox="0 0 80 20" className="w-full h-full">
-                          <path d={generateChartPath(item.priceHistory)} fill="none" stroke={chartColor} strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
+                        <ResponsiveContainer width="100%" height={32}>
+                          <LineChart
+                            data={data}
+                            margin={{ top: 2, right: 0, bottom: 2, left: 0 }}
+                          >
+                            <YAxis domain={yDomain} hide />
+                            <Line
+                              type="monotone"
+                              dataKey="price"
+                              stroke={chartColor}
+                              strokeWidth={1.5}
+                              dot={false}
+                              isAnimationActive={false}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
                       </div>
 
                       <div className="text-right">
