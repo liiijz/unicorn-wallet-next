@@ -43,3 +43,5 @@ next-env.d.ts
 
 scratch
 ref
+.claude
+.vscode
