@@ -4,8 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import type { Account } from "@/types/Account";
 import Avatar from "./Avatar";
+import SendModal from "./SendModal";
 import { ethers } from "ethers";
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
+import { GiReceiveMoney } from "react-icons/gi";
+import { IoIosSend } from "react-icons/io";
+import { BiTransfer } from "react-icons/bi";
+import { MdShoppingCart } from "react-icons/md";
 
 // Market Data Types
 interface MarketData {
@@ -43,6 +48,7 @@ export default function WalletHome() {
   const [marketData, setMarketData] = useState<MarketData[]>([]);
   const [selectedMarketTab, setSelectedMarketTab] = useState("hot");
   const [isLoadingMarket, setIsLoadingMarket] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
 
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
@@ -206,24 +212,21 @@ export default function WalletHome() {
 
           {/* Action Buttons - Send, Receive, Buy */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-              <span className="font-medium">Sent</span>
+            <button
+              onClick={() => setShowSendModal(true)}
+              className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors"
+            >
+              <IoIosSend className="w-5 h-5" />
+              <span className="font-medium">Send</span>
             </button>
 
             <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
+              <GiReceiveMoney className="w-5 h-5" />
               <span className="font-medium">Receive</span>
             </button>
 
             <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <MdShoppingCart className="w-5 h-5" />
               <span className="font-medium">Buy</span>
             </button>
           </div>
@@ -458,6 +461,20 @@ export default function WalletHome() {
             </div>
           </section>
         </main>
+
+        {/* Send Modal */}
+        <SendModal
+          isOpen={showSendModal}
+          onClose={() => setShowSendModal(false)}
+          currentAccount={currentAccount}
+          currentNetwork={currentNetwork}
+          balance={balance}
+          onTransactionComplete={(txHash) => {
+            console.log("Transaction completed:", txHash);
+            // Refresh balance after transaction
+            fetchBalance();
+          }}
+        />
       </div>
     </div>
   );
