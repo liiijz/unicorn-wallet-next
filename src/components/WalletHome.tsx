@@ -11,6 +11,7 @@ import { GiReceiveMoney } from "react-icons/gi";
 import { IoIosSend } from "react-icons/io";
 import { BiTransfer } from "react-icons/bi";
 import { MdShoppingCart } from "react-icons/md";
+import { useNotification } from "./Notification";
 
 // Market Data Types
 interface MarketData {
@@ -49,6 +50,7 @@ export default function WalletHome() {
   const [selectedMarketTab, setSelectedMarketTab] = useState("hot");
   const [isLoadingMarket, setIsLoadingMarket] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+  const { addNotification} = useNotification();
 
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
@@ -100,6 +102,9 @@ export default function WalletHome() {
       await networkController.switchNetwork(networkId);
       setCurrentNetwork(networkController.getCurrentNetwork());
       setShowNetworkSelector(false);
+
+      addNotification("success", "网络切换成功");
+
       // 切换网络后重新获取余额
       fetchBalance();
     } catch (error) {

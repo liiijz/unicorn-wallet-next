@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { I18nProvider } from "@/providers/I18nProvider";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
+import { NotificationProvider } from "@/components/Notification";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,11 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <I18nProvider>
-          {children}
+          <NotificationProvider>{children}</NotificationProvider>
         </I18nProvider>
         <Analytics />
       </body>
