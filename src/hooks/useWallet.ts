@@ -12,6 +12,7 @@ export const useWallet = () => {
     isInitialized,
     currentAccount,
     keyrings,
+    keyringController,
     networkController,
     initializeWallet,
     unlock,
@@ -154,6 +155,7 @@ export const useWallet = () => {
     currentAccount,
     keyrings,
     allAccounts: getAllAccounts(),
+    keyringController,
     networkController,
 
     // 方法
