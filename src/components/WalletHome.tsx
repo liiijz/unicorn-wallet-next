@@ -12,6 +12,7 @@ import { IoIosSend } from "react-icons/io";
 import { BiTransfer } from "react-icons/bi";
 import { MdShoppingCart } from "react-icons/md";
 import { useNotification } from "./Notification";
+import { WalletAssets } from "./WalletAssets";
 
 // Market Data Types
 interface MarketData {
@@ -208,7 +209,7 @@ export default function WalletHome() {
 
           {/* Balance Display - Centered */}
           <div className="text-center mb-8">
-            <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{balance} {currentNetwork.symbol}</div>
+            <div className="text-5xl font-bold mb-2 bg-gradient-to-r text-primary">{balance} {currentNetwork.symbol}</div>
             <div className="flex items-center justify-center gap-2 text-gray-400">
               <span className="text-lg">${balanceUSD}</span>
               <span className="text-green-400 text-sm">+0.7%</span>
@@ -377,6 +378,10 @@ export default function WalletHome() {
 
         {/* Main Content */}
         <main className="px-8 space-y-8">
+
+          {/* 资产展示区域 */}
+          <WalletAssets></WalletAssets>
+
           {/* Market Statistics */}
           <section>
             <h3 className="text-white text-lg font-medium mb-4">Market Statistics</h3>
