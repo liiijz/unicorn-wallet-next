@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import type { Account } from "@/types/Account";
 import Avatar from "./Avatar";
@@ -54,7 +54,7 @@ export default function WalletHome() {
   const [isLoadingMarket, setIsLoadingMarket] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const { addNotification } = useNotification();
-  const [fetchBalanceTimer, setFetchBalanceTimer] = useState<NodeJS.Timeout | null>(null);
+  const fetchBalanceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
@@ -169,15 +169,13 @@ export default function WalletHome() {
 
   const startFetchBalance = (network: Network) => {
     fetchBalance(network);
-    if (fetchBalanceTimer) {
-      clearInterval(fetchBalanceTimer);
+    if (fetchBalanceTimerRef.current) {
+      clearInterval(fetchBalanceTimerRef.current);
     }
-    setFetchBalanceTimer(
-      setInterval(() => {
-        console.log("Fetching balance...");
-        fetchBalance(network);
-      }, 10000)
-    );
+    fetchBalanceTimerRef.current = setInterval(() => {
+      console.log("Fetching balance...");
+      fetchBalance(network);
+    }, 10000);
   };
 
   useEffect(() => {
