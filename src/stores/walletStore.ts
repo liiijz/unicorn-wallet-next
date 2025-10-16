@@ -33,7 +33,7 @@ interface WalletActions {
 
   // 钱包管理
   createNewWallet: (password: string) => Promise<string>;
-  importWallet: (mnemonic: string, password: string) => Promise<void>;
+  importWallet: (mnemonic: string, password: string | null) => Promise<void>;
 
   // 账户管理
   setCurrentAccount: (account: Account) => void;
@@ -160,9 +160,11 @@ export const useWalletStore = create<WalletStore>()(
         },
 
         // 导入钱包
-        importWallet: async (mnemonic: string, password: string): Promise<void> => {
+        importWallet: async (mnemonic: string, password: string | null): Promise<void> => {
           const { keyringController } = get();
-          keyringController.setPassword(password);
+          if (password) {
+            keyringController.setPassword(password);
+          }
 
           // 订阅一次账户同步事件
           return new Promise<void>((resolve) => {

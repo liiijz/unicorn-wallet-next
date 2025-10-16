@@ -16,6 +16,7 @@ import { WalletAssets } from "./WalletAssets";
 import { walletEventBus } from "@/events/WalletEvents";
 import { Network } from "@/types/Network";
 import { useUIStore } from "@/stores/uiStore";
+import { KeyringController } from "@/controllers/KeyringController";
 
 // Market Data Types
 interface MarketData {
@@ -503,22 +504,12 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setLocalError(null);
 
-    if (!mnemonic || !password || !confirmPassword) {
+    if (!mnemonic ) {
       setLocalError('请填写所有字段');
       return;
     }
 
-    if (password.length < 8) {
-      setLocalError('密码长度至少为8个字符');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setLocalError('两次密码输入不一致');
-      return;
-    }
-
-    const success = await importExistingWallet(mnemonic.trim(), password);
+    const success = await importExistingWallet(mnemonic.trim(), null);
     if (success) {
       onClose();
     }
@@ -564,36 +555,6 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
               rows={3}
               disabled={isLoading}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-400 mb-2">密码</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setLocalError(null);
-              }}
-              placeholder="请输入密码（至少8个字符）"
-              disabled={isLoading}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-400 mb-2">确认密码</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setLocalError(null);
-              }}
-              placeholder="请再次输入密码"
-              disabled={isLoading}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 

@@ -86,7 +86,7 @@ export const useWallet = () => {
   }, [createNewWallet, setLoading, setError, clearError]);
 
   // 导入钱包
-  const importExistingWallet = useCallback(async (mnemonic: string, password: string) => {
+  const importExistingWallet = useCallback(async (mnemonic: string, password: string | null) => {
     setLoading(true, '正在导入钱包...');
     clearError();
 
