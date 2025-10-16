@@ -9,14 +9,13 @@ import { ethers } from "ethers";
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 import { GiReceiveMoney } from "react-icons/gi";
 import { IoIosSend } from "react-icons/io";
-import { BiTransfer } from "react-icons/bi";
 import { MdShoppingCart } from "react-icons/md";
 import { useNotification } from "./Notification";
 import { WalletAssets } from "./WalletAssets";
 import { walletEventBus } from "@/events/WalletEvents";
 import { Network } from "@/types/Network";
 import { useUIStore } from "@/stores/uiStore";
-import { KeyringController } from "@/controllers/KeyringController";
+import { useWalletStore } from '@/stores/walletStore';
 
 // Market Data Types
 interface MarketData {
@@ -43,7 +42,8 @@ interface MarketResponse {
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, allAccounts, lockWallet, setCurrentAccount, addAccount, networkController } = useWallet();
+  const {currentAccount, setCurrentAccount} = useWalletStore();
+  const {allAccounts, addAccount, networkController } = useWallet();
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
@@ -118,6 +118,7 @@ export default function WalletHome() {
     if (!currentAccount?.address) {
       return;
     }
+    console.log("🚀 Fetching balance for account:", currentAccount.address);
     console.log("🔄 Fetching balance...");
     console.log("  📍 Address:", currentAccount.address);
     console.log("  🌐 Network:", network.name, `(${network.chainId})`);
@@ -195,7 +196,7 @@ export default function WalletHome() {
     return () => {
       walletEventBus.off("network:changed");
     };
-  }, []);
+  }, [currentAccount, currentNetwork]);
 
   // 初始加载市场数据
   useEffect(() => {
@@ -494,8 +495,6 @@ export default function WalletHome() {
  */
 function ImportWalletModal({ onClose }: { onClose: () => void }) {
   const [mnemonic, setMnemonic] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const { importExistingWallet } = useWallet();
   const { isLoading } = useUIStore();
