@@ -14,6 +14,7 @@ import { MdShoppingCart } from "react-icons/md";
 import { useNotification } from "./Notification";
 import { WalletAssets } from "./WalletAssets";
 import { walletEventBus } from "@/events/WalletEvents";
+import { Network } from "@/types/Network";
 
 // Market Data Types
 interface MarketData {
@@ -110,43 +111,26 @@ export default function WalletHome() {
   };
 
   // 获取账户余额
-  const fetchBalance = async () => {
+  const fetchBalance = async (network: Network) => {
     if (!currentAccount?.address) {
-      console.log("❌ No account address");
       return;
     }
-
     console.log("🔄 Fetching balance...");
     console.log("  📍 Address:", currentAccount.address);
-    console.log("  🌐 Network:", currentNetwork.name, `(${currentNetwork.chainId})`);
-
+    console.log("  🌐 Network:", network.name, `(${network.chainId})`);
     try {
-      const provider = new ethers.JsonRpcProvider(currentNetwork.rpcUrl);
-
+      const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       // 验证网络连接
-      const network = await provider.getNetwork();
-      console.log("  ✅ Connected to chainId:", network.chainId.toString());
-
       const balanceWei = await provider.getBalance(currentAccount.address);
       const balanceEth = ethers.formatEther(balanceWei);
-      console.log("  💰 Balance:", balanceEth, "ETH");
-
       // 格式化为4位小数
       const formattedBalance = parseFloat(balanceEth).toFixed(4);
       setBalance(formattedBalance);
-
       // 简单的USD估算
       const ethPriceUSD = 2000;
       const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
       setBalanceUSD(usdValue);
-
-      console.log("  💵", formattedBalance, "ETH ≈ $" + usdValue);
     } catch (error) {
-      console.error("❌ Balance fetch failed:");
-      console.error("   Network:", currentNetwork.name);
-      console.error("   RPC:", currentNetwork.rpcUrl);
-      console.error("   Full error:", error);
-
       setBalance("0.0000");
       setBalanceUSD("0.00");
     }
@@ -183,27 +167,28 @@ export default function WalletHome() {
     fetchMarketData(sortByMap[tab] || tab.toLowerCase());
   };
 
-  const startFetchBalanceTimer = () => {
+  const startFetchBalance = (network: Network) => {
+    fetchBalance(network);
     if (fetchBalanceTimer) {
       clearInterval(fetchBalanceTimer);
     }
     setFetchBalanceTimer(
       setInterval(() => {
         console.log("Fetching balance...");
-        fetchBalance();
+        fetchBalance(network);
       }, 10000)
     );
   };
 
   useEffect(() => {
     console.log("WalletHome mounted");
-    fetchBalance();
+    fetchBalance(currentNetwork);
     walletEventBus.on("network:changed", ({ network }) => {
       console.log("Current network:", network);
       // 切换网络后重新获取余额
       setCurrentNetwork(network);
       addNotification("success", "网络切换成功");
-      startFetchBalanceTimer();
+      startFetchBalance(network);
     });
 
     return () => {
