@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useWallet } from "@/stores";
+import { useEffect, useState } from "react";
 
 export const WalletAssets = () => {
+  const { currentAccount } = useWallet();
+
   const [activeTab, setActiveTab] = useState<string>("tokens");
   const tabs = [
     {
@@ -12,6 +15,15 @@ export const WalletAssets = () => {
       value: "nfts",
     },
   ];
+
+  useEffect(() => {
+    if (activeTab === "tokens") {
+      const address = currentAccount?.address;
+      fetchTokens(address);
+    } else if (activeTab === "nfts") {
+      fetchNFTs();
+    }
+  }, [activeTab]);
 
   return (
     <section>
@@ -25,9 +37,22 @@ export const WalletAssets = () => {
             </li>
           ))}
         </ul>
-        {activeTab === "tokens" && (<div className="mt-4">tokens</div>)}
-        {activeTab === "nfts" && (<div className="mt-4">nfts</div>)}
+        {activeTab === "tokens" && <div className="mt-4">tokens</div>}
+        {activeTab === "nfts" && <div className="mt-4">nfts</div>}
       </div>
     </section>
   );
 };
+async function fetchTokens(address: string | undefined) {
+  if (!address) return [];
+  try {
+    const response = await fetch(`https://api.example.com/api/v1/tokens?address=${address}`);
+    const result = await response.json();
+  } catch (error) {
+  } finally {
+  }
+}
+
+function fetchNFTs() {
+  throw new Error("Function not implemented.");
+}

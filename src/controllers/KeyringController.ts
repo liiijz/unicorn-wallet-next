@@ -201,6 +201,13 @@ export class KeyringController {
       throw new Error("Provider 未初始化，请先切换网络");
     }
 
+    this.provider.getNetwork().then((network) => {
+      console.log("Network Info:", {
+        name: network.name,
+        chainId: network.chainId,
+      });
+    });
+
     // 从 keyrings 中找到对应的 HDNodeWallet
     for (const keyring of this.keyrings) {
       if (keyring instanceof HDKeyring) {

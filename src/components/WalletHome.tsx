@@ -13,6 +13,7 @@ import { BiTransfer } from "react-icons/bi";
 import { MdShoppingCart } from "react-icons/md";
 import { useNotification } from "./Notification";
 import { WalletAssets } from "./WalletAssets";
+import { walletEventBus } from "@/events/WalletEvents";
 
 // Market Data Types
 interface MarketData {
@@ -51,7 +52,8 @@ export default function WalletHome() {
   const [selectedMarketTab, setSelectedMarketTab] = useState("hot");
   const [isLoadingMarket, setIsLoadingMarket] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
-  const { addNotification} = useNotification();
+  const { addNotification } = useNotification();
+  const [fetchBalanceTimer, setFetchBalanceTimer] = useState<NodeJS.Timeout | null>(null);
 
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
@@ -101,13 +103,7 @@ export default function WalletHome() {
   const handleNetworkSwitch = async (networkId: string) => {
     try {
       await networkController.switchNetwork(networkId);
-      setCurrentNetwork(networkController.getCurrentNetwork());
       setShowNetworkSelector(false);
-
-      addNotification("success", "网络切换成功");
-
-      // 切换网络后重新获取余额
-      fetchBalance();
     } catch (error) {
       console.error("Failed to switch network:", error);
     }
@@ -115,23 +111,42 @@ export default function WalletHome() {
 
   // 获取账户余额
   const fetchBalance = async () => {
-    if (!currentAccount?.address) return;
+    if (!currentAccount?.address) {
+      console.log("❌ No account address");
+      return;
+    }
+
+    console.log("🔄 Fetching balance...");
+    console.log("  📍 Address:", currentAccount.address);
+    console.log("  🌐 Network:", currentNetwork.name, `(${currentNetwork.chainId})`);
 
     try {
       const provider = new ethers.JsonRpcProvider(currentNetwork.rpcUrl);
+
+      // 验证网络连接
+      const network = await provider.getNetwork();
+      console.log("  ✅ Connected to chainId:", network.chainId.toString());
+
       const balanceWei = await provider.getBalance(currentAccount.address);
       const balanceEth = ethers.formatEther(balanceWei);
+      console.log("  💰 Balance:", balanceEth, "ETH");
 
       // 格式化为4位小数
       const formattedBalance = parseFloat(balanceEth).toFixed(4);
       setBalance(formattedBalance);
 
-      // 简单的USD估算（这里使用固定汇率，实际应该从API获取）
-      const ethPriceUSD = 2000; // 示例价格
+      // 简单的USD估算
+      const ethPriceUSD = 2000;
       const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
       setBalanceUSD(usdValue);
+
+      console.log("  💵", formattedBalance, "ETH ≈ $" + usdValue);
     } catch (error) {
-      console.error("Failed to fetch balance:", error);
+      console.error("❌ Balance fetch failed:");
+      console.error("   Network:", currentNetwork.name);
+      console.error("   RPC:", currentNetwork.rpcUrl);
+      console.error("   Full error:", error);
+
       setBalance("0.0000");
       setBalanceUSD("0.00");
     }
@@ -159,22 +174,42 @@ export default function WalletHome() {
     setSelectedMarketTab(tab);
     const sortByMap: Record<string, string> = {
       "24 hrs": "24hrs",
-      "Hot": "hot",
-      "Profit": "profit",
-      "Rising": "rising",
-      "Loss": "loss",
-      "Top Gain": "topGain"
+      Hot: "hot",
+      Profit: "profit",
+      Rising: "rising",
+      Loss: "loss",
+      "Top Gain": "topGain",
     };
     fetchMarketData(sortByMap[tab] || tab.toLowerCase());
   };
 
-  // 当账户或网络变化时获取余额
+  const startFetchBalanceTimer = () => {
+    if (fetchBalanceTimer) {
+      clearInterval(fetchBalanceTimer);
+    }
+    setFetchBalanceTimer(
+      setInterval(() => {
+        console.log("Fetching balance...");
+        fetchBalance();
+      }, 10000)
+    );
+  };
+
   useEffect(() => {
+    console.log("WalletHome mounted");
     fetchBalance();
-    // 设置定时刷新余额（每30秒）
-    const interval = setInterval(fetchBalance, 30000);
-    return () => clearInterval(interval);
-  }, [currentAccount?.address, currentNetwork.id]);
+    walletEventBus.on("network:changed", ({ network }) => {
+      console.log("Current network:", network);
+      // 切换网络后重新获取余额
+      setCurrentNetwork(network);
+      addNotification("success", "网络切换成功");
+      startFetchBalanceTimer();
+    });
+
+    return () => {
+      walletEventBus.off("network:changed");
+    };
+  }, []);
 
   // 初始加载市场数据
   useEffect(() => {
@@ -209,7 +244,9 @@ export default function WalletHome() {
 
           {/* Balance Display - Centered */}
           <div className="text-center mb-8">
-            <div className="text-5xl font-bold mb-2 bg-gradient-to-r text-primary">{balance} {currentNetwork.symbol}</div>
+            <div className="text-5xl font-bold mb-2 bg-gradient-to-r text-primary">
+              {balance} {currentNetwork.symbol}
+            </div>
             <div className="flex items-center justify-center gap-2 text-gray-400">
               <span className="text-lg">${balanceUSD}</span>
               <span className="text-green-400 text-sm">+0.7%</span>
@@ -218,10 +255,7 @@ export default function WalletHome() {
 
           {/* Action Buttons - Send, Receive, Buy */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <button
-              onClick={() => setShowSendModal(true)}
-              className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors"
-            >
+            <button onClick={() => setShowSendModal(true)} className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
               <IoIosSend className="w-5 h-5" />
               <span className="font-medium">Send</span>
             </button>
@@ -240,7 +274,7 @@ export default function WalletHome() {
           {/* Account Selector Dropdown */}
           {showAccountSelector && (
             <>
-             {/* Backdrop */}
+              {/* Backdrop */}
               <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowAccountSelector(false)} />
               {/* Dropdown */}
               <div className="absolute top-20 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
@@ -345,19 +379,9 @@ export default function WalletHome() {
               <div className="absolute top-20 right-8 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-[60] min-w-[240px]">
                 <div className="p-4 space-y-2">
                   {networkController.getAllNetworks().map((network) => (
-                    <button
-                      key={network.id}
-                      onClick={() => handleNetworkSwitch(network.id)}
-                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                        currentNetwork.id === network.id
-                          ? "bg-[#00F4C8]/20 border border-[#00F4C8]/50"
-                          : "bg-gray-800 hover:bg-gray-700"
-                      }`}
-                    >
+                    <button key={network.id} onClick={() => handleNetworkSwitch(network.id)} className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${currentNetwork.id === network.id ? "bg-[#00F4C8]/20 border border-[#00F4C8]/50" : "bg-gray-800 hover:bg-gray-700"}`}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-xs font-bold">
-                          {network.symbol.charAt(0)}
-                        </div>
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-xs font-bold">{network.symbol.charAt(0)}</div>
                         <div className="text-left">
                           <div className="font-medium text-sm">{network.name}</div>
                           <div className="text-xs text-gray-400">Chain ID: {network.chainId}</div>
@@ -378,7 +402,6 @@ export default function WalletHome() {
 
         {/* Main Content */}
         <main className="px-8 space-y-8">
-
           {/* 资产展示区域 */}
           <WalletAssets></WalletAssets>
 
@@ -389,15 +412,7 @@ export default function WalletHome() {
             {/* Filter Tabs */}
             <div className="flex gap-2 mb-4 overflow-x-auto">
               {["24 hrs", "Hot", "Profit", "Rising", "Loss", "Top Gain"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => handleMarketTabChange(tab)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                    selectedMarketTab === tab.toLowerCase() || (tab === "Hot" && selectedMarketTab === "hot")
-                      ? "bg-gray-800 text-white"
-                      : "bg-transparent text-gray-400 hover:bg-gray-800/50"
-                  }`}
-                >
+                <button key={tab} onClick={() => handleMarketTabChange(tab)} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedMarketTab === tab.toLowerCase() || (tab === "Hot" && selectedMarketTab === "hot") ? "bg-gray-800 text-white" : "bg-transparent text-gray-400 hover:bg-gray-800/50"}`}>
                   {tab}
                 </button>
               ))}
@@ -425,9 +440,7 @@ export default function WalletHome() {
                             <img src={item.icon} alt={item.code} className="w-full h-full object-cover" />
                           </div>
                         ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {item.code.charAt(0).toUpperCase()}
-                          </div>
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm">{item.code.charAt(0).toUpperCase()}</div>
                         )}
                         <div>
                           <div className="text-white font-medium">{item.name}</div>
@@ -438,19 +451,9 @@ export default function WalletHome() {
                       {/* Mini chart - Recharts version */}
                       <div className="flex-1 mx-4 h-8">
                         <ResponsiveContainer width="100%" height={32}>
-                          <LineChart
-                            data={data}
-                            margin={{ top: 2, right: 0, bottom: 2, left: 0 }}
-                          >
+                          <LineChart data={data} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
                             <YAxis domain={yDomain} hide />
-                            <Line
-                              type="monotone"
-                              dataKey="price"
-                              stroke={chartColor}
-                              strokeWidth={1.5}
-                              dot={false}
-                              isAnimationActive={false}
-                            />
+                            <Line type="monotone" dataKey="price" stroke={chartColor} strokeWidth={1.5} dot={false} isAnimationActive={false} />
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
