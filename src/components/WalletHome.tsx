@@ -468,7 +468,7 @@ export default function WalletHome() {
           onTransactionComplete={(txHash) => {
             console.log("Transaction completed:", txHash);
             // Refresh balance after transaction
-            fetchBalance();
+            fetchBalance(currentNetwork);
           }}
         />
       </div>
