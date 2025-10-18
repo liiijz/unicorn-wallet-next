@@ -144,6 +144,11 @@ export class NetworkController {
    * Load custom networks from localStorage
    */
   private loadCustomNetworks(): void {
+    // Only access localStorage in browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     try {
       const stored = localStorage.getItem("customNetworks");
       if (stored) {
@@ -168,6 +173,10 @@ export class NetworkController {
    * Save custom networks to localStorage
    */
   private saveCustomNetworks(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     try {
       localStorage.setItem("customNetworks", JSON.stringify(this.customNetworks));
     } catch (error) {
@@ -179,6 +188,10 @@ export class NetworkController {
    * Save current network to localStorage
    */
   private saveCurrentNetwork(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     try {
       localStorage.setItem("currentNetworkId", this.currentNetwork.id);
     } catch (error) {
