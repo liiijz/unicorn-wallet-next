@@ -145,7 +145,8 @@ export default function WalletHome() {
   const fetchMarketData = async (sortBy: string = "hot") => {
     setIsLoadingMarket(true);
     try {
-      const response = await fetch(`https://api.example.com/api/v1/market/statistics?sortBy=${sortBy}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/v1/market/statistics?sortBy=${sortBy}`);
       const result: MarketResponse = await response.json();
 
       if (result.code === 200 && result.data) {

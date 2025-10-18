@@ -46,7 +46,8 @@ export const WalletAssets = () => {
 async function fetchTokens(address: string | undefined) {
   if (!address) return [];
   try {
-    const response = await fetch(`https://api.example.com/api/v1/tokens?address=${address}`);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const response = await fetch(`${apiUrl}/api/v1/tokens?address=${address}`);
     const result = await response.json();
   } catch (error) {
   } finally {
