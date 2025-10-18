@@ -137,7 +137,6 @@ export class KeyringController {
     const data = JSON.parse(dataString);
     const decrypted = this.walletService.decryptVault(data.vault, this.password);
     const keyrings = JSON.parse(decrypted);
-    console.log("keyrings:", keyrings);
     keyrings.forEach((kr: any) => {
       const keyring: IKeyring = new HDKeyring();
       keyring.deserialize(kr);
