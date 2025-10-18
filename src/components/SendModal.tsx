@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@/hooks/useWallet";
+import { useWalletStore } from "@/stores/walletStore";
 
 interface SendModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export default function SendModal({
   balance,
   onTransactionComplete,
 }: SendModalProps) {
-  const { keyringController } = useWallet();
+  const { keyringController } = useWalletStore();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);

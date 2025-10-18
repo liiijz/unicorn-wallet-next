@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useWallet } from "@/hooks/useWallet";
+import { useWalletAccounts, useWalletAuth } from "@/hooks/wallet";
 import type { Account } from "@/types/Account";
 import Avatar from "./Avatar";
 import SendModal from "./SendModal";
@@ -42,8 +42,9 @@ interface MarketResponse {
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const {currentAccount, setCurrentAccount} = useWalletStore();
-  const {allAccounts, addAccount, networkController } = useWallet();
+  const { currentAccount, setCurrentAccount, getAllAccounts, networkController } = useWalletStore();
+  const { addAccount } = useWalletAccounts();
+  const allAccounts = getAllAccounts();
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
@@ -496,7 +497,7 @@ export default function WalletHome() {
 function ImportWalletModal({ onClose }: { onClose: () => void }) {
   const [mnemonic, setMnemonic] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
-  const { importExistingWallet } = useWallet();
+  const { importExistingWallet } = useWalletAuth();
   const { isLoading } = useUIStore();
 
   const handleImport = async (e: React.FormEvent) => {

@@ -1,8 +1,8 @@
-import { useWallet } from "@/stores";
+import { useWalletStore } from "@/stores/walletStore";
 import { useEffect, useState } from "react";
 
 export const WalletAssets = () => {
-  const { currentAccount } = useWallet();
+  const { currentAccount } = useWalletStore();
 
   const [activeTab, setActiveTab] = useState<string>("tokens");
   const tabs = [

@@ -1,19 +1,13 @@
 'use client';
 
-import { useWallet } from '@/hooks/useWallet';
+import { useWalletAuth } from '@/hooks/wallet';
+import { useWalletStore } from '@/stores/walletStore';
 import { useUIStore } from '@/stores/uiStore';
 
 export default function WalletStatus() {
-  const {
-    isUnlocked,
-    isInitialized,
-    currentAccount,
-    allAccounts,
-    initialize,
-    unlockWallet,
-    lockWallet,
-    createWallet,
-  } = useWallet();
+  const { isUnlocked, isInitialized, currentAccount, getAllAccounts } = useWalletStore();
+  const { initialize, unlockWallet, lockWallet, createWallet } = useWalletAuth();
+  const allAccounts = getAllAccounts();
 
   const { isLoading, loadingMessage, error, clearError } = useUIStore();
 

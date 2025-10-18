@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useWallet } from '@/hooks/useWallet';
+import { useWalletAuth } from '@/hooks/wallet';
+import { useWalletStore } from '@/stores/walletStore';
 import Welcome from '@/components/Welcome';
 import Unlock from '@/components/Unlock';
 import WalletHome from '@/components/WalletHome';
@@ -15,7 +16,8 @@ import WalletHome from '@/components/WalletHome';
  * 3. 已解锁 -> WalletHome 页面
  */
 export default function Home() {
-  const { isInitialized, isUnlocked, initialize } = useWallet();
+  const { isInitialized, isUnlocked } = useWalletStore();
+  const { initialize } = useWalletAuth();
 
   // 初始化钱包状态（检查是否有存储的钱包数据）
   useEffect(() => {

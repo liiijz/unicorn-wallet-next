@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useWallet } from "@/hooks/useWallet";
+import { useWalletAuth } from "@/hooks/wallet";
 import { useUIStore } from "@/stores/uiStore";
 
 /**
@@ -12,7 +12,7 @@ import { useUIStore } from "@/stores/uiStore";
 export default function Unlock() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { unlockWallet } = useWallet();
+  const { unlockWallet } = useWalletAuth();
   const { isLoading, loadingMessage, error, setError, clearError } = useUIStore();
 
   const handleUnlock = async (e: React.FormEvent) => {

@@ -3,26 +3,24 @@ import { useUIStore } from '@/stores/uiStore';
 import { useCallback } from 'react';
 
 /**
- * 钱包相关的自定义 Hook
- * 提供钱包操作的便捷方法和状态管理
+ * 钱包认证 Hook
+ *
+ * 职责:
+ * - 提供钱包认证相关的操作 (初始化、解锁、锁定、创建、导入)
+ * - 自动处理 UI 反馈 (loading、error)
+ *
+ * 使用场景:
+ * - Welcome 页面 (创建/导入钱包)
+ * - Unlock 页面 (解锁钱包)
+ * - 设置页面 (锁定钱包)
  */
-export const useWallet = () => {
+export const useWalletAuth = () => {
   const {
-    isUnlocked,
-    isInitialized,
-    currentAccount,
-    keyrings,
-    keyringController,
-    networkController,
     initializeWallet,
     unlock,
     lock,
     createNewWallet,
     importWallet,
-    setCurrentAccount,
-    getAllAccounts,
-    addNewAccount,
-    refreshWalletData,
   } = useWalletStore();
 
   const { setLoading, setError, clearError } = useUIStore();
@@ -102,71 +100,12 @@ export const useWallet = () => {
     }
   }, [importWallet, setLoading, setError, clearError]);
 
-  // 切换账户
-  const switchAccount = useCallback((accountIndex: number) => {
-    try {
-      const accounts = getAllAccounts();
-      if (accounts[accountIndex]) {
-        setCurrentAccount(accounts[accountIndex]);
-      }
-    } catch (error) {
-      console.error('Failed to switch account:', error);
-      setError('账户切换失败');
-    }
-  }, [getAllAccounts, setCurrentAccount, setError]);
-
-  // 刷新钱包数据
-  const refresh = useCallback(() => {
-    try {
-      refreshWalletData();
-    } catch (error) {
-      console.error('Failed to refresh wallet data:', error);
-      setError('数据刷新失败');
-    }
-  }, [refreshWalletData, setError]);
-
-  // 添加新账户
-  const addAccount = useCallback(async () => {
-    setLoading(true, '正在创建新账户...');
-    clearError();
-
-    try {
-      const newAccount = await addNewAccount();
-      if (newAccount) {
-        setCurrentAccount(newAccount);
-        return newAccount;
-      } else {
-        setError('账户创建失败');
-        return null;
-      }
-    } catch (error) {
-      console.error('Failed to add account:', error);
-      setError('账户创建失败');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [addNewAccount, setCurrentAccount, setLoading, setError, clearError]);
-
   return {
-    // 状态
-    isUnlocked,
-    isInitialized,
-    currentAccount,
-    keyrings,
-    allAccounts: getAllAccounts(),
-    keyringController,
-    networkController,
-
-    // 方法
+    // 认证操作方法
     initialize,
     unlockWallet,
     lockWallet,
     createWallet,
     importExistingWallet,
-    switchAccount,
-    setCurrentAccount,
-    addAccount,
-    refresh,
   };
 };

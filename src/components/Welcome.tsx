@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWallet } from '@/hooks/useWallet';
+import { useWalletAuth } from '@/hooks/wallet';
 import { useUIStore } from '@/stores/uiStore';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -99,7 +99,7 @@ function CreateWalletModal({ onClose }: { onClose: () => void }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const { createWallet } = useWallet();
+  const { createWallet } = useWalletAuth();
   const { isLoading } = useUIStore();
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -239,7 +239,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
-  const { importExistingWallet } = useWallet();
+  const { importExistingWallet } = useWalletAuth();
   const { isLoading } = useUIStore();
 
   const handleImport = async (e: React.FormEvent) => {
