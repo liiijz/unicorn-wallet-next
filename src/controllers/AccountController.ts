@@ -59,6 +59,9 @@ export class AccountController {
    */
   private syncAccountsFromKeyrings(): Account[] {
     const newAccounts: Account[] = [];
+    
+    // 按 keyring 类型统计账户数量，用于生成正确的账户名称
+    const accountCountByType: Record<string, number> = {};
 
     this.keyringsCache.forEach((keyring: IKeyring) => {
       const addresses = keyring.getAccounts();
@@ -69,19 +72,30 @@ export class AccountController {
         let existingAccount = this.accounts.find(acc => acc.address === address);
 
         if (!existingAccount) {
-          // 创建新账户
+          // 初始化该类型的计数器
+          if (!accountCountByType[keyring.type]) {
+            accountCountByType[keyring.type] = 0;
+          }
+          
+          // 创建新账户，使用累计的账户数量来生成名称
           const account: Account = {
             id: `${keyring.type}-${address}`,
             address,
-            name: this.generateAccountName(keyring.type, index),
+            name: this.generateAccountName(keyring.type, accountCountByType[keyring.type]),
             type: this.mapKeyringTypeToAccountType(keyring.type),
             derivationPath: keyringData.hdPath ? `${keyringData.hdPath}/${index}` : null,
             accountIndex: index,
             createdAt: Date.now(),
           };
           newAccounts.push(account);
+          accountCountByType[keyring.type]++;
         } else {
           newAccounts.push(existingAccount);
+          // 如果是已存在的账户，也要更新计数器
+          if (!accountCountByType[keyring.type]) {
+            accountCountByType[keyring.type] = 0;
+          }
+          accountCountByType[keyring.type]++;
         }
       });
     });
