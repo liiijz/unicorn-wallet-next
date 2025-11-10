@@ -57,21 +57,43 @@ export class WalletService {
   }
 
   decryptVault(encryptedVault: string, password: string): string {
-    const vault = JSON.parse(encryptedVault);
-    const salt = CryptoJS.enc.Hex.parse(vault.salt);
-    const iv = CryptoJS.enc.Hex.parse(vault.iv);
+    try {
+      const vault = JSON.parse(encryptedVault);
+      const salt = CryptoJS.enc.Hex.parse(vault.salt);
+      const iv = CryptoJS.enc.Hex.parse(vault.iv);
 
-    const key = CryptoJS.PBKDF2(password, salt, {
-      keySize: 8,
-      iterations: vault.keyMetadata.params.iterations,
-    });
+      const key = CryptoJS.PBKDF2(password, salt, {
+        keySize: 8,
+        iterations: vault.keyMetadata.params.iterations,
+      });
 
-    const decrypted = CryptoJS.AES.decrypt(vault.data, key, {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7,
-    });
+      const decrypted = CryptoJS.AES.decrypt(vault.data, key, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      });
 
-    return decrypted.toString(CryptoJS.enc.Utf8);
+      // 尝试转换为 UTF-8 字符串，如果失败说明密码错误
+      let decryptedStr: string;
+      try {
+        decryptedStr = decrypted.toString(CryptoJS.enc.Utf8);
+      } catch (error) {
+        throw new Error('密码错误');
+      }
+      
+      // 验证解密结果
+      if (!decryptedStr || decryptedStr.length === 0) {
+        throw new Error('密码错误');
+      }
+
+      return decryptedStr;
+    } catch (error: any) {
+      // 如果是我们自己抛出的密码错误，直接抛出
+      if (error.message === '密码错误') {
+        throw error;
+      }
+      // 其他任何错误都视为密码错误
+      throw new Error('密码错误');
+    }
   }
 }

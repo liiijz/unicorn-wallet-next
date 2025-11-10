@@ -77,40 +77,41 @@ export const useWalletStore = create<WalletStore>()(
 
         // 解锁钱包
         unlock: async (password: string): Promise<boolean> => {
-          try {
-            set({ walletStatus: 'unlocking' });
-            
-            const { keyringController } = get();
-            keyringController.setPassword(password);
+          set({ walletStatus: 'unlocking' });
+          
+          const { keyringController } = get();
+          keyringController.setPassword(password);
 
-            // 订阅一次账户同步事件
-            return new Promise<boolean>((resolve) => {
-              const handleAccountSynced = ({ accounts }: { accounts: Account[] }) => {
-                const keyrings = keyringController.getKeyrings();
+          // 订阅一次账户同步事件
+          return new Promise<boolean>((resolve, reject) => {
+            const handleAccountSynced = ({ accounts }: { accounts: Account[] }) => {
+              const keyrings = keyringController.getKeyrings();
 
-                set({
-                  walletStatus: 'unlocked',
-                  keyrings,
-                  accounts,
-                  currentAccount: accounts[0] || null,
-                });
+              set({
+                walletStatus: 'unlocked',
+                keyrings,
+                accounts,
+                currentAccount: accounts[0] || null,
+              });
 
-                // 取消订阅
-                walletEventBus.off("account:synced", handleAccountSynced);
-                resolve(true);
-              };
+              // 取消订阅
+              walletEventBus.off("account:synced", handleAccountSynced);
+              resolve(true);
+            };
 
-              walletEventBus.on("account:synced", handleAccountSynced);
+            walletEventBus.on("account:synced", handleAccountSynced);
 
-              // restoreVault 会触发 keyring:restored 事件
-              // AccountController 会自动响应并同步账户
+            // restoreVault 会触发 keyring:restored 事件
+            // AccountController 会自动响应并同步账户
+            try {
               keyringController.restoreVault();
-            });
-          } catch (error) {
-            console.error("Failed to unlock wallet:", error);
-            set({ walletStatus: 'locked' });
-            return false;
-          }
+            } catch (error) {
+              // 解密失败时，清理事件监听器并设置状态
+              walletEventBus.off("account:synced", handleAccountSynced);
+              set({ walletStatus: 'locked' });
+              resolve(false); // 返回 false 而不是 reject，让调用方统一处理
+            }
+          });
         },
 
         // 锁定钱包
