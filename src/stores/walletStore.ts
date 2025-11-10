@@ -6,13 +6,13 @@ import { KeyringController } from "@/controllers/KeyringController";
 import { walletEventBus } from "@/events/WalletEvents";
 import type { Account } from "@/types/Account";
 import type { IKeyring } from "@/types/Keyring";
+import type { WalletStatus } from "@/types/WalletStatus";
 
 import { NetworkController } from "../controllers/NetworkController";
 
 interface WalletState {
-  // 认证状态
-  isUnlocked: boolean;
-  isInitialized: boolean;
+  // 钱包状态（替代 isUnlocked 和 isInitialized）
+  walletStatus: WalletStatus;
 
   // 钱包数据
   keyrings: IKeyring[];
@@ -34,6 +34,7 @@ interface WalletActions {
   // 钱包管理
   createNewWallet: (password: string) => Promise<string>;
   importWallet: (mnemonic: string, password: string | null) => Promise<void>;
+  confirmMnemonicBackup: () => void; // 新增：确认助记词备份完成
 
   // 账户管理
   setCurrentAccount: (account: Account) => void;
@@ -60,8 +61,7 @@ export const useWalletStore = create<WalletStore>()(
     persist(
       (set, get) => ({
         // 初始状态
-        isUnlocked: false,
-        isInitialized: false,
+        walletStatus: 'uninitialized',
         keyrings: [],
         accounts: [],
         currentAccount: null,
@@ -72,12 +72,14 @@ export const useWalletStore = create<WalletStore>()(
         // 初始化钱包
         initializeWallet: () => {
           const hasVault = localStorage.getItem("KeyringController");
-          set({ isInitialized: !!hasVault });
+          set({ walletStatus: hasVault ? 'locked' : 'uninitialized' });
         },
 
         // 解锁钱包
         unlock: async (password: string): Promise<boolean> => {
           try {
+            set({ walletStatus: 'unlocking' });
+            
             const { keyringController } = get();
             keyringController.setPassword(password);
 
@@ -87,7 +89,7 @@ export const useWalletStore = create<WalletStore>()(
                 const keyrings = keyringController.getKeyrings();
 
                 set({
-                  isUnlocked: true,
+                  walletStatus: 'unlocked',
                   keyrings,
                   accounts,
                   currentAccount: accounts[0] || null,
@@ -106,6 +108,7 @@ export const useWalletStore = create<WalletStore>()(
             });
           } catch (error) {
             console.error("Failed to unlock wallet:", error);
+            set({ walletStatus: 'locked' });
             return false;
           }
         },
@@ -119,7 +122,7 @@ export const useWalletStore = create<WalletStore>()(
           keyringController.lock();
 
           set({
-            isUnlocked: false,
+            walletStatus: 'locked',
             keyrings: [],
             accounts: [],
             currentAccount: null,
@@ -128,6 +131,8 @@ export const useWalletStore = create<WalletStore>()(
 
         // 创建新钱包
         createNewWallet: async (password: string): Promise<string> => {
+          set({ walletStatus: 'creating' });
+          
           const { keyringController } = get();
           keyringController.setPassword(password);
 
@@ -136,9 +141,9 @@ export const useWalletStore = create<WalletStore>()(
             const handleAccountSynced = ({ accounts }: { accounts: Account[] }) => {
               const keyrings = keyringController.getKeyrings();
 
+              // ✅ 关键：只设置为 showing-mnemonic 状态，不设置为 unlocked
               set({
-                isUnlocked: true,
-                isInitialized: true,
+                walletStatus: 'showing-mnemonic',
                 keyrings,
                 accounts,
                 currentAccount: accounts[0] || null,
@@ -154,13 +159,20 @@ export const useWalletStore = create<WalletStore>()(
             // AccountController 会自动响应并同步账户
             const mnemonic = keyringController.createNew();
             keyringController.persistVault();
-
             resolve(mnemonic);
           });
         },
 
+        // ✅ 新增：确认助记词备份完成
+        confirmMnemonicBackup: () => {
+          // 用户确认备份后，才真正完成钱包创建
+          set({ walletStatus: 'unlocked' });
+        },
+
         // 导入钱包
         importWallet: async (mnemonic: string, password: string | null): Promise<void> => {
+          set({ walletStatus: 'importing' });
+          
           const { keyringController } = get();
           if (password) {
             keyringController.setPassword(password);
@@ -171,9 +183,9 @@ export const useWalletStore = create<WalletStore>()(
             const handleAccountSynced = ({ accounts }: { accounts: Account[] }) => {
               const keyrings = keyringController.getKeyrings();
 
+              // 导入钱包直接设置为 unlocked（不需要显示助记词）
               set({
-                isUnlocked: true,
-                isInitialized: true,
+                walletStatus: 'unlocked',
                 keyrings,
                 accounts,
                 currentAccount: accounts[0] || null,
@@ -270,8 +282,8 @@ export const useWalletStore = create<WalletStore>()(
       {
         name: "wallet-storage",
         partialize: (state) => ({
-          isInitialized: state.isInitialized,
-          // 只持久化基本状态，敏感数据通过 KeyringController 加密存储
+          walletStatus: state.walletStatus,
+          // 只持久化钱包状态，敏感数据通过 KeyringController 加密存储
         }),
       }
     ),

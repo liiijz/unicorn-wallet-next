@@ -60,6 +60,12 @@
       "passwordMismatch": "Passwords do not match"
     }
   },
+  "mnemonicModal": {
+    "title": "Backup Recovery Phrase",
+    "backupTitle": "Write Down Your Recovery Phrase",
+    "warning": "Please write down the following words in order and keep them safe. Never share your recovery phrase with anyone, or you may lose all your assets.",
+    "confirmButton": "I Have Written It Down"
+  },
   "unlock": {
     "title": "Welcome Back",
     "subtitle": "Enter your password to unlock your wallet",

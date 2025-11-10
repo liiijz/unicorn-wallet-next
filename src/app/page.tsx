@@ -11,12 +11,13 @@ import WalletHome from '@/components/WalletHome';
  * 主页面路由逻辑
  *
  * 根据钱包状态自动切换显示不同的页面：
- * 1. 未初始化（无钱包数据）-> Welcome 页面
- * 2. 已初始化但未解锁 -> Unlock 页面
- * 3. 已解锁 -> WalletHome 页面
+ * 1. uninitialized -> Welcome 页面
+ * 2. locked -> Unlock 页面
+ * 3. unlocked -> WalletHome 页面
+ * 4. showing-mnemonic -> Welcome 页面（会显示助记词模态框）
  */
 export default function Home() {
-  const { isInitialized, isUnlocked } = useWalletStore();
+  const { walletStatus } = useWalletStore();
   const { initialize } = useWalletAuth();
 
   // 初始化钱包状态（检查是否有存储的钱包数据）
@@ -25,16 +26,28 @@ export default function Home() {
   }, [initialize]);
 
   // 路由逻辑
-  if (!isInitialized) {
-    // 首次使用，显示欢迎页面
+  if (walletStatus === 'uninitialized' || walletStatus === 'showing-mnemonic') {
+    // 首次使用或正在显示助记词，显示欢迎页面
     return <Welcome />;
   }
 
-  if (!isUnlocked) {
+  if (walletStatus === 'locked') {
     // 有钱包但未解锁，显示解锁页面
     return <Unlock />;
   }
 
-  // 已解锁，显示主钱包界面
-  return <WalletHome />;
+  if (walletStatus === 'unlocked') {
+    // 已解锁，显示主钱包界面
+    return <WalletHome />;
+  }
+
+  // 加载中状态
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <p className="mt-4 text-gray-400">加载中...</p>
+      </div>
+    </div>
+  );
 }

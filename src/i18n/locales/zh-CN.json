@@ -60,6 +60,12 @@
       "passwordMismatch": "两次输入的密码不一致"
     }
   },
+  "mnemonicModal": {
+    "title": "备份助记词",
+    "backupTitle": "抄写备份助记词",
+    "warning": "请按顺序抄写以下若干，并妥善保管。切勿向任何人透露你的助记词，否则你可能会失去全部资产。",
+    "confirmButton": "我已记录完毕"
+  },
   "unlock": {
     "title": "欢迎回来",
     "subtitle": "输入密码以解锁您的钱包",
