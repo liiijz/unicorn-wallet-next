@@ -61,6 +61,8 @@ export const useWalletStore = create<WalletStore>()(
         name: "wallet-storage",
         partialize: (state) => ({
           walletStatus: state.walletStatus,
+          accounts: state.accounts,
+          currentAccount: state.currentAccount,
         }),
       }
     ),

@@ -57,25 +57,25 @@ class WalletController {
   async createNewWallet(password: string): Promise<string> {
     useWalletStore.setState({ walletStatus: 'creating', password });
 
-    // 创建 HD Keyring
+    // 创建 HD Keyring (默认创建 1 个地址)
     const { keyring, mnemonic } = keyringService.createNewHDKeyring(1);
     
-    // 持久化
+    // 持久化 Keyring
     await keyringService.persistVault([keyring], password);
     
-    // 生成 accounts
-    const accounts = this.mapKeyringsToAccounts([keyring]);
+    // 创建初始账户
+    const initialAccount = this.createNewAccount(keyring, 0);
     
-    // 更新 Store
+    // 更新 Store (追加到 accounts)
+    const { accounts: existingAccounts } = useWalletStore.getState();
+    const accounts = [...existingAccounts, initialAccount];
+    
     useWalletStore.setState({
       keyrings: [keyring],
       accounts,
-      currentAccount: accounts[0],
+      currentAccount: initialAccount,
       walletStatus: 'showing-mnemonic',
     });
-    
-    // 持久化账户元数据
-    this.persistAccountMetadata(accounts);
     
     walletEventBus.emit('keyring:created', { keyrings: [keyring] });
     
@@ -88,10 +88,11 @@ class WalletController {
   async importWallet(mnemonic: string, password: string): Promise<void> {
     const currentState = useWalletStore.getState();
     const existingKeyrings = currentState.keyrings;
+    const existingAccounts = currentState.accounts;
     
     useWalletStore.setState({ walletStatus: 'importing', password });
 
-    // 从助记词创建 HD Keyring
+    // 从助记词创建 HD Keyring (默认创建 1 个地址)
     const newKeyring = keyringService.createHDKeyringFromMnemonic(mnemonic, 1);
     
     // 合并现有 keyrings 和新 keyring
@@ -100,18 +101,17 @@ class WalletController {
     // 持久化所有 keyrings
     await keyringService.persistVault(allKeyrings, password);
     
-    // 重新生成所有 accounts
-    const accounts = this.mapKeyringsToAccounts(allKeyrings);
+    // 创建初始账户并追加到现有 accounts
+    const newAccount = this.createNewAccount(newKeyring, 0);
+    const accounts = [...existingAccounts, newAccount];
     
     // 更新 Store
     useWalletStore.setState({
       keyrings: allKeyrings,
       accounts,
-      currentAccount: accounts[0], // 保持第一个账户为当前账户
+      currentAccount: existingAccounts[0] || newAccount, // 保持第一个账户为当前账户
       walletStatus: 'unlocked',
     });
-    
-    this.persistAccountMetadata(accounts);
     
     walletEventBus.emit('keyring:imported', { keyrings: allKeyrings });
   }
@@ -129,17 +129,13 @@ class WalletController {
       throw new Error('Invalid password or vault not found');
     }
     
-    // 生成 accounts
-    const accounts = this.mapKeyringsToAccounts(keyrings);
+    // 直接使用 Store 中持久化的 accounts (不再重新生成)
+    const { accounts, currentAccount } = useWalletStore.getState();
     
-    // 恢复用户自定义的账户名称
-    this.restoreAccountMetadata(accounts);
-    
-    // 更新 Store
+    // 更新 Store (恢复 keyrings,保持 accounts 不变)
     useWalletStore.setState({
       keyrings,
-      accounts,
-      currentAccount: accounts[0],
+      currentAccount: currentAccount || accounts[0],
       walletStatus: 'unlocked',
     });
     
@@ -164,31 +160,26 @@ class WalletController {
   // ========== Account 管理 ==========
 
   /**
-   * 将 Keyrings 映射为 Account 列表
+   * 创建单个新账户
    */
-  private mapKeyringsToAccounts(keyrings: IKeyring[]): Account[] {
-    const accounts: Account[] = [];
-    let accountCount = 0;
+  private createNewAccount(keyring: IKeyring, accountIndex: number): Account {
+    const addresses = keyring.getAddresses();
+    const address = addresses[accountIndex];
+    const keyringData = keyring.serialize();
     
-    keyrings.forEach((keyring) => {
-      const addresses = keyring.getAddresses();
-      const keyringData = keyring.serialize();
-      
-      addresses.forEach((address, index) => {
-        accounts.push({
-          id: `${keyring.type}-${address}`,
-          address,
-          name: `Account ${accountCount + 1}`,
-          type: this.mapKeyringTypeToAccountType(keyring.type),
-          derivationPath: keyringData.hdPath ? `${keyringData.hdPath}/${index}` : null,
-          accountIndex: index,
-          createdAt: Date.now(),
-        });
-        accountCount++;
-      });
-    });
+    // 获取当前所有账户数量，用于生成默认名称
+    const { accounts } = useWalletStore.getState();
+    const accountCount = accounts.length;
     
-    return accounts;
+    return {
+      id: `${keyring.type}-${address}`,
+      address,
+      name: `Account ${accountCount + 1}`,
+      type: this.mapKeyringTypeToAccountType(keyring.type),
+      derivationPath: keyringData.hdPath ? `${keyringData.hdPath}/${accountIndex}` : null,
+      accountIndex,
+      createdAt: Date.now(),
+    };
   }
 
   /**
@@ -201,7 +192,7 @@ class WalletController {
     if (account) {
       account.name = name;
       useWalletStore.setState({ accounts: [...accounts] });
-      this.persistAccountMetadata(accounts);
+      // 账户已通过 Zustand persist 自动持久化,无需手动保存
     }
   }
 
@@ -217,14 +208,13 @@ class WalletController {
    * 添加新账户
    */
   async addAccount(): Promise<Account | null> {
-    const { keyrings, password } = useWalletStore.getState();
+    const { keyrings, password, accounts: existingAccounts } = useWalletStore.getState();
     if (!password) throw new Error('No password set');
     
     const keyring = keyrings[0];
     if (!keyring) throw new Error('No keyring found');
     
-    const oldAddresses = keyring.getAddresses();
-    const oldAddressCount = oldAddresses.length;
+    const oldAddressCount = keyring.getAddresses().length;
     
     // 派生新地址
     await keyring.addAddresses(1);
@@ -232,47 +222,14 @@ class WalletController {
     // 持久化 Keyring
     await keyringService.persistVault(keyrings, password);
     
-    // 重新生成 accounts
-    const accounts = this.mapKeyringsToAccounts(keyrings);
+    // 创建新账户并追加到 Store
+    const newAccount = this.createNewAccount(keyring, oldAddressCount);
+    const accounts = [...existingAccounts, newAccount];
     
     useWalletStore.setState({ keyrings: [...keyrings], accounts });
-    this.persistAccountMetadata(accounts);
     
     // 返回新创建的账户
-    return accounts[oldAddressCount] || null;
-  }
-
-  /**
-   * 持久化账户元数据 (只存用户自定义的名称)
-   */
-  private persistAccountMetadata(accounts: Account[]): void {
-    const metadata = accounts.map(acc => ({
-      address: acc.address,
-      name: acc.name,
-    }));
-    localStorage.setItem('account-metadata', JSON.stringify(metadata));
-  }
-
-  /**
-   * 恢复账户元数据 (合并用户自定义的名称)
-   */
-  private restoreAccountMetadata(accounts: Account[]): void {
-    const dataString = localStorage.getItem('account-metadata');
-    if (!dataString) return;
-    
-    try {
-      const metadata = JSON.parse(dataString);
-      accounts.forEach(account => {
-        const saved = metadata.find((m: any) => 
-          m.address.toLowerCase() === account.address.toLowerCase()
-        );
-        if (saved) {
-          account.name = saved.name;
-        }
-      });
-    } catch (error) {
-      console.error('Failed to restore account metadata:', error);
-    }
+    return newAccount;
   }
 
   /**
