@@ -103,14 +103,8 @@ export const useWalletStore = create<WalletStore>()(
 
             // restoreVault 会触发 keyring:restored 事件
             // AccountController 会自动响应并同步账户
-            try {
               keyringController.restoreVault();
-            } catch (error) {
-              // 解密失败时，清理事件监听器并设置状态
-              walletEventBus.off("account:synced", handleAccountSynced);
-              set({ walletStatus: 'locked' });
-              resolve(false); // 返回 false 而不是 reject，让调用方统一处理
-            }
+
           });
         },
 
