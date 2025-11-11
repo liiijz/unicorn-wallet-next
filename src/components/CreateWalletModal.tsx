@@ -1,4 +1,4 @@
-import { useUIStore, useWalletStore } from "@/stores";
+import { useWalletStore } from "@/stores";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { walletController } from "@/controllers/WalletController";

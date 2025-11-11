@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import { useUIStore } from "@/stores/uiStore";
-import {walletController} from "@/controllers/WalletController";
+import { walletController } from "@/controllers/WalletController";
 import { useWalletStore } from "@/stores";
 
 /**

@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useWalletAuth } from "@/hooks/wallet";
 import { useWalletStore } from "@/stores/walletStore";
 import Welcome from "@/components/Welcome";
 import Unlock from "@/components/Unlock";
 import WalletHome from "@/components/WalletHome";
-import { useUIStore } from "@/stores";
 
 /**
  * 主页面路由逻辑
@@ -19,7 +17,6 @@ import { useUIStore } from "@/stores";
  */
 export default function Home() {
   const { walletStatus, setWalletStatus } = useWalletStore();
-  const { setError } = useUIStore();
 
   const initialize = () => {
     try {
@@ -27,7 +24,6 @@ export default function Home() {
       setWalletStatus(hasVault ? "locked" : "uninitialized");
     } catch (error) {
       console.error("Failed to initialize wallet:", error);
-      setError("钱包初始化失败");
     }
   };
 

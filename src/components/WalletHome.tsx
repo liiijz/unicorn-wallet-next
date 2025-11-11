@@ -13,7 +13,6 @@ import { useNotification } from "./Notification";
 import { WalletAssets } from "./WalletAssets";
 import { walletEventBus } from "@/events/WalletEvents";
 import { Network } from "@/types/Network";
-import { useUIStore } from "@/stores/uiStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { networkController } from "@/controllers/NetworkController";
 import { walletController } from "@/controllers";
