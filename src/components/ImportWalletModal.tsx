@@ -1,4 +1,4 @@
-import { useUIStore } from "@/stores";
+import { useUIStore, useWalletStore } from "@/stores";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { walletController } from "@/controllers/WalletController";
@@ -9,20 +9,26 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
-  const { isLoading, setLoading, clearError, setError } = useUIStore();
+  const [isLoading, setIsLoading] = useState(false); // 使用组件内部状态
+  
+  // 获取钱包状态和已有密码
+  const { walletStatus, password: existingPassword } = useWalletStore();
+  
+  // 判断是否已有钱包(已解锁且有密码)
+  const hasExistingWallet = walletStatus === 'unlocked' && existingPassword !== null;
 
-  const importExistingWallet = async (mnemonic: string, password: string) => {
-    setLoading(true, "正在导入钱包...");
-    clearError();
+  const importExistingWallet = async (mnemonic: string, passwordToUse: string) => {
+    setIsLoading(true);
+    setLocalError(null);
     try {
-      await walletController.importWallet(mnemonic, password);
+      await walletController.importWallet(mnemonic, passwordToUse);
       return true;
     } catch (error) {
       console.error("Failed to import wallet:", error);
-      setError("钱包导入失败");
+      setLocalError("钱包导入失败");
       return false;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -33,22 +39,38 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setLocalError(null);
 
-    if (!mnemonic || !password || !confirmPassword) {
+    // 验证助记词
+    if (!mnemonic) {
       setLocalError(t("importWallet.errors.allFieldsRequired"));
       return;
     }
 
-    if (password.length < 8) {
-      setLocalError(t("importWallet.errors.passwordTooShort"));
-      return;
+    let passwordToUse: string;
+
+    if (hasExistingWallet) {
+      // 场景1: 已有钱包,使用现有密码
+      passwordToUse = existingPassword!;
+    } else {
+      // 场景2: 首次创建钱包,验证新密码
+      if (!password || !confirmPassword) {
+        setLocalError(t("importWallet.errors.allFieldsRequired"));
+        return;
+      }
+
+      if (password.length < 8) {
+        setLocalError(t("importWallet.errors.passwordTooShort"));
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setLocalError(t("importWallet.errors.passwordMismatch"));
+        return;
+      }
+
+      passwordToUse = password;
     }
 
-    if (password !== confirmPassword) {
-      setLocalError(t("importWallet.errors.passwordMismatch"));
-      return;
-    }
-
-    const success = await importExistingWallet(mnemonic.trim(), password);
+    const success = await importExistingWallet(mnemonic.trim(), passwordToUse);
     if (success) {
       onClose();
     }
@@ -94,35 +116,53 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-2">{t("importWallet.password")}</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setLocalError(null);
-              }}
-              placeholder={t("importWallet.passwordPlaceholder")}
-              disabled={isLoading}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
+          {/* 仅在没有现有钱包时显示密码输入 */}
+          {!hasExistingWallet && (
+            <>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">{t("importWallet.password")}</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setLocalError(null);
+                  }}
+                  placeholder={t("importWallet.passwordPlaceholder")}
+                  disabled={isLoading}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-2">{t("importWallet.confirmPassword")}</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setLocalError(null);
-              }}
-              placeholder={t("importWallet.confirmPasswordPlaceholder")}
-              disabled={isLoading}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">{t("importWallet.confirmPassword")}</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setLocalError(null);
+                  }}
+                  placeholder={t("importWallet.confirmPasswordPlaceholder")}
+                  disabled={isLoading}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+            </>
+          )}
+
+          {/* 已有钱包时显示提示 */}
+          {hasExistingWallet && (
+            <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-3 flex items-start gap-2">
+              <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="text-sm text-blue-300">
+                <p className="font-medium mb-1">导入到现有钱包</p>
+                <p className="text-blue-400/80">将使用当前钱包密码加密新导入的账户</p>
+              </div>
+            </div>
+          )}
 
           <button type="submit" disabled={isLoading} className="cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             {isLoading && (

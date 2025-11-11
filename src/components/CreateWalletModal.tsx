@@ -17,22 +17,22 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const { isLoading, setLoading, clearError, setError } = useUIStore();
+  const [isLoading, setIsLoading] = useState(false); // 使用组件内部状态
   const { setWalletStatus } = useWalletStore();
 
   const createWallet = async (password: string) => {
-    setLoading(true, "正在创建钱包...");
-    clearError();
+    setIsLoading(true);
+    setLocalError(null);
 
     try {
       const mnemonic = await walletController.createNewWallet(password);
       return mnemonic;
     } catch (error) {
       console.error("Failed to create wallet:", error);
-      setError("钱包创建失败");
+      setLocalError("钱包创建失败");
       return null;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 

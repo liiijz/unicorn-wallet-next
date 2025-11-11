@@ -9,5 +9,4 @@
  * - useWalletStore: 钱包状态和基础方法
  * - useUIStore: UI 状态 (loading, error, modals)
  */
-export { useWalletAuth } from './useWalletAuth';
 export { useWalletAccounts } from './useWalletAccounts';

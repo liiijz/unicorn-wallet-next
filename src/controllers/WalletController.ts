@@ -88,28 +88,34 @@ class WalletController {
    * 导入钱包
    */
   async importWallet(mnemonic: string, password: string): Promise<void> {
+    const currentState = useWalletStore.getState();
+    const existingKeyrings = currentState.keyrings;
+    
     useWalletStore.setState({ walletStatus: 'importing', password });
 
     // 从助记词创建 HD Keyring
-    const keyring = keyringService.createHDKeyringFromMnemonic(mnemonic, 1);
+    const newKeyring = keyringService.createHDKeyringFromMnemonic(mnemonic, 1);
     
-    // 持久化
-    await keyringService.persistVault([keyring], password);
+    // 合并现有 keyrings 和新 keyring
+    const allKeyrings = [...existingKeyrings, newKeyring];
     
-    // 生成 accounts
-    const accounts = this.generateAccountsFromKeyrings([keyring]);
+    // 持久化所有 keyrings
+    await keyringService.persistVault(allKeyrings, password);
+    
+    // 重新生成所有 accounts
+    const accounts = this.generateAccountsFromKeyrings(allKeyrings);
     
     // 更新 Store
     useWalletStore.setState({
-      keyrings: [keyring],
+      keyrings: allKeyrings,
       accounts,
-      currentAccount: accounts[0],
+      currentAccount: accounts[0], // 保持第一个账户为当前账户
       walletStatus: 'unlocked',
     });
     
     this.persistAccountMetadata(accounts);
     
-    walletEventBus.emit('keyring:imported', { keyrings: [keyring] });
+    walletEventBus.emit('keyring:imported', { keyrings: allKeyrings });
   }
 
   /**
