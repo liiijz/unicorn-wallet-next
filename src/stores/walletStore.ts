@@ -1,13 +1,9 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-import { AccountController } from "@/controllers/AccountController";
-import { walletEventBus } from "@/events/WalletEvents";
 import type { Account } from "@/types/Account";
 import type { IKeyring } from "@/types/Keyring";
 import type { WalletStatus } from "@/types/WalletStatus";
-
-import { NetworkController } from "../controllers/NetworkController";
 
 interface WalletState {
   // 钱包状态（替代 isUnlocked 和 isInitialized）
