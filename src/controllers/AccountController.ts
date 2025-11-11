@@ -64,7 +64,7 @@ export class AccountController {
     const accountCountByType: Record<string, number> = {};
 
     this.keyringsCache.forEach((keyring: IKeyring) => {
-      const addresses = keyring.getAccounts();
+      const addresses = keyring.getAddresses();
       const keyringData = keyring.serialize();
 
       addresses.forEach((address: string, index: number) => {

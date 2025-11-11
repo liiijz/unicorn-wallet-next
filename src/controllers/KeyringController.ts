@@ -147,7 +147,7 @@ export class KeyringController {
     }
 
     // 派生新账户
-    const newAddresses = await keyring.addAccounts(1);
+    const newAddresses = await keyring.addAddresses(1);
 
     // 持久化
     this.persistVault();

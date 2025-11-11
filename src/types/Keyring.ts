@@ -7,9 +7,9 @@ export interface IKeyring {
   /** Keyring 类型 (如: 'HD', 'Simple', 'Hardware') */
   type: KeyringType;
 
-  addAccounts(count: number): Promise<string[]>;
+  addAddresses(count: number): Promise<string[]>;
 
-  getAccounts(): string[];
+  getAddresses(): string[];
 
   signTransaction(address: string, transaction: TransactionRequest): Promise<string>;
 

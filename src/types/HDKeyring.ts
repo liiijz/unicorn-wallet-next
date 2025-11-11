@@ -34,7 +34,7 @@ export class HDKeyring implements IKeyring {
   signMessage(address: string, message: string | Uint8Array): Promise<string> {
     throw new Error("Method not implemented.");
   }
-  async addAccounts(count: number): Promise<string[]> {
+  async addAddresses(count: number): Promise<string[]> {
     if (!Number.isInteger(count) || count <= 0) {
       throw new Error("Count must be a positive integer");
     }
@@ -72,7 +72,7 @@ export class HDKeyring implements IKeyring {
     }
 
     this.initFromMnemonic(opts.mnemonic);
-    this.addAccounts(opts.numberOfAccounts);
+    this.addAddresses(opts.numberOfAccounts);
   }
 
   /**
@@ -85,7 +85,7 @@ export class HDKeyring implements IKeyring {
     this.root = masterWallet.derivePath(this.hdPath);
   }
 
-  getAccounts(): string[] {
+  getAddresses(): string[] {
     return this.wallets.map((wallet) => wallet.address);
   }
 
