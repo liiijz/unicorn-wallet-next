@@ -1,6 +1,7 @@
 import { HDKeyringOptions } from "./../types/HDKeyring";
 import type { IKeyring } from "@/types/Keyring";
-import { WalletService } from "@/services/WalletService";
+import { EncryptionHelper } from "@/helpers/EncryptionHelper";
+import { MnemonicHelper } from "@/helpers/MnemonicHelper";
 import { HDKeyring } from "@/types/HDKeyring";
 import { walletEventBus } from "@/events/WalletEvents";
 import { ethers, JsonRpcProvider, Wallet } from "ethers";
@@ -14,10 +15,7 @@ export class KeyringController {
   private provider: JsonRpcProvider | null = null;
   private currentNetwork: Network | null = null;
 
-  private walletService: WalletService;
   constructor() {
-    this.walletService = new WalletService();
-
     // 默认连接到以太坊主网
     this.provider = new ethers.JsonRpcProvider(PRESET_NETWORKS[0].rpcUrl);
     // 订阅网络切换事件
@@ -63,8 +61,8 @@ export class KeyringController {
    * 创建新钱包（从助记词）
    */
   createNew(): string {
-    // 1. 生成助记词
-    const mnemonic = this.walletService.generateMnemonic();
+    // 1. 生成助记词 ← 使用 MnemonicHelper
+    const mnemonic = MnemonicHelper.generate(128);
 
     // 2. 创建 HD Keyring
     const opts: HDKeyringOptions = {
@@ -113,8 +111,9 @@ export class KeyringController {
       throw new Error("No password set");
     }
     const serialized = this.serializeKeyrings();
-    const encrypted = this.walletService.encryptVault(JSON.stringify(serialized), this.password);
-    localStorage.setItem("KeyringController", JSON.stringify({ vault: encrypted }));
+    // ← 使用 EncryptionHelper 加密
+    const encrypted = EncryptionHelper.encrypt(serialized, this.password);
+    localStorage.setItem("KeyringController", encrypted);
   }
 
   /**
@@ -125,28 +124,32 @@ export class KeyringController {
       throw new Error("No password set");
     }
     // 从 localStorage 读取
-    const dataString = localStorage.getItem("KeyringController");
-    if (!dataString) {
+    const encrypted = localStorage.getItem("KeyringController");
+    if (!encrypted) {
       throw new Error("No vault found");
     }
 
     // 清空 keyrings
     this.keyrings = [];
 
-    // 解密并恢复 keyrings
-    const data = JSON.parse(dataString);
-    const decrypted = this.walletService.decryptVault(data.vault, this.password);
-    const keyrings = JSON.parse(decrypted);
-    keyrings.forEach((kr: any) => {
-      const keyring: IKeyring = new HDKeyring();
-      keyring.deserialize(kr);
-      this.keyrings.push(keyring);
-    });
+    // ← 使用 EncryptionHelper 解密
+    try {
+      const decrypted = EncryptionHelper.decrypt(encrypted, this.password);
+      const keyrings = JSON.parse(decrypted);
+      console.log("keyrings:", keyrings);
+      keyrings.forEach((kr: any) => {
+        const keyring: IKeyring = new HDKeyring();
+        keyring.deserialize(kr);
+        this.keyrings.push(keyring);
+      });
 
-    // 发布事件：钱包已恢复
-    walletEventBus.emit("keyring:restored", {
-      keyrings: this.getKeyrings(),
-    });
+      // 发布事件：钱包已恢复
+      walletEventBus.emit("keyring:restored", {
+        keyrings: this.getKeyrings(),
+      });
+    } catch (error) {
+      throw new Error("Failed to restore vault: wrong password or corrupted data");
+    }
   }
 
   getKeyrings(): IKeyring[] {
