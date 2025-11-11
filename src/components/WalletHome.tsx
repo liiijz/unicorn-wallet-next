@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useWalletAccounts, useWalletAuth } from "@/hooks/wallet";
 import type { Account } from "@/types/Account";
 import Avatar from "./Avatar";
 import SendModal from "./SendModal";
@@ -17,6 +16,7 @@ import { Network } from "@/types/Network";
 import { useUIStore } from "@/stores/uiStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { networkController } from "@/controllers/NetworkController";
+import { walletController } from "@/controllers";
 import ImportWalletModal from "./ImportWalletModal";
 
 // Market Data Types
@@ -45,7 +45,6 @@ interface MarketResponse {
  */
 export default function WalletHome() {
   const { currentAccount, setCurrentAccount, accounts } = useWalletStore();
-  const { addAccount } = useWalletAccounts();
   const allAccounts = accounts;
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -99,10 +98,14 @@ export default function WalletHome() {
   // 处理添加以太坊账户
   const handleAddEthereumAccount = async () => {
     setShowAddAccountModal(false);
-    const newAccount = await addAccount();
-    if (newAccount) {
-      // 账户已自动设置为当前账户
-      console.log("New account created:", newAccount);
+    try {
+      const newAccount = await walletController.addAccount();
+      if (newAccount) {
+        setCurrentAccount(newAccount);
+        console.log("New account created:", newAccount);
+      }
+    } catch (error) {
+      console.error("Failed to add account:", error);
     }
   };
 

@@ -1,13 +1,9 @@
 import { Network, PRESET_NETWORKS, CustomNetworkConfig } from "../types/Network";
 import { walletEventBus } from "@/events/WalletEvents";
+import { useWalletStore } from "@/stores/walletStore";
 
  class NetworkController {
-  private currentNetwork: Network;
-  private customNetworks: Network[] = [];
-
   constructor() {
-    // Default to Ethereum Mainnet
-    this.currentNetwork = PRESET_NETWORKS[0];
     this.loadCustomNetworks();
   }
 
@@ -15,21 +11,22 @@ import { walletEventBus } from "@/events/WalletEvents";
    * Get the current active network
    */
   getCurrentNetwork(): Network {
-    return this.currentNetwork;
+    return useWalletStore.getState().currentNetwork;
   }
 
   /**
    * Get all available networks (preset + custom)
    */
   getAllNetworks(): Network[] {
-    return [...PRESET_NETWORKS, ...this.customNetworks];
+    const { customNetworks } = useWalletStore.getState();
+    return [...PRESET_NETWORKS, ...customNetworks];
   }
 
   /**
    * Get only custom networks
    */
   getCustomNetworks(): Network[] {
-    return this.customNetworks;
+    return useWalletStore.getState().customNetworks;
   }
 
   /**
@@ -43,7 +40,7 @@ import { walletEventBus } from "@/events/WalletEvents";
       throw new Error(`Network with id "${networkId}" not found`);
     }
 
-    this.currentNetwork = network;
+    useWalletStore.setState({ currentNetwork: network });
     this.saveCurrentNetwork();
     this.notifyNetworkChange(network);
   }
@@ -73,7 +70,9 @@ import { walletEventBus } from "@/events/WalletEvents";
       isCustom: true,
     };
 
-    this.customNetworks.push(customNetwork);
+    const { customNetworks } = useWalletStore.getState();
+    const updatedNetworks = [...customNetworks, customNetwork];
+    useWalletStore.setState({ customNetworks: updatedNetworks });
     this.saveCustomNetworks();
 
     return customNetwork;
@@ -83,18 +82,20 @@ import { walletEventBus } from "@/events/WalletEvents";
    * Remove a custom network
    */
   removeCustomNetwork(networkId: string): void {
-    const index = this.customNetworks.findIndex((n) => n.id === networkId);
+    const { customNetworks, currentNetwork } = useWalletStore.getState();
+    const index = customNetworks.findIndex((n) => n.id === networkId);
 
     if (index === -1) {
       throw new Error(`Custom network with id "${networkId}" not found`);
     }
 
     // If removing the current network, switch to mainnet
-    if (this.currentNetwork.id === networkId) {
+    if (currentNetwork.id === networkId) {
       this.switchNetwork(PRESET_NETWORKS[0].id);
     }
 
-    this.customNetworks.splice(index, 1);
+    const updatedNetworks = customNetworks.filter((n) => n.id !== networkId);
+    useWalletStore.setState({ customNetworks: updatedNetworks });
     this.saveCustomNetworks();
   }
 
@@ -102,7 +103,8 @@ import { walletEventBus } from "@/events/WalletEvents";
    * Update a custom network configuration
    */
   updateCustomNetwork(networkId: string, config: Partial<CustomNetworkConfig>): void {
-    const network = this.customNetworks.find((n) => n.id === networkId);
+    const { customNetworks, currentNetwork } = useWalletStore.getState();
+    const network = customNetworks.find((n) => n.id === networkId);
 
     if (!network) {
       throw new Error(`Custom network with id "${networkId}" not found`);
@@ -112,12 +114,17 @@ import { walletEventBus } from "@/events/WalletEvents";
       throw new Error("Invalid RPC URL format");
     }
 
-    Object.assign(network, config);
+    const updatedNetwork = { ...network, ...config };
+    const updatedNetworks = customNetworks.map((n) =>
+      n.id === networkId ? updatedNetwork : n
+    );
+    useWalletStore.setState({ customNetworks: updatedNetworks });
     this.saveCustomNetworks();
 
-    // If updating the current network, notify listeners
-    if (this.currentNetwork.id === networkId) {
-      this.notifyNetworkChange(network);
+    // If updating the current network, notify listeners and update current network
+    if (currentNetwork.id === networkId) {
+      useWalletStore.setState({ currentNetwork: updatedNetwork });
+      this.notifyNetworkChange(updatedNetwork);
     }
   }
 
@@ -152,7 +159,8 @@ import { walletEventBus } from "@/events/WalletEvents";
     try {
       const stored = localStorage.getItem("customNetworks");
       if (stored) {
-        this.customNetworks = JSON.parse(stored);
+        const customNetworks = JSON.parse(stored);
+        useWalletStore.setState({ customNetworks });
       }
 
       const currentNetworkId = localStorage.getItem("currentNetworkId");
@@ -160,12 +168,12 @@ import { walletEventBus } from "@/events/WalletEvents";
         const allNetworks = this.getAllNetworks();
         const network = allNetworks.find((n) => n.id === currentNetworkId);
         if (network) {
-          this.currentNetwork = network;
+          useWalletStore.setState({ currentNetwork: network });
         }
       }
     } catch (error) {
       console.error("Error loading custom networks:", error);
-      this.customNetworks = [];
+      useWalletStore.setState({ customNetworks: [] });
     }
   }
 
@@ -178,7 +186,8 @@ import { walletEventBus } from "@/events/WalletEvents";
     }
 
     try {
-      localStorage.setItem("customNetworks", JSON.stringify(this.customNetworks));
+      const { customNetworks } = useWalletStore.getState();
+      localStorage.setItem("customNetworks", JSON.stringify(customNetworks));
     } catch (error) {
       console.error("Error saving custom networks:", error);
     }
@@ -193,7 +202,8 @@ import { walletEventBus } from "@/events/WalletEvents";
     }
 
     try {
-      localStorage.setItem("currentNetworkId", this.currentNetwork.id);
+      const { currentNetwork } = useWalletStore.getState();
+      localStorage.setItem("currentNetworkId", currentNetwork.id);
     } catch (error) {
       console.error("Error saving current network:", error);
     }

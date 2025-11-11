@@ -11,11 +11,11 @@ import { Account } from "@/types/Account";
 
 class WalletController {
   private provider: JsonRpcProvider | null = null;
-  private currentNetwork: Network | null = null;
 
   constructor() {
     // 默认连接到以太坊主网
-    this.provider = new ethers.JsonRpcProvider(PRESET_NETWORKS[0].rpcUrl);
+    const { currentNetwork } = useWalletStore.getState();
+    this.provider = new ethers.JsonRpcProvider(currentNetwork.rpcUrl);
     // 订阅网络切换事件
     this.subscribeToNetworkEvents();
   }
@@ -28,8 +28,6 @@ class WalletController {
 
   private async handleNetworkChange(network: Network): Promise<void> {
     console.log(`WalletController: 网络切换到 ${network.name}`);
-
-    this.currentNetwork = network;
 
     // 创建新的 Provider
     this.provider = new ethers.JsonRpcProvider(network.rpcUrl);
@@ -218,17 +216,18 @@ class WalletController {
   /**
    * 添加新账户
    */
-  async addAccount(): Promise<void> {
+  async addAccount(): Promise<Account | null> {
     const { keyrings, password } = useWalletStore.getState();
     if (!password) throw new Error('No password set');
     
     const keyring = keyrings[0];
     if (!keyring) throw new Error('No keyring found');
     
-    // 派生新地址 (如果是 HD Keyring)
-    if ('deriveAddresses' in keyring) {
-      await (keyring as any).deriveAddresses(1);
-    }
+    const oldAddresses = keyring.getAddresses();
+    const oldAddressCount = oldAddresses.length;
+    
+    // 派生新地址
+    await keyring.addAddresses(1);
     
     // 持久化 Keyring
     await keyringService.persistVault(keyrings, password);
@@ -238,6 +237,9 @@ class WalletController {
     
     useWalletStore.setState({ keyrings: [...keyrings], accounts });
     this.persistAccountMetadata(accounts);
+    
+    // 返回新创建的账户
+    return accounts[oldAddressCount] || null;
   }
 
   /**
