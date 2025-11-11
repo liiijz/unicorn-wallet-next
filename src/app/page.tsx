@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useWalletAuth } from '@/hooks/wallet';
-import { useWalletStore } from '@/stores/walletStore';
-import Welcome from '@/components/Welcome';
-import Unlock from '@/components/Unlock';
-import WalletHome from '@/components/WalletHome';
+import { useEffect } from "react";
+import { useWalletAuth } from "@/hooks/wallet";
+import { useWalletStore } from "@/stores/walletStore";
+import Welcome from "@/components/Welcome";
+import Unlock from "@/components/Unlock";
+import WalletHome from "@/components/WalletHome";
+import { useUIStore } from "@/stores";
 
 /**
  * 主页面路由逻辑
@@ -17,26 +18,36 @@ import WalletHome from '@/components/WalletHome';
  * 4. showing-mnemonic -> Welcome 页面（会显示助记词模态框）
  */
 export default function Home() {
-  const { walletStatus } = useWalletStore();
-  const { initialize } = useWalletAuth();
+  const { walletStatus, setWalletStatus } = useWalletStore();
+  const { setError } = useUIStore();
+
+  const initialize = () => {
+    try {
+      const hasVault = localStorage.getItem("vault");
+      setWalletStatus(hasVault ? "locked" : "uninitialized");
+    } catch (error) {
+      console.error("Failed to initialize wallet:", error);
+      setError("钱包初始化失败");
+    }
+  };
 
   // 初始化钱包状态（检查是否有存储的钱包数据）
   useEffect(() => {
     initialize();
-  }, [initialize]);
+  }, []);
 
   // 路由逻辑
-  if (walletStatus === 'uninitialized' || walletStatus === 'showing-mnemonic') {
+  if (walletStatus === "uninitialized" || walletStatus === "showing-mnemonic") {
     // 首次使用或正在显示助记词，显示欢迎页面
     return <Welcome />;
   }
 
-  if (walletStatus === 'locked') {
+  if (walletStatus === "locked") {
     // 有钱包但未解锁，显示解锁页面
     return <Unlock />;
   }
 
-  if (walletStatus === 'unlocked') {
+  if (walletStatus === "unlocked") {
     // 已解锁，显示主钱包界面
     return <WalletHome />;
   }

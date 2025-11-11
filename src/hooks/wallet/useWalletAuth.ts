@@ -1,6 +1,7 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useCallback } from "react";
+import { walletController } from "@/controllers/WalletController";  
 
 /**
  * 钱包认证 Hook
@@ -15,19 +16,9 @@ import { useCallback } from "react";
  * - 设置页面 (锁定钱包)
  */
 export const useWalletAuth = () => {
-  const { initializeWallet, unlock, lock, createNewWallet, importWallet } = useWalletStore();
 
+  const { setWalletStatus } = useWalletStore();
   const { setLoading, setError, clearError } = useUIStore();
-
-  // 初始化钱包
-  const initialize = useCallback(() => {
-    try {
-      initializeWallet();
-    } catch (error) {
-      console.error("Failed to initialize wallet:", error);
-      setError("钱包初始化失败");
-    }
-  }, [initializeWallet, setError]);
 
   // 解锁钱包
   const unlockWallet = useCallback(
@@ -86,21 +77,7 @@ export const useWalletAuth = () => {
 
   // 导入钱包
   const importExistingWallet = useCallback(
-    async (mnemonic: string, password: string | null) => {
-      setLoading(true, "正在导入钱包...");
-      clearError();
-
-      try {
-        await importWallet(mnemonic, password);
-        return true;
-      } catch (error) {
-        console.error("Failed to import wallet:", error);
-        setError("钱包导入失败");
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    },
+    
     [importWallet, setLoading, setError, clearError]
   );
 

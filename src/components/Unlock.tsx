@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { useWalletAuth } from "@/hooks/wallet";
+import React, { useCallback, useState } from "react";
 import { useUIStore } from "@/stores/uiStore";
+import {walletController} from "@/controllers/WalletController";
+import { useWalletStore } from "@/stores";
 
 /**
  * Unlock 组件 - 钱包解锁页面
@@ -12,8 +13,30 @@ import { useUIStore } from "@/stores/uiStore";
 export default function Unlock() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { unlockWallet } = useWalletAuth();
-  const { isLoading, loadingMessage, error, setError, clearError } = useUIStore();
+  const { isLoading, loadingMessage, error, setError, clearError, setLoading } = useUIStore();
+  const {setWalletStatus} = useWalletStore();
+
+  const unlockWallet = async (password: string) => {
+    setLoading(true, "正在解锁钱包...");
+    clearError();
+
+    try {
+      const success = walletController.unlock(password);
+      if (!success) {
+        setError("密码错误，请重试");
+        return false;
+      }
+      console.log("钱包解锁成功");
+      return true;
+    } catch (error: any) {
+      // 这里不应该再有异常了，因为 unlock 已经处理了所有错误
+      console.error("Unexpected error during unlock:", error);
+      setError("钱包解锁失败，请稍后重试");
+      return false;
+    } finally {
+      console.log("解锁完成");
+    }
+  };
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +51,7 @@ export default function Unlock() {
     if (!success) {
       setPassword("");
     }
+    setWalletStatus("unlocked");
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {

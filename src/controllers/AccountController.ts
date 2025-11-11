@@ -1,6 +1,7 @@
 import type { Account } from "@/types/Account";
 import type { IKeyring } from "@/types/Keyring";
 import { walletEventBus } from "@/events/WalletEvents";
+import { useWalletStore } from "@/stores/walletStore";
 
 /**
  * AccountController - 管理账户信息和状态
@@ -13,8 +14,6 @@ import { walletEventBus } from "@/events/WalletEvents";
  * - 通过事件订阅响应 KeyringController 的变化
  */
 export class AccountController {
-  private accounts: Account[] = [];
-  private keyringsCache: IKeyring[] = [];
 
   constructor() {
     this.subscribeToKeyringEvents();
@@ -25,31 +24,30 @@ export class AccountController {
    */
   private subscribeToKeyringEvents(): void {
     // 钱包创建时同步账户
-    walletEventBus.on('keyring:created', ({ keyrings }) => {
+    walletEventBus.on("keyring:created", ({ keyrings }) => {
       this.keyringsCache = keyrings;
       this.syncAccountsFromKeyrings();
     });
 
     // 钱包导入时同步账户
-    walletEventBus.on('keyring:imported', ({ keyrings }) => {
-      this.keyringsCache = keyrings;
-      this.syncAccountsFromKeyrings();
+    walletEventBus.on("keyring:imported", ({ keyrings }) => {
+      // this.keyringsCache = keyrings;
+      // this.syncAccountsFromKeyrings();
     });
 
     // 钱包恢复时同步账户
-    walletEventBus.on('keyring:restored', ({ keyrings }) => {
-      this.keyringsCache = keyrings;
-      this.syncAccountsFromKeyrings();
+    walletEventBus.on("keyring:restored", ({ keyrings }) => {
+      console.log("keyring:restored", keyrings);
       this.restoreAccounts();
     });
 
     // 账户添加时同步
-    walletEventBus.on('keyring:accountAdded', () => {
+    walletEventBus.on("keyring:accountAdded", () => {
       this.syncAccountsFromKeyrings();
     });
 
     // 钱包锁定时清空账户
-    walletEventBus.on('keyring:locked', () => {
+    walletEventBus.on("keyring:locked", () => {
       this.clear();
     });
   }
@@ -59,7 +57,7 @@ export class AccountController {
    */
   private syncAccountsFromKeyrings(): Account[] {
     const newAccounts: Account[] = [];
-    
+
     // 按 keyring 类型统计账户数量，用于生成正确的账户名称
     const accountCountByType: Record<string, number> = {};
 
@@ -69,14 +67,14 @@ export class AccountController {
 
       addresses.forEach((address: string, index: number) => {
         // 检查是否已存在
-        let existingAccount = this.accounts.find(acc => acc.address === address);
+        let existingAccount = this.accounts.find((acc) => acc.address === address);
 
         if (!existingAccount) {
           // 初始化该类型的计数器
           if (!accountCountByType[keyring.type]) {
             accountCountByType[keyring.type] = 0;
           }
-          
+
           // 创建新账户，使用累计的账户数量来生成名称
           const account: Account = {
             id: `${keyring.type}-${address}`,
@@ -104,7 +102,7 @@ export class AccountController {
     this.persistAccounts();
 
     // 发布事件：账户已同步
-    walletEventBus.emit('account:synced', {
+    walletEventBus.emit("account:synced", {
       accounts: this.accounts,
     });
 
@@ -122,7 +120,7 @@ export class AccountController {
    * 根据地址获取账户
    */
   getAccountByAddress(address: string): Account | undefined {
-    return this.accounts.find(acc => acc.address.toLowerCase() === address.toLowerCase());
+    return this.accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
   }
 
   /**
@@ -135,7 +133,7 @@ export class AccountController {
       this.persistAccounts();
 
       // 发布事件：账户已更新
-      walletEventBus.emit('account:updated', {
+      walletEventBus.emit("account:updated", {
         account,
       });
     }
@@ -146,11 +144,11 @@ export class AccountController {
    */
   private generateAccountName(keyringType: string, index: number): string {
     switch (keyringType) {
-      case 'HD':
+      case "HD":
         return `Account ${index + 1}`;
-      case 'Simple':
+      case "Simple":
         return `Imported ${index + 1}`;
-      case 'Hardware':
+      case "Hardware":
         return `Hardware ${index + 1}`;
       default:
         return `Account ${index + 1}`;
@@ -160,18 +158,18 @@ export class AccountController {
   /**
    * 映射 KeyringType 到 AccountType
    */
-  private mapKeyringTypeToAccountType(keyringType: string): 'mnemonic' | 'privateKey' | 'hardware' {
+  private mapKeyringTypeToAccountType(keyringType: string): "mnemonic" | "privateKey" | "hardware" {
     switch (keyringType) {
-      case 'HD':
-        return 'mnemonic';
-      case 'Simple':
-        return 'privateKey';
-      case 'Hardware':
-      case 'Ledger':
-      case 'Trezor':
-        return 'hardware';
+      case "HD":
+        return "mnemonic";
+      case "Simple":
+        return "privateKey";
+      case "Hardware":
+      case "Ledger":
+      case "Trezor":
+        return "hardware";
       default:
-        return 'mnemonic';
+        return "mnemonic";
     }
   }
 
@@ -179,38 +177,36 @@ export class AccountController {
    * 持久化账户元数据到 localStorage
    */
   private persistAccounts(): void {
-    const accountsData = this.accounts.map(acc => ({
+    const accountsData = this.accounts.map((acc) => ({
       address: acc.address,
       name: acc.name,
       customData: {
         // 只存储用户自定义的数据
-      }
+      },
     }));
 
-    localStorage.setItem('AccountController', JSON.stringify(accountsData));
+    localStorage.setItem("AccountController", JSON.stringify(accountsData));
   }
 
   /**
    * 从 localStorage 恢复账户元数据
    */
   restoreAccounts(): void {
-    const dataString = localStorage.getItem('AccountController');
+    const dataString = localStorage.getItem("AccountController");
     if (!dataString) return;
 
     try {
       const accountsData = JSON.parse(dataString);
 
       // 合并已保存的元数据
-      this.accounts.forEach(account => {
-        const savedData = accountsData.find(
-          (data: any) => data.address.toLowerCase() === account.address.toLowerCase()
-        );
-        if (savedData) {
-          account.name = savedData.name;
-        }
-      });
+      // this.accounts.forEach((account) => {
+      //   const savedData = accountsData.find((data: any) => data.address.toLowerCase() === account.address.toLowerCase());
+      //   if (savedData) {
+      //     account.name = savedData.name;
+      //   }
+      // });
     } catch (error) {
-      console.error('Failed to restore accounts:', error);
+      console.error("Failed to restore accounts:", error);
     }
   }
 
@@ -229,5 +225,39 @@ export class AccountController {
     // mitt 的 all.clear() 会清除所有监听器
     // 如果只想清除特定的监听器，需要保存 handler 引用
     this.clear();
+  }
+
+  // 添加新账户
+  async addNewAccount(): Promise<Account | null> {
+    // 订阅一次账户同步事件
+    return new Promise<Account | null>((resolve) => {
+      const handleAccountSynced = ({ accounts }: { accounts: Account[] }) => {
+        set({ accounts });
+
+        // 取消订阅
+        walletEventBus.off("account:synced", handleAccountSynced);
+
+        // 返回最后添加的账户
+        resolve(accounts[accounts.length - 1] || null);
+      };
+
+      walletEventBus.on("account:synced", handleAccountSynced);
+
+      // addAccountToKeyring 会触发 keyring:accountAdded 事件
+      // AccountController 会自动响应并同步账户
+      keyringController.addAccountToKeyring(0).catch((error) => {
+        console.error("Failed to add account:", error);
+        walletEventBus.off("account:synced", handleAccountSynced);
+        resolve(null);
+      });
+    });
+  }
+
+  // 更新账户名称
+  updateAccountName(address: string, name: string) {
+    this.updateAccountName(address, name);
+
+    const accounts = accountController.getAllAccounts();
+    set({ accounts });
   }
 }

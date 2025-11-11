@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useWalletAuth } from "@/hooks/wallet";
-import { useUIStore } from "@/stores/uiStore";
 import LanguageSwitcher from "./LanguageSwitcher";
 import MnemonicModal from "./MnemonicModal";
 import CreateWalletModal from "./CreateWalletModal";
@@ -21,7 +19,7 @@ export default function Welcome() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showMnemonicModal, setShowMnemonicModal] = useState(false);
   const [mnemonic, setMnemonic] = useState("");
-  const { confirmMnemonicBackup } = useWalletStore();
+  const { setWalletStatus } = useWalletStore();
 
   return (
     <>
@@ -96,7 +94,7 @@ export default function Welcome() {
         <MnemonicModal
           mnemonic={mnemonic}
           onClose={() => {
-            confirmMnemonicBackup();
+            setWalletStatus("unlocked");
             setShowMnemonicModal(false);
           }}
         />

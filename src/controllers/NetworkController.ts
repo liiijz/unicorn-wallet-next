@@ -1,7 +1,7 @@
 import { Network, PRESET_NETWORKS, CustomNetworkConfig } from "../types/Network";
 import { walletEventBus } from "@/events/WalletEvents";
 
-export class NetworkController {
+ class NetworkController {
   private currentNetwork: Network;
   private customNetworks: Network[] = [];
 
@@ -200,4 +200,4 @@ export class NetworkController {
   }
 }
 
-export default NetworkController;
+export const networkController = new NetworkController();

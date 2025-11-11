@@ -6,12 +6,12 @@ import { IKeyring, KeyringType } from "@/types/Keyring";
 export const keyringService = {
   persistVault(serialized: any[], password: string): void {
     const encrypted = EncryptionHelper.encrypt(serialized, password);
-    localStorage.setItem("KeyringController", encrypted);
+    localStorage.setItem("vault", encrypted);
   },
 
   restoreVault(password: string): IKeyring[] | null {
     const keyrings: IKeyring[] = [];
-    const encrypted = localStorage.getItem("KeyringController");
+    const encrypted = localStorage.getItem("vault");
     if (!encrypted) {
       return null;
     }

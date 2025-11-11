@@ -1,4 +1,4 @@
-import { KeyringController } from "./controllers/KeyringController";
+import { KeyringController } from "./controllers/WalletController";
 
 import { LocalStorage } from 'node-localstorage';
 

@@ -1,6 +1,7 @@
-import { useUIStore, useWalletAuth } from "@/stores";
+import { useUIStore, useWalletStore } from "@/stores";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { walletController } from "@/controllers/WalletController";
 
 interface CreateWalletModalProps {
   onClose: () => void;
@@ -16,8 +17,24 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const { createWallet } = useWalletAuth();
-  const { isLoading } = useUIStore();
+  const { isLoading, setLoading, clearError, setError } = useUIStore();
+  const { setWalletStatus } = useWalletStore();
+
+  const createWallet = async (password: string) => {
+    setLoading(true, "正在创建钱包...");
+    clearError();
+
+    try {
+      const mnemonic = await walletController.createNewWallet(password);
+      return mnemonic;
+    } catch (error) {
+      console.error("Failed to create wallet:", error);
+      setError("钱包创建失败");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +62,15 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
 
     const mnemonic = await createWallet(password);
     if (mnemonic) {
-      // TODO: 显示助记词备份页面
+            //   set({
+      //     walletStatus: "showing-mnemonic",
+      //     keyrings,
+      //     accounts,
+      //     currentAccount: accounts[0] || null,
+      //   });
+
+      setWalletStatus("showing-mnemonic");
+
       if (onCreated) {
         onCreated(mnemonic);
       }

@@ -16,6 +16,7 @@ import { walletEventBus } from "@/events/WalletEvents";
 import { Network } from "@/types/Network";
 import { useUIStore } from "@/stores/uiStore";
 import { useWalletStore } from '@/stores/walletStore';
+import { networkController } from "@/controllers/NetworkController";
 
 // Market Data Types
 interface MarketData {
@@ -42,9 +43,9 @@ interface MarketResponse {
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, setCurrentAccount, getAllAccounts, networkController } = useWalletStore();
+  const { currentAccount, setCurrentAccount, accounts } = useWalletStore();
   const { addAccount } = useWalletAccounts();
-  const allAccounts = getAllAccounts();
+  const allAccounts = accounts;
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
