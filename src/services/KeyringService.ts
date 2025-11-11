@@ -1,5 +1,6 @@
 import { EncryptionHelper } from "@/helpers/EncryptionHelper";
-import { HDKeyring } from "@/types/HDKeyring";
+import { MnemonicHelper } from "@/helpers/MnemonicHelper";
+import { HDKeyring, HDKeyringOptions } from "@/types/HDKeyring";
 import { IKeyring, KeyringType } from "@/types/Keyring";
 
 export const keyringService = {
@@ -39,7 +40,35 @@ export const keyringService = {
   },
 
   /**
-   * 根据类型创建 Keyring 实例
+   * 创建新的 HD Keyring（生成助记词）
+   */
+  createNewHDKeyring(numberOfAccounts: number = 1): { keyring: HDKeyring; mnemonic: string } {
+    // 生成助记词
+    const mnemonic = MnemonicHelper.generate(128);
+
+    // 创建 HD Keyring
+    const opts: HDKeyringOptions = {
+      mnemonic,
+      numberOfAccounts,
+    };
+    const keyring = new HDKeyring(opts);
+
+    return { keyring, mnemonic };
+  },
+
+  /**
+   * 从助记词创建 HD Keyring
+   */
+  createHDKeyringFromMnemonic(mnemonic: string, numberOfAccounts: number = 1): HDKeyring {
+    const opts: HDKeyringOptions = {
+      mnemonic,
+      numberOfAccounts,
+    };
+    return new HDKeyring(opts);
+  },
+
+  /**
+   * 根据类型创建 Keyring 实例（用于反序列化）
    */
   createKeyringFromType(type: KeyringType | string): IKeyring | null {
     switch (type) {

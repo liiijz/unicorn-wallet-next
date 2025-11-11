@@ -62,18 +62,11 @@ export class KeyringController {
    * 创建新钱包（从助记词）
    */
   createNew(): string {
-    // 1. 生成助记词 ← 使用 MnemonicHelper
-    const mnemonic = MnemonicHelper.generate(128);
+    // 使用 KeyringService 创建新的 HD Keyring
+    const { keyring, mnemonic } = keyringService.createNewHDKeyring(1);
+    this.keyrings.push(keyring);
 
-    // 2. 创建 HD Keyring
-    const opts: HDKeyringOptions = {
-      mnemonic,
-      numberOfAccounts: 1,
-    };
-    const hdKeyring = new HDKeyring(opts);
-    this.keyrings.push(hdKeyring);
-
-    // 3. 发布事件：钱包已创建
+    // 发布事件：钱包已创建
     walletEventBus.emit("keyring:created", {
       keyrings: this.getKeyrings(),
     });
@@ -85,11 +78,8 @@ export class KeyringController {
    * 导入钱包（从助记词）
    */
   importFromMnemonic(mnemonic: string): void {
-    const opts: HDKeyringOptions = {
-      mnemonic,
-      numberOfAccounts: 1,
-    };
-    const hdKeyring = new HDKeyring(opts);
+    // 使用 KeyringService 从助记词创建 HD Keyring
+    const hdKeyring = keyringService.createHDKeyringFromMnemonic(mnemonic, 1);
     this.keyrings.push(hdKeyring);
 
     // 发布事件：钱包已导入
