@@ -64,7 +64,7 @@ class WalletController {
     await keyringService.persistVault([keyring], password);
     
     // 生成 accounts
-    const accounts = this.generateAccountsFromKeyrings([keyring]);
+    const accounts = this.mapKeyringsToAccounts([keyring]);
     
     // 更新 Store
     useWalletStore.setState({
@@ -101,7 +101,7 @@ class WalletController {
     await keyringService.persistVault(allKeyrings, password);
     
     // 重新生成所有 accounts
-    const accounts = this.generateAccountsFromKeyrings(allKeyrings);
+    const accounts = this.mapKeyringsToAccounts(allKeyrings);
     
     // 更新 Store
     useWalletStore.setState({
@@ -130,7 +130,7 @@ class WalletController {
     }
     
     // 生成 accounts
-    const accounts = this.generateAccountsFromKeyrings(keyrings);
+    const accounts = this.mapKeyringsToAccounts(keyrings);
     
     // 恢复用户自定义的账户名称
     this.restoreAccountMetadata(accounts);
@@ -164,9 +164,9 @@ class WalletController {
   // ========== Account 管理 ==========
 
   /**
-   * 从 Keyrings 生成 Account 列表
+   * 将 Keyrings 映射为 Account 列表
    */
-  private generateAccountsFromKeyrings(keyrings: IKeyring[]): Account[] {
+  private mapKeyringsToAccounts(keyrings: IKeyring[]): Account[] {
     const accounts: Account[] = [];
     let accountCount = 0;
     
@@ -233,7 +233,7 @@ class WalletController {
     await keyringService.persistVault(keyrings, password);
     
     // 重新生成 accounts
-    const accounts = this.generateAccountsFromKeyrings(keyrings);
+    const accounts = this.mapKeyringsToAccounts(keyrings);
     
     useWalletStore.setState({ keyrings: [...keyrings], accounts });
     this.persistAccountMetadata(accounts);
