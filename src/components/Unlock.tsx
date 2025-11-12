@@ -16,22 +16,17 @@ export default function Unlock() {
   const [error, setError] = useState<string | null>(null); // 使用组件内部状态
   const {setWalletStatus} = useWalletStore();
 
-  const unlockWallet = async (password: string) => {
+  const unlockWallet = (password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const success = walletController.unlock(password);
-      if (!success) {
-        setError("密码错误，请重试");
-        return false;
-      }
+      walletController.unlock(password);
       console.log("钱包解锁成功");
       return true;
     } catch (error: any) {
-      // 这里不应该再有异常了，因为 unlock 已经处理了所有错误
-      console.error("Unexpected error during unlock:", error);
-      setError("钱包解锁失败，请稍后重试");
+      console.error("Unlock error:", error);
+      setError("密码错误，请重试");
       return false;
     } finally {
       setIsLoading(false);
@@ -39,7 +34,7 @@ export default function Unlock() {
     }
   };
 
-  const handleUnlock = async (e: React.FormEvent) => {
+  const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -48,11 +43,12 @@ export default function Unlock() {
       return;
     }
 
-    const success = await unlockWallet(password);
+    const success = unlockWallet(password);
     if (!success) {
       setPassword("");
+    } else {
+      setWalletStatus("unlocked");
     }
-    setWalletStatus("unlocked");
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {

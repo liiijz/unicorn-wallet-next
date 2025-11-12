@@ -17,11 +17,11 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
   // 判断是否已有钱包(已解锁且有密码)
   const hasExistingWallet = walletStatus === 'unlocked' && existingPassword !== null;
 
-  const importExistingWallet = async (mnemonic: string, passwordToUse: string) => {
+  const importExistingWallet = (mnemonic: string, passwordToUse: string) => {
     setIsLoading(true);
     setLocalError(null);
     try {
-      await walletController.importWallet(mnemonic, passwordToUse);
+      walletController.importWallet(mnemonic, passwordToUse);
       return true;
     } catch (error) {
       console.error("Failed to import wallet:", error);
@@ -35,7 +35,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
   /**
    * ImportWalletModal - 导入钱包模态框
    */
-  const handleImport = async (e: React.FormEvent) => {
+  const handleImport = (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
 
@@ -70,7 +70,7 @@ function ImportWalletModal({ onClose }: { onClose: () => void }) {
       passwordToUse = password;
     }
 
-    const success = await importExistingWallet(mnemonic.trim(), passwordToUse);
+    const success = importExistingWallet(mnemonic.trim(), passwordToUse);
     if (success) {
       onClose();
     }

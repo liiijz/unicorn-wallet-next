@@ -7,7 +7,7 @@ export interface IKeyring {
   /** Keyring 类型 (如: 'HD', 'Simple', 'Hardware') */
   type: KeyringType;
 
-  addAddresses(count: number): Promise<string[]>;
+  addAddresses(count: number): string[];
 
   getAddresses(): string[];
 

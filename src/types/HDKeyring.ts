@@ -34,7 +34,7 @@ export class HDKeyring implements IKeyring {
   signMessage(address: string, message: string | Uint8Array): Promise<string> {
     throw new Error("Method not implemented.");
   }
-  async addAddresses(count: number): Promise<string[]> {
+  addAddresses(count: number): string[] {
     if (!Number.isInteger(count) || count <= 0) {
       throw new Error("Count must be a positive integer");
     }

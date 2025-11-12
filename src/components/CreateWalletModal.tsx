@@ -20,12 +20,12 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
   const [isLoading, setIsLoading] = useState(false); // 使用组件内部状态
   const { setWalletStatus } = useWalletStore();
 
-  const createWallet = async (password: string) => {
+  const createWallet = (password: string) => {
     setIsLoading(true);
     setLocalError(null);
 
     try {
-      const mnemonic = await walletController.createNewWallet(password);
+      const mnemonic = walletController.createNewWallet(password);
       return mnemonic;
     } catch (error) {
       console.error("Failed to create wallet:", error);
@@ -36,7 +36,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
 
@@ -60,7 +60,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
       return;
     }
 
-    const mnemonic = await createWallet(password);
+    const mnemonic = createWallet(password);
     if (mnemonic) {
             //   set({
       //     walletStatus: "showing-mnemonic",

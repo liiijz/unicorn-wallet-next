@@ -95,14 +95,12 @@ export default function WalletHome() {
   };
 
   // 处理添加以太坊账户
-  const handleAddEthereumAccount = async () => {
+  const handleAddEthereumAccount = () => {
     setShowAddAccountModal(false);
     try {
-      const newAccount = await walletController.addAccount();
-      if (newAccount) {
-        setCurrentAccount(newAccount);
-        console.log("New account created:", newAccount);
-      }
+      const newAccount = walletController.addAccount();
+      setCurrentAccount(newAccount);
+      console.log("New account created:", newAccount);
     } catch (error) {
       console.error("Failed to add account:", error);
     }

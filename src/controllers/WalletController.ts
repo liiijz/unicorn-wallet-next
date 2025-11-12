@@ -54,14 +54,14 @@ class WalletController {
   /**
    * 创建新钱包
    */
-  async createNewWallet(password: string): Promise<string> {
+  createNewWallet(password: string): string {
     useWalletStore.setState({ walletStatus: 'creating', password });
 
     // 创建 HD Keyring (默认创建 1 个地址)
     const { keyring, mnemonic } = keyringService.createNewHDKeyring(1);
     
-    // 持久化 Keyring
-    await keyringService.persistVault([keyring], password);
+    // 持久化 Keyring (同步操作)
+    keyringService.persistVault([keyring], password);
     
     // 创建初始账户
     const initialAccount = this.createNewAccount(keyring, 0);
@@ -85,7 +85,7 @@ class WalletController {
   /**
    * 导入钱包
    */
-  async importWallet(mnemonic: string, password: string): Promise<void> {
+  importWallet(mnemonic: string, password: string): void {
     const currentState = useWalletStore.getState();
     const existingKeyrings = currentState.keyrings;
     const existingAccounts = currentState.accounts;
@@ -98,8 +98,8 @@ class WalletController {
     // 合并现有 keyrings 和新 keyring
     const allKeyrings = [...existingKeyrings, newKeyring];
     
-    // 持久化所有 keyrings
-    await keyringService.persistVault(allKeyrings, password);
+    // 持久化所有 keyrings (同步操作)
+    keyringService.persistVault(allKeyrings, password);
     
     // 创建初始账户并追加到现有 accounts
     const newAccount = this.createNewAccount(newKeyring, 0);
@@ -119,10 +119,10 @@ class WalletController {
   /**
    * 解锁钱包
    */
-  async unlock(password: string): Promise<void> {
+  unlock(password: string): void {
     useWalletStore.setState({ walletStatus: 'unlocking', password });
     
-    // 恢复 Keyrings
+    // 恢复 Keyrings (同步操作)
     const keyrings = keyringService.restoreVault(password);
     if (!keyrings) {
       useWalletStore.setState({ walletStatus: 'locked', password: null });
@@ -207,7 +207,7 @@ class WalletController {
   /**
    * 添加新账户
    */
-  async addAccount(): Promise<Account | null> {
+  addAccount(): Account {
     const { keyrings, password, accounts: existingAccounts } = useWalletStore.getState();
     if (!password) throw new Error('No password set');
     
@@ -216,11 +216,11 @@ class WalletController {
     
     const oldAddressCount = keyring.getAddresses().length;
     
-    // 派生新地址
-    await keyring.addAddresses(1);
+    // 派生新地址 (同步操作)
+    keyring.addAddresses(1);
     
-    // 持久化 Keyring
-    await keyringService.persistVault(keyrings, password);
+    // 持久化 Keyring (同步操作)
+    keyringService.persistVault(keyrings, password);
     
     // 创建新账户并追加到 Store
     const newAccount = this.createNewAccount(keyring, oldAddressCount);

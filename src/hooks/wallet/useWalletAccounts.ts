@@ -31,19 +31,14 @@ export const useWalletAccounts = () => {
   }, [accounts, setCurrentAccount]);
 
   // 添加新账户
-  const addAccount = useCallback(async () => {
+  const addAccount = useCallback(() => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const newAccount = await walletController.addAccount();
-      if (newAccount) {
-        setCurrentAccount(newAccount);
-        return newAccount;
-      } else {
-        setError('账户创建失败');
-        return null;
-      }
+      const newAccount = walletController.addAccount();
+      setCurrentAccount(newAccount);
+      return newAccount;
     } catch (error) {
       console.error('Failed to add account:', error);
       setError('账户创建失败');
