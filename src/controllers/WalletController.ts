@@ -8,9 +8,39 @@ import { PRESET_NETWORKS } from "@/types/Network";
 import { keyringService } from "@/services/KeyringService";
 import { useWalletStore } from "@/stores";
 import { Account } from "@/types/Account";
+import { WalletStatus } from "@/types/WalletStatus";
 
 class WalletController {
   private provider: JsonRpcProvider | null = null;
+
+  /**
+   * 设置钱包状态（增强版）
+   * 
+   * 特性：
+   * - 状态变更日志
+   * - 事件通知
+   */
+  setWalletStatus(status: WalletStatus): void {
+    const { walletStatus: oldStatus, setWalletStatus } = useWalletStore.getState();
+
+    // 相同状态不需要处理
+    if (oldStatus === status) {
+      return;
+    }
+
+    // 状态变更日志
+    console.log(`[WalletStatus] ${oldStatus} → ${status}`);
+
+    // 更新 Store
+    setWalletStatus(status);
+
+    // 发布状态变更事件
+    walletEventBus.emit("wallet:statusChanged", {
+      from: oldStatus,
+      to: status,
+      timestamp: Date.now(),
+    });
+  }
 
   constructor() {
     // 默认连接到以太坊主网
@@ -52,33 +82,48 @@ class WalletController {
   // ========== 钱包生命周期 ==========
 
   /**
+   * 初始化钱包状态
+   * 检查是否存在 vault，决定初始状态是 locked 还是 uninitialized
+   */
+  initialize(): void {
+    try {
+      const hasVault = typeof window !== "undefined" && localStorage.getItem("vault");
+      this.setWalletStatus(hasVault ? "locked" : "uninitialized");
+    } catch (error) {
+      console.error("Failed to initialize wallet:", error);
+      this.setWalletStatus("uninitialized");
+    }
+  }
+
+  /**
    * 创建新钱包
    */
   createNewWallet(password: string): string {
-    useWalletStore.setState({ walletStatus: 'creating', password });
+    this.setWalletStatus("creating");
+    useWalletStore.setState({ password });
 
     // 创建 HD Keyring (默认创建 1 个地址)
     const { keyring, mnemonic } = keyringService.createNewHDKeyring(1);
-    
+
     // 持久化 Keyring (同步操作)
     keyringService.persistVault([keyring], password);
-    
+
     // 创建初始账户
     const initialAccount = this.createNewAccount(keyring, 0);
-    
+
     // 更新 Store (追加到 accounts)
     const { accounts: existingAccounts } = useWalletStore.getState();
     const accounts = [...existingAccounts, initialAccount];
-    
+
+    this.setWalletStatus("showing-mnemonic");
     useWalletStore.setState({
       keyrings: [keyring],
       accounts,
       currentAccount: initialAccount,
-      walletStatus: 'showing-mnemonic',
     });
-    
-    walletEventBus.emit('keyring:created', { keyrings: [keyring] });
-    
+
+    walletEventBus.emit("keyring:created", { keyrings: [keyring] });
+
     return mnemonic;
   }
 
@@ -89,57 +134,60 @@ class WalletController {
     const currentState = useWalletStore.getState();
     const existingKeyrings = currentState.keyrings;
     const existingAccounts = currentState.accounts;
-    
-    useWalletStore.setState({ walletStatus: 'importing', password });
+
+    this.setWalletStatus("importing");
+    useWalletStore.setState({ password });
 
     // 从助记词创建 HD Keyring (默认创建 1 个地址)
     const newKeyring = keyringService.createHDKeyringFromMnemonic(mnemonic, 1);
-    
+
     // 合并现有 keyrings 和新 keyring
     const allKeyrings = [...existingKeyrings, newKeyring];
-    
+
     // 持久化所有 keyrings (同步操作)
     keyringService.persistVault(allKeyrings, password);
-    
+
     // 创建初始账户并追加到现有 accounts
     const newAccount = this.createNewAccount(newKeyring, 0);
     const accounts = [...existingAccounts, newAccount];
-    
+
     // 更新 Store
+    this.setWalletStatus("unlocked");
     useWalletStore.setState({
       keyrings: allKeyrings,
       accounts,
       currentAccount: existingAccounts[0] || newAccount, // 保持第一个账户为当前账户
-      walletStatus: 'unlocked',
     });
-    
-    walletEventBus.emit('keyring:imported', { keyrings: allKeyrings });
+
+    walletEventBus.emit("keyring:imported", { keyrings: allKeyrings });
   }
 
   /**
    * 解锁钱包
    */
   unlock(password: string): boolean {
-    useWalletStore.setState({ walletStatus: 'unlocking', password });
-    
+    this.setWalletStatus("unlocking");
+    useWalletStore.setState({ password });
+
     // 恢复 Keyrings (同步操作)
     const keyrings = keyringService.restoreVault(password);
     if (!keyrings) {
-      useWalletStore.setState({ walletStatus: 'locked', password: null });
+      this.setWalletStatus("locked");
+      useWalletStore.setState({ password: null });
       return false;
     }
-    
+
     // 直接使用 Store 中持久化的 accounts (不再重新生成)
     const { accounts, currentAccount } = useWalletStore.getState();
-    
+
     // 更新 Store (恢复 keyrings,保持 accounts 不变)
+    this.setWalletStatus("unlocked");
     useWalletStore.setState({
       keyrings,
       currentAccount: currentAccount || accounts[0],
-      walletStatus: 'unlocked',
     });
-    
-    walletEventBus.emit('keyring:restored', { keyrings });
+
+    walletEventBus.emit("keyring:restored", { keyrings });
     return true;
   }
 
@@ -147,15 +195,15 @@ class WalletController {
    * 锁定钱包
    */
   lock(): void {
+    this.setWalletStatus("locked");
     useWalletStore.setState({
-      walletStatus: 'locked',
       keyrings: [],
       accounts: [],
       currentAccount: null,
       password: null,
     });
-    
-    walletEventBus.emit('keyring:locked');
+
+    walletEventBus.emit("keyring:locked");
   }
 
   // ========== Account 管理 ==========
@@ -167,11 +215,11 @@ class WalletController {
     const addresses = keyring.getAddresses();
     const address = addresses[accountIndex];
     const keyringData = keyring.serialize();
-    
+
     // 获取当前所有账户数量，用于生成默认名称
     const { accounts } = useWalletStore.getState();
     const accountCount = accounts.length;
-    
+
     return {
       id: `${keyring.type}-${address}`,
       address,
@@ -188,8 +236,8 @@ class WalletController {
    */
   updateAccountName(address: string, name: string): void {
     const { accounts } = useWalletStore.getState();
-    const account = accounts.find(acc => acc.address.toLowerCase() === address.toLowerCase());
-    
+    const account = accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
+
     if (account) {
       account.name = name;
       useWalletStore.setState({ accounts: [...accounts] });
@@ -202,7 +250,7 @@ class WalletController {
    */
   getAccountByAddress(address: string): Account | undefined {
     const { accounts } = useWalletStore.getState();
-    return accounts.find(acc => acc.address.toLowerCase() === address.toLowerCase());
+    return accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
   }
 
   /**
@@ -210,25 +258,25 @@ class WalletController {
    */
   addAccount(): Account {
     const { keyrings, password, accounts: existingAccounts } = useWalletStore.getState();
-    if (!password) throw new Error('No password set');
-    
+    if (!password) throw new Error("No password set");
+
     const keyring = keyrings[0];
-    if (!keyring) throw new Error('No keyring found');
-    
+    if (!keyring) throw new Error("No keyring found");
+
     const oldAddressCount = keyring.getAddresses().length;
-    
+
     // 派生新地址 (同步操作)
     keyring.addAddresses(1);
-    
+
     // 持久化 Keyring (同步操作)
     keyringService.persistVault(keyrings, password);
-    
+
     // 创建新账户并追加到 Store
     const newAccount = this.createNewAccount(keyring, oldAddressCount);
     const accounts = [...existingAccounts, newAccount];
-    
+
     useWalletStore.setState({ keyrings: [...keyrings], accounts });
-    
+
     // 返回新创建的账户
     return newAccount;
   }
@@ -236,14 +284,18 @@ class WalletController {
   /**
    * 映射 KeyringType 到 AccountType
    */
-  private mapKeyringTypeToAccountType(keyringType: string): 'mnemonic' | 'privateKey' | 'hardware' {
+  private mapKeyringTypeToAccountType(keyringType: string): "mnemonic" | "privateKey" | "hardware" {
     switch (keyringType) {
-      case 'HD': return 'mnemonic';
-      case 'Simple': return 'privateKey';
-      case 'Hardware':
-      case 'Ledger':
-      case 'Trezor': return 'hardware';
-      default: return 'mnemonic';
+      case "HD":
+        return "mnemonic";
+      case "Simple":
+        return "privateKey";
+      case "Hardware":
+      case "Ledger":
+      case "Trezor":
+        return "hardware";
+      default:
+        return "mnemonic";
     }
   }
 
@@ -255,14 +307,14 @@ class WalletController {
   async sendTransaction(fromAddress: string, to: string, value: string): Promise<string> {
     const { keyrings } = useWalletStore.getState();
     const wallet = this.getConnectedWallet(keyrings, fromAddress);
-    
+
     if (!wallet) throw new Error(`Wallet ${fromAddress} not found`);
-    
+
     const tx = await wallet.sendTransaction({
       to,
       value: ethers.parseEther(value),
     });
-    
+
     return tx.hash;
   }
 
@@ -271,7 +323,7 @@ class WalletController {
    */
   private getConnectedWallet(keyrings: IKeyring[], address: string): BaseWallet | null {
     if (!this.provider) throw new Error("Provider not initialized");
-    
+
     for (const keyring of keyrings) {
       if (keyring instanceof HDKeyring) {
         const wallet = keyring.wallets.find((w) => w.address === address);
@@ -280,7 +332,7 @@ class WalletController {
         }
       }
     }
-    
+
     return null;
   }
 

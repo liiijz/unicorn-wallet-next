@@ -1,4 +1,3 @@
-import { useWalletStore } from "@/stores";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { walletController } from "@/controllers/WalletController";
@@ -20,7 +19,6 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
   const [agreed, setAgreed] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); // 使用组件内部状态
-  const { setWalletStatus } = useWalletStore();
 
   const createWallet = (password: string) => {
     setIsLoading(true);
@@ -64,15 +62,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
 
     const mnemonic = createWallet(password);
     if (mnemonic) {
-            //   set({
-      //     walletStatus: "showing-mnemonic",
-      //     keyrings,
-      //     accounts,
-      //     currentAccount: accounts[0] || null,
-      //   });
-
-      setWalletStatus("showing-mnemonic");
-
+      // walletStatus 已经在 walletController.createNewWallet() 内部设置为 "showing-mnemonic"
       if (onCreated) {
         onCreated(mnemonic);
       }

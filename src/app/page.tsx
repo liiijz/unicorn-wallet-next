@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useWalletStore } from "@/stores/walletStore";
+import { walletController } from "@/controllers/WalletController";
 import Welcome from "@/components/Welcome";
 import Unlock from "@/components/Unlock";
 import WalletHome from "@/components/WalletHome";
@@ -16,20 +17,11 @@ import WalletHome from "@/components/WalletHome";
  * 4. showing-mnemonic -> Welcome 页面（会显示助记词模态框）
  */
 export default function Home() {
-  const { walletStatus, setWalletStatus } = useWalletStore();
-
-  const initialize = () => {
-    try {
-      const hasVault = localStorage.getItem("vault");
-      setWalletStatus(hasVault ? "locked" : "uninitialized");
-    } catch (error) {
-      console.error("Failed to initialize wallet:", error);
-    }
-  };
+  const { walletStatus } = useWalletStore();
 
   // 初始化钱包状态（检查是否有存储的钱包数据）
   useEffect(() => {
-    initialize();
+    walletController.initialize();
   }, []);
 
   // 路由逻辑

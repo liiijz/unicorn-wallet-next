@@ -6,7 +6,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import MnemonicModal from "./MnemonicModal";
 import CreateWalletModal from "./CreateWalletModal";
 import ImportWalletModal from "./ImportWalletModal";
-import { useWalletStore } from "@/stores";
+import { walletController } from "@/controllers/WalletController";
 
 /**
  * Welcome 组件 - 欢迎页面
@@ -19,7 +19,6 @@ export default function Welcome() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showMnemonicModal, setShowMnemonicModal] = useState(false);
   const [mnemonic, setMnemonic] = useState("");
-  const { setWalletStatus } = useWalletStore();
 
   return (
     <>
@@ -94,7 +93,8 @@ export default function Welcome() {
         <MnemonicModal
           mnemonic={mnemonic}
           onClose={() => {
-            setWalletStatus("unlocked");
+            // 用户确认备份助记词后,设置为 unlocked 状态
+            walletController.setWalletStatus("unlocked");
             setShowMnemonicModal(false);
           }}
         />

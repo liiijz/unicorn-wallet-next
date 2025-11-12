@@ -71,6 +71,15 @@ export type WalletEvents = {
 
   "network:changed": { network: Network };
   "keyring:providerUpdated": { network: Network; provider: ethers.JsonRpcProvider };
+
+  // ========== WalletController 事件 ==========
+
+  /** 钱包状态变更事件 */
+  "wallet:statusChanged": {
+    from: string;
+    to: string;
+    timestamp: number;
+  };
 };
 
 /**

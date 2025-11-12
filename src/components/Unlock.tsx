@@ -2,7 +2,6 @@
 
 import React, { useCallback, useState } from "react";
 import { walletController } from "@/controllers/WalletController";
-import { useWalletStore } from "@/stores";
 
 /**
  * Unlock 组件 - 钱包解锁页面
@@ -14,19 +13,19 @@ export default function Unlock() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // 使用组件内部状态
   const [error, setError] = useState<string | null>(null); // 使用组件内部状态
-  const { setWalletStatus } = useWalletStore();
 
-  const unlockWallet = (password: string) => {
+  const unlockWallet = (password: string): boolean => {
     setIsLoading(true);
     setError(null);
     const result = walletController.unlock(password);
     if (!result) {
       setError("密码错误，请重试");
       setIsLoading(false);
-      return;
+      return false;
     }
     console.log("钱包解锁成功");
     setIsLoading(false);
+    return true;
   };
 
   const handleUnlock = (e: React.FormEvent) => {
@@ -41,9 +40,8 @@ export default function Unlock() {
     const success = unlockWallet(password);
     if (!success) {
       setPassword("");
-    } else {
-      setWalletStatus("unlocked");
     }
+    // walletStatus 已经在 walletController.unlock() 内部设置为 "unlocked"
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
