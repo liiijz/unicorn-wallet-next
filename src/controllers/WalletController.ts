@@ -17,7 +17,7 @@ class WalletController {
    * 设置钱包状态（增强版）
    * 
    * 特性：
-   * - 状态变更日志
+   * - 状态变更日志（包含调用栈，仅开发环境）
    * - 事件通知
    */
   setWalletStatus(status: WalletStatus): void {
@@ -28,8 +28,18 @@ class WalletController {
       return;
     }
 
-    // 状态变更日志
-    console.log(`[WalletStatus] ${oldStatus} → ${status}`);
+    // 状态变更日志（仅在开发环境）
+    if (process.env.NODE_ENV === "development") {
+      // 获取调用栈信息
+      const stack = new Error().stack;
+      const caller = stack
+        ?.split("\n")[2] // 第3行是调用方
+        ?.trim()
+        .replace(/^at\s+/, "") // 移除 "at "
+        .split(" ")[0]; // 提取方法名
+
+      console.log(`[WalletStatus] ${oldStatus} → ${status} (caller: ${caller || "unknown"})`);
+    }
 
     // 更新 Store
     setWalletStatus(status);
