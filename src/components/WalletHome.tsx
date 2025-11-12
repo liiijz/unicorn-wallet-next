@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import type { Account } from "@/types/Account";
 import PixelAvatar from "./PixelAvatar";
 import SendModal from "./SendModal";
-import { ethers } from "ethers";
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 import { GiReceiveMoney } from "react-icons/gi";
 import { IoIosSend } from "react-icons/io";
@@ -121,26 +120,14 @@ export default function WalletHome() {
     if (!currentAccount?.address) {
       return;
     }
-    console.log("🚀 Fetching balance for account:", currentAccount.address);
-    console.log("🔄 Fetching balance...");
-    console.log("  📍 Address:", currentAccount.address);
-    console.log("  🌐 Network:", network.name, `(${network.chainId})`);
-    try {
-      const provider = new ethers.JsonRpcProvider(network.rpcUrl);
-      // 验证网络连接
-      const balanceWei = await provider.getBalance(currentAccount.address);
-      const balanceEth = ethers.formatEther(balanceWei);
-      // 格式化为4位小数
-      const formattedBalance = parseFloat(balanceEth).toFixed(4);
-      setBalance(formattedBalance);
-      // 简单的USD估算
-      const ethPriceUSD = 2000;
-      const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
-      setBalanceUSD(usdValue);
-    } catch (error) {
-      setBalance("0.0000");
-      setBalanceUSD("0.00");
-    }
+    
+    const { balance: newBalance, balanceUSD: newBalanceUSD } = await walletController.getBalance(
+      currentAccount.address,
+      network
+    );
+    
+    setBalance(newBalance);
+    setBalanceUSD(newBalanceUSD);
   };
 
   // 获取市场数据

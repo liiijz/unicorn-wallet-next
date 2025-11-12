@@ -5,6 +5,9 @@ import { keyringService } from "@/services/KeyringService";
 import { useWalletStore } from "@/stores";
 import { Account } from "@/types/Account";
 import { WalletStatus } from "@/types/WalletStatus";
+import { ethers } from "ethers";
+import type { Network } from "@/types/Network";
+import { networkManager } from "@/services/NetworkManager";
 
 class WalletController {
 
@@ -263,6 +266,41 @@ class WalletController {
         return "hardware";
       default:
         return "mnemonic";
+    }
+  }
+
+  // ========== Balance ==========
+
+  /**
+   * 获取账户余额
+   * @param address 账户地址
+   * @param network 网络配置（可选，用于日志输出）
+   * @returns 余额对象 { balance: "0.0000", balanceUSD: "0.00" }
+   */
+  async getBalance(address: string, network?: Network): Promise<{ balance: string; balanceUSD: string }> {
+    if (!address) {
+      return { balance: "0.0000", balanceUSD: "0.00" };
+    }
+
+    try {
+      // 使用 NetworkManager 的 getBalance 方法
+      const balanceWei = await networkManager.getBalance(address);
+      const balanceEth = ethers.formatEther(balanceWei);
+      
+      // 格式化为4位小数
+      const formattedBalance = parseFloat(balanceEth).toFixed(4);
+      
+      // 简单的USD估算（TODO: 接入真实价格API）
+      const ethPriceUSD = 2000;
+      const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
+      
+      return {
+        balance: formattedBalance,
+        balanceUSD: usdValue,
+      };
+    } catch (error) {
+      console.error("Failed to fetch balance:", error);
+      return { balance: "0.0000", balanceUSD: "0.00" };
     }
   }
 
