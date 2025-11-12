@@ -33,17 +33,18 @@ export async function GET(request: NextRequest) {
     
     // 获取参数
     const chainId = parseInt(searchParams.get("chainid") || "1");
-    const module = searchParams.get("module");
-    const action = searchParams.get("action");
     const address = searchParams.get("address");
+    // 自动补全参数
+    const module = searchParams.get("module") || "account";
+    const action = searchParams.get("action") || "tokentx";
     const startblock = searchParams.get("startblock") || "0";
     const endblock = searchParams.get("endblock") || "99999999";
     const sort = searchParams.get("sort") || "asc";
 
     // 验证必需参数
-    if (!module || !action || !address) {
+    if (!address) {
       return NextResponse.json(
-        { error: "缺少必需参数: module, action, address" },
+        { error: "缺少必需参数: address" },
         { status: 400 }
       );
     }
@@ -69,6 +70,8 @@ export async function GET(request: NextRequest) {
     // 构建 Etherscan API URL
     const apiUrl = ETHERSCAN_API_URLS[chainId];
     const etherscanUrl = `${apiUrl}?chainid=${chainId}&module=${module}&action=${action}&address=${address}&startblock=${startblock}&endblock=${endblock}&sort=${sort}&apikey=${apiKey}`;
+
+    console.log(`[Etherscan API] 请求 URL: ${etherscanUrl}`);
 
     // 调用 Etherscan API
     const response = await fetch(etherscanUrl);

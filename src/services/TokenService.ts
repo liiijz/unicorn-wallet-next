@@ -57,9 +57,9 @@ class TokenService {
    */
   private async getTokenListFromEtherscan(address: string, chainId: number): Promise<TokenListResponse> {
     try {
-      // 调用本地 API 路由，避免暴露 API Key
+      // 调用本地 API 路由，只传 chainId 和 address，后端自动补全参数
       const response = await fetch(
-        `/api/etherscan?chainid=${chainId}&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&sort=asc`
+        `/api/etherscan?chainid=${chainId}&address=${address}`
       );
 
       const data = await response.json();
