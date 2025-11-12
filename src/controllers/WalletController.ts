@@ -119,14 +119,14 @@ class WalletController {
   /**
    * 解锁钱包
    */
-  unlock(password: string): void {
+  unlock(password: string): boolean {
     useWalletStore.setState({ walletStatus: 'unlocking', password });
     
     // 恢复 Keyrings (同步操作)
     const keyrings = keyringService.restoreVault(password);
     if (!keyrings) {
       useWalletStore.setState({ walletStatus: 'locked', password: null });
-      throw new Error('Invalid password or vault not found');
+      return false;
     }
     
     // 直接使用 Store 中持久化的 accounts (不再重新生成)
@@ -140,6 +140,7 @@ class WalletController {
     });
     
     walletEventBus.emit('keyring:restored', { keyrings });
+    return true;
   }
 
   /**

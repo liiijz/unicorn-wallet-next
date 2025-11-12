@@ -14,24 +14,19 @@ export default function Unlock() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // 使用组件内部状态
   const [error, setError] = useState<string | null>(null); // 使用组件内部状态
-  const {setWalletStatus} = useWalletStore();
+  const { setWalletStatus } = useWalletStore();
 
   const unlockWallet = (password: string) => {
     setIsLoading(true);
     setError(null);
-
-    try {
-      walletController.unlock(password);
-      console.log("钱包解锁成功");
-      return true;
-    } catch (error: any) {
-      console.error("Unlock error:", error);
+    const result = walletController.unlock(password);
+    if (!result) {
       setError("密码错误，请重试");
-      return false;
-    } finally {
       setIsLoading(false);
-      console.log("解锁完成");
+      return;
     }
+    console.log("钱包解锁成功");
+    setIsLoading(false);
   };
 
   const handleUnlock = (e: React.FormEvent) => {
