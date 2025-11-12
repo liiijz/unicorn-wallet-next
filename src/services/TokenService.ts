@@ -25,23 +25,8 @@ class TokenService {
     "function balanceOf(address) view returns (uint256)",
   ];
 
-  // Etherscan API 配置
-  private readonly ETHERSCAN_API_KEYS: Record<number, string> = {
-    1: process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY || "", // 以太坊主网
-    11155111: process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY || "", // Sepolia 测试网
-    // 可以添加更多网络的 API Key
-  };
-
-  private readonly ETHERSCAN_API_URLS: Record<number, string> = {
-    1: "https://api.etherscan.io/v2/api",
-    11155111: "https://api-sepolia.etherscan.io/v2/api",
-    // BSC
-    56: "https://api.bscscan.com/v2/api",
-    97: "https://api-testnet.bscscan.com/v2/api",
-    // Polygon
-    137: "https://api.polygonscan.com/v2/api",
-    80001: "https://api-testnet.polygonscan.com/v2/api",
-  };
+  // 支持的 Etherscan API 链 ID
+  private readonly SUPPORTED_CHAINS = [1, 11155111, 56, 97, 137, 80001];
 
   /**
    * 获取地址的所有 ERC-20 Token 列表
@@ -68,24 +53,22 @@ class TokenService {
   }
 
   /**
-   * 从 Etherscan API 获取 Token 列表
+   * 从 Etherscan API 获取 Token 列表（通过后端代理）
    */
   private async getTokenListFromEtherscan(address: string, chainId: number): Promise<TokenListResponse> {
-    const apiKey = this.ETHERSCAN_API_KEYS[chainId];
-    const apiUrl = this.ETHERSCAN_API_URLS[chainId];
-
-    if (!apiKey) {
-      console.warn(`[TokenService] 未配置 Chain ${chainId} 的 Etherscan API Key`);
-      return { tokens: [], timestamp: Date.now() };
-    }
-
     try {
-      // Etherscan API V2: 获取 ERC-20 Token 余额 (需要 chainid 参数)
+      // 调用本地 API 路由，避免暴露 API Key
       const response = await fetch(
-        `${apiUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`
+        `/api/etherscan?chainid=${chainId}&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&sort=asc`
       );
 
       const data = await response.json();
+
+      // 处理错误响应
+      if (data.error) {
+        console.warn("[TokenService] Etherscan API 错误:", data.error);
+        return { tokens: [], timestamp: Date.now() };
+      }
 
       if (data.status !== "1" || !data.result) {
         console.warn("[TokenService] Etherscan API 返回空结果");
@@ -181,7 +164,7 @@ class TokenService {
    * 检查是否支持 Etherscan API
    */
   private supportsEtherscanAPI(chainId: number): boolean {
-    return chainId in this.ETHERSCAN_API_URLS;
+    return this.SUPPORTED_CHAINS.includes(chainId);
   }
 
   /**
