@@ -35,7 +35,6 @@
     "and": "和",
     "privacyPolicy": "隐私政策",
     "createButton": "创建钱包",
-    "creating": "创建中...",
     "successMessage": "钱包创建成功！\n\n请妥善保存您的助记词：\n\n{{mnemonic}}\n\n⚠️ 请务必备份助记词，这是恢复钱包的唯一方式！",
     "errors": {
       "allFieldsRequired": "请填写所有字段",
@@ -53,7 +52,6 @@
     "confirmPassword": "确认密码",
     "confirmPasswordPlaceholder": "再次输入密码",
     "importButton": "导入钱包",
-    "importing": "导入中...",
     "errors": {
       "allFieldsRequired": "请填写所有字段",
       "passwordTooShort": "密码至少需要8个字符",
@@ -72,7 +70,6 @@
     "password": "密码",
     "passwordPlaceholder": "输入您的密码",
     "unlockButton": "解锁钱包",
-    "unlocking": "解锁中...",
     "forgotPassword": "忘记密码？",
     "forgotPasswordMessage": "忘记密码功能开发中...\n\n提示：如果忘记密码，您需要使用助记词重新导入钱包。",
     "securityTip": {

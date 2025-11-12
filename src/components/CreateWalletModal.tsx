@@ -137,7 +137,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
 
           <button type="submit" disabled={isLoading} className="cursor-pointer w-full bg-primary text-black h-[52px] rounded-2xl font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             {isLoading && <AiOutlineLoading3Quarters className="w-4 h-4 animate-spin" />}
-            <span>{isLoading ? t("createWallet.creating") : t("createWallet.createButton")}</span>
+            <span>{t("createWallet.createButton")}</span>
             {!isLoading && <IoArrowForward className="w-5 h-5" />}
           </button>
         </form>

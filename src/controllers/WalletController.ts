@@ -109,7 +109,6 @@ class WalletController {
    * 创建新钱包
    */
   createNewWallet(password: string): string {
-    this.setWalletStatus("creating");
     useWalletStore.setState({ password });
 
     // 创建 HD Keyring (默认创建 1 个地址)
@@ -145,7 +144,6 @@ class WalletController {
     const existingKeyrings = currentState.keyrings;
     const existingAccounts = currentState.accounts;
 
-    this.setWalletStatus("importing");
     useWalletStore.setState({ password });
 
     // 从助记词创建 HD Keyring (默认创建 1 个地址)
@@ -176,7 +174,6 @@ class WalletController {
    * 解锁钱包
    */
   unlock(password: string): boolean {
-    this.setWalletStatus("unlocking");
     useWalletStore.setState({ password });
 
     // 恢复 Keyrings (同步操作)

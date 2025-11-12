@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useWalletStore } from "@/stores/walletStore";
 import { walletController } from "@/controllers/WalletController";
 import Welcome from "@/components/Welcome";
@@ -18,11 +18,25 @@ import WalletHome from "@/components/WalletHome";
  */
 export default function Home() {
   const { walletStatus } = useWalletStore();
+  const [mounted, setMounted] = useState(false);
 
-  // 初始化钱包状态（检查是否有存储的钱包数据）
+  // 等待客户端挂载，避免 i18n SSR hydration mismatch
   useEffect(() => {
+    setMounted(true);
     walletController.initialize();
   }, []);
+
+  // SSR 阶段显示加载占位符
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center opacity-0">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="mt-4 text-gray-400">加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   // 路由逻辑
   if (walletStatus === "uninitialized" || walletStatus === "showing-mnemonic") {

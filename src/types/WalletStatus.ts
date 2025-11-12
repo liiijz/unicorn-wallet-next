@@ -6,21 +6,16 @@
  */
 export type WalletStatus =
   | 'uninitialized'       // 未初始化（首次使用，无钱包）
-  | 'creating'            // 创建中
-  | 'importing'           // 导入中
   | 'showing-mnemonic'    // 显示助记词（等待用户确认备份）
   | 'locked'              // 已锁定（有钱包但未解锁）
-  | 'unlocking'           // 解锁中
   | 'unlocked';           // 已解锁
 
 /**
  * 状态转换关系：
  * 
- * uninitialized → creating → showing-mnemonic → unlocked
- *                    ↓
- * uninitialized → importing → unlocked
+ * uninitialized → showing-mnemonic → unlocked (创建钱包)
+ * uninitialized → unlocked (导入钱包)
  * 
- * locked → unlocking → unlocked
- * 
- * unlocked → locked
+ * locked → unlocked (解锁)
+ * unlocked → locked (锁定)
  */

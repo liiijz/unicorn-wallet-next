@@ -35,7 +35,6 @@
     "and": "and",
     "privacyPolicy": "Privacy Policy",
     "createButton": "Create Wallet",
-    "creating": "Creating...",
     "successMessage": "Wallet created successfully!\n\nPlease save your recovery phrase:\n\n{{mnemonic}}\n\n⚠️ Make sure to back up your recovery phrase. This is the only way to recover your wallet!",
     "errors": {
       "allFieldsRequired": "Please fill in all fields",
@@ -53,7 +52,6 @@
     "confirmPassword": "Confirm Password",
     "confirmPasswordPlaceholder": "Enter password again",
     "importButton": "Import Wallet",
-    "importing": "Importing...",
     "errors": {
       "allFieldsRequired": "Please fill in all fields",
       "passwordTooShort": "Password must be at least 8 characters",
@@ -72,7 +70,6 @@
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
     "unlockButton": "Unlock Wallet",
-    "unlocking": "Unlocking...",
     "forgotPassword": "Forgot Password?",
     "forgotPasswordMessage": "Forgot password feature is under development...\n\nTip: If you forgot your password, you need to re-import your wallet using the recovery phrase.",
     "securityTip": {

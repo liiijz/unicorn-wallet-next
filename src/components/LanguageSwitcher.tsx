@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "@/i18n/config";
 import { IoLanguage } from "react-icons/io5";
@@ -13,6 +13,12 @@ import { IoLanguage } from "react-icons/io5";
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // 等待客户端挂载完成，避免 SSR hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const currentLanguage = i18n.language as SupportedLanguage;
 
@@ -20,6 +26,18 @@ export default function LanguageSwitcher() {
     i18n.changeLanguage(lang);
     setIsOpen(false);
   };
+
+  // SSR 时显示占位符，避免 hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="relative">
+        <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-900 transition-colors text-sm opacity-0">
+          <IoLanguage className="text-lg"/>
+          <span className="text-white">Loading...</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
