@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/walletStore";
+import { transactionController } from "@/controllers";
 
 interface SendModalProps {
   isOpen: boolean;
@@ -29,7 +30,6 @@ export default function SendModal({
   balance,
   onTransactionComplete,
 }: SendModalProps) {
-  const { keyringController } = useWalletStore();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -119,8 +119,8 @@ export default function SendModal({
     setError("");
 
     try {
-      // Use KeyringController to send the transaction
-      const txHash = await keyringController.sendTransaction(
+      // Use TransactionController to send the transaction
+      const txHash = await transactionController.sendTransaction(
         currentAccount.address,
         recipient,
         amount

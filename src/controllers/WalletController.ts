@@ -1,17 +1,12 @@
 import type { IKeyring } from "@/types/Keyring";
 import { HDKeyring } from "@/types/HDKeyring";
 import { walletEventBus } from "@/events/WalletEvents";
-import { ethers, JsonRpcProvider } from "ethers";
-import { BaseWallet } from "ethers";
-import { Network } from "@/types/Network";
-import { PRESET_NETWORKS } from "@/types/Network";
 import { keyringService } from "@/services/KeyringService";
 import { useWalletStore } from "@/stores";
 import { Account } from "@/types/Account";
 import { WalletStatus } from "@/types/WalletStatus";
 
 class WalletController {
-  private provider: JsonRpcProvider | null = null;
 
   /**
    * 设置钱包状态（增强版）
@@ -52,42 +47,7 @@ class WalletController {
     });
   }
 
-  constructor() {
-    // 默认连接到以太坊主网
-    const { currentNetwork } = useWalletStore.getState();
-    this.provider = new ethers.JsonRpcProvider(currentNetwork.rpcUrl);
-    // 订阅网络切换事件
-    this.subscribeToNetworkEvents();
-  }
-
-  subscribeToNetworkEvents() {
-    walletEventBus.on("network:changed", ({ network }) => {
-      this.handleNetworkChange(network);
-    });
-  }
-
-  private async handleNetworkChange(network: Network): Promise<void> {
-    console.log(`WalletController: 网络切换到 ${network.name}`);
-
-    // 创建新的 Provider
-    this.provider = new ethers.JsonRpcProvider(network.rpcUrl);
-
-    // 验证网络连接
-    try {
-      const chainId = await this.provider.getNetwork();
-      if (Number(chainId.chainId) !== network.chainId) {
-        console.warn(`Chain ID 不匹配: 期望 ${network.chainId}, 实际 ${chainId.chainId}`);
-      }
-    } catch (error) {
-      console.error("网络连接验证失败:", error);
-    }
-
-    // 发布事件：Provider 已更新
-    walletEventBus.emit("keyring:providerUpdated", {
-      network,
-      provider: this.provider,
-    });
-  }
+  // Provider 管理已移至 NetworkManager
 
   // ========== 钱包生命周期 ==========
 
@@ -307,48 +267,8 @@ class WalletController {
   }
 
   // ========== Transaction ==========
-
-  /**
-   * 发送交易
-   */
-  async sendTransaction(fromAddress: string, to: string, value: string): Promise<string> {
-    const { keyrings } = useWalletStore.getState();
-    const wallet = this.getConnectedWallet(keyrings, fromAddress);
-
-    if (!wallet) throw new Error(`Wallet ${fromAddress} not found`);
-
-    const tx = await wallet.sendTransaction({
-      to,
-      value: ethers.parseEther(value),
-    });
-
-    return tx.hash;
-  }
-
-  /**
-   * 获取连接到当前网络的钱包实例
-   */
-  private getConnectedWallet(keyrings: IKeyring[], address: string): BaseWallet | null {
-    if (!this.provider) throw new Error("Provider not initialized");
-
-    for (const keyring of keyrings) {
-      if (keyring instanceof HDKeyring) {
-        const wallet = keyring.wallets.find((w) => w.address === address);
-        if (wallet) {
-          return wallet.connect(this.provider);
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * 获取 Provider
-   */
-  getProvider(): ethers.JsonRpcProvider | null {
-    return this.provider;
-  }
+  // Provider 管理已移至 NetworkManager
+  // 使用 networkManager.getProvider() 获取 Provider 实例
 }
 
 export const walletController = new WalletController();

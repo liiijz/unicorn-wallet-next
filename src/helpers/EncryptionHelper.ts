@@ -121,24 +121,4 @@ export class EncryptionHelper {
       throw new Error("Decryption failed: invalid encrypted data or wrong password");
     }
   }
-
-  /**
-   * 验证加密数据的格式是否正确
-   * @param encryptedData - 加密数据字符串
-   * @returns 是否有效
-   */
-  static isValidEncryptedData(encryptedData: string): boolean {
-    try {
-      const vault: EncryptedVault = JSON.parse(encryptedData);
-      return (
-        vault.data &&
-        vault.iv &&
-        vault.salt &&
-        vault.keyMetadata?.algorithm === "PBKDF2" &&
-        vault.keyMetadata?.params?.iterations > 0
-      );
-    } catch {
-      return false;
-    }
-  }
 }
