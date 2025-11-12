@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import type { Account } from "@/types/Account";
-import Avatar from "./Avatar";
+import PixelAvatar from "./PixelAvatar";
 import SendModal from "./SendModal";
 import { ethers } from "ethers";
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
@@ -219,9 +219,7 @@ export default function WalletHome() {
           <div className="flex items-center justify-between mb-8">
             {/* Avatar - Square with rounded corners */}
             <button onClick={() => setShowAccountSelector(!showAccountSelector)} className="relative">
-              {/* <div className="w-[42px] h-[42px] rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-400 flex items-center justify-center text-sm font-bold overflow-hidden">
-                {currentAccount?.name?.charAt(0) || "A"}</div> */}
-              <Avatar address={currentAccount?.address || ""} />
+              <PixelAvatar address={currentAccount?.address || ""} size={42} />
             </button>
 
             {/* Network Dropdown */}
@@ -279,7 +277,7 @@ export default function WalletHome() {
                       }}
                       className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${currentAccount?.id === account.id ? "bg-[#00F4C8]/20 border border-[#00F4C8]/50" : "bg-gray-800 hover:bg-gray-700"}`}>
                       <div className="flex items-center gap-3">
-                        <Avatar address={account?.address || ""}></Avatar>
+                        <PixelAvatar address={account?.address || ""} size={42} />
                         <div className="text-left">
                           <div className="font-medium">{account.name}</div>
                           <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
