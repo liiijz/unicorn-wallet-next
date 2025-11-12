@@ -8,6 +8,8 @@ import { WalletStatus } from "@/types/WalletStatus";
 import { ethers } from "ethers";
 import type { Network } from "@/types/Network";
 import { networkManager } from "@/services/NetworkManager";
+import { tokenService } from "@/services/TokenService";
+import type { TokenListResponse } from "@/types/Token";
 
 class WalletController {
 
@@ -272,7 +274,7 @@ class WalletController {
   // ========== Balance ==========
 
   /**
-   * 获取账户余额
+   * 获取账户余额（原生代币，如 ETH）
    * @param address 账户地址
    * @param network 网络配置（可选，用于日志输出）
    * @returns 余额对象 { balance: "0.0000", balanceUSD: "0.00" }
@@ -301,6 +303,28 @@ class WalletController {
     } catch (error) {
       console.error("Failed to fetch balance:", error);
       return { balance: "0.0000", balanceUSD: "0.00" };
+    }
+  }
+
+  /**
+   * 获取账户的所有 ERC-20 Token 列表
+   * @param address 账户地址
+   * @returns Token 列表响应
+   */
+  async getTokenList(address: string): Promise<TokenListResponse> {
+    if (!address) {
+      return { tokens: [], timestamp: Date.now() };
+    }
+
+    try {
+      // 获取当前网络的 chainId
+      const chainId = await networkManager.getChainId();
+      
+      // 使用 TokenService 获取 token 列表
+      return await tokenService.getTokenList(address, chainId);
+    } catch (error) {
+      console.error("Failed to fetch token list:", error);
+      return { tokens: [], timestamp: Date.now() };
     }
   }
 
