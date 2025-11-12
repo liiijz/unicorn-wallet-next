@@ -33,14 +33,14 @@ class TokenService {
   };
 
   private readonly ETHERSCAN_API_URLS: Record<number, string> = {
-    1: "https://api.etherscan.io/api",
-    11155111: "https://api-sepolia.etherscan.io/api",
+    1: "https://api.etherscan.io/v2/api",
+    11155111: "https://api-sepolia.etherscan.io/v2/api",
     // BSC
-    56: "https://api.bscscan.com/api",
-    97: "https://api-testnet.bscscan.com/api",
+    56: "https://api.bscscan.com/v2/api",
+    97: "https://api-testnet.bscscan.com/v2/api",
     // Polygon
-    137: "https://api.polygonscan.com/api",
-    80001: "https://api-testnet.polygonscan.com/api",
+    137: "https://api.polygonscan.com/v2/api",
+    80001: "https://api-testnet.polygonscan.com/v2/api",
   };
 
   /**
@@ -80,9 +80,9 @@ class TokenService {
     }
 
     try {
-      // Etherscan API: 获取 ERC-20 Token 余额
+      // Etherscan API V2: 获取 ERC-20 Token 余额 (需要 chainid 参数)
       const response = await fetch(
-        `${apiUrl}?module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`
+        `${apiUrl}?chainid=${chainId}&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`
       );
 
       const data = await response.json();
