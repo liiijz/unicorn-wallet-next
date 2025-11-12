@@ -63,7 +63,7 @@ export default function WalletHome() {
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
     if (!address) return "";
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    return `${address.slice(0, 20)}...${address.slice(-4)}`;
   };
 
   // 准备图表数据
