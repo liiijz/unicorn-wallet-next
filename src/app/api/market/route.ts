@@ -1,7 +1,112 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fetch from 'node-fetch';
+
+/**
+ * Market API - 使用 CoinGecko 获取加密货币市场数据
+ */
+
+interface CoinGeckoMarketData {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+  total_volume: number;
+  sparkline_in_7d?: {
+    price: number[];
+  };
+}
+
+interface MarketData {
+  symbol: string;
+  name: string;
+  code: string;
+  icon: string;
+  price: number;
+  change24h: number;
+  changeRate: number;
+  volume: number;
+  priceHistory: number[];
+}
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({ message: "GET API ready." });
+  try {
+    const { searchParams } = new URL(request.url);
+    const sortBy = searchParams.get('sortBy') || 'hot';
+    
+    // CoinGecko API 参数映射
+    const sortMapping: Record<string, string> = {
+      'hot': 'market_cap_desc',
+      '24hrs': 'volume_desc',
+      'profit': 'price_change_percentage_24h_desc',
+      'rising': 'price_change_percentage_24h_desc',
+      'loss': 'price_change_percentage_24h_asc',
+      'topGain': 'price_change_percentage_24h_desc',
+    };
+    
+    const order = sortMapping[sortBy] || 'market_cap_desc';
+    
+    // 调用 CoinGecko API
+    const coingeckoUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=${order}&per_page=10&page=1&sparkline=true&price_change_percentage=24h`;
+    
+    console.log(`[Market API] 请求 CoinGecko: ${coingeckoUrl}`);
+    
+    // 代理支持（如果需要）
+    const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+    const fetchOptions: any = {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+      },
+    };
+    
+    if (proxyUrl) {
+      const { HttpsProxyAgent } = await import('https-proxy-agent');
+      fetchOptions.agent = new HttpsProxyAgent(proxyUrl);
+      console.log(`[Market API] 使用代理: ${proxyUrl}`);
+    }
+    
+    const response = await fetch(coingeckoUrl, fetchOptions);
+    
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.status}`);
+    }
+    
+    const data = await response.json() as CoinGeckoMarketData[];
+    
+    // 转换为我们的数据格式
+    const marketData: MarketData[] = data.map(coin => ({
+      symbol: coin.symbol,
+      name: coin.name,
+      code: coin.symbol,
+      icon: coin.image,
+      price: coin.current_price,
+      change24h: coin.current_price * (coin.price_change_percentage_24h / 100),
+      changeRate: coin.price_change_percentage_24h,
+      volume: coin.total_volume,
+      priceHistory: coin.sparkline_in_7d?.price?.slice(-24) || [], // 最近24小时数据
+    }));
+    
+    console.log(`[Market API] 成功获取 ${marketData.length} 条市场数据`);
+    
+    return NextResponse.json({
+      code: 200,
+      message: 'success',
+      data: marketData,
+    });
+  } catch (error) {
+    console.error('[Market API] 请求失败:', error);
+    return NextResponse.json(
+      {
+        code: 500,
+        message: 'Failed to fetch market data',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        data: [],
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
