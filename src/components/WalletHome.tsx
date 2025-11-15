@@ -1,23 +1,30 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import type { Account } from "@/types/Account";
-import PixelAvatar from "./PixelAvatar";
-import SendModal from "./SendModal";
-import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
-import { GiReceiveMoney } from "react-icons/gi";
-import { IoIosSend } from "react-icons/io";
-import { MdShoppingCart } from "react-icons/md";
-import { IoCopy } from "react-icons/io5";
-import { useNotification } from "./Notification";
-import { WalletAssets } from "./WalletAssets";
-import { walletEventBus } from "@/events/WalletEvents";
-import { Network } from "@/types/Network";
-import { useWalletStore } from "@/stores/walletStore";
-import { networkController } from "@/controllers/NetworkController";
-import { walletController } from "@/controllers";
-import ImportWalletModal from "./ImportWalletModal";
-import MarketStats from "./MarketStats";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
+import { GiReceiveMoney } from 'react-icons/gi';
+import { IoIosSend } from 'react-icons/io';
+import { IoCopy } from 'react-icons/io5';
+import { MdShoppingCart } from 'react-icons/md';
+
+import { walletController } from '@/controllers';
+import { networkController } from '@/controllers/NetworkController';
+import { walletEventBus } from '@/events/WalletEvents';
+import { useWalletStore } from '@/stores/walletStore';
+import type { Account } from '@/types/Account';
+import { Network } from '@/types/Network';
+
+import ImportWalletModal from './ImportWalletModal';
+import MarketStats from './MarketStats';
+import { useNotification } from './Notification';
+import PixelAvatar from './PixelAvatar';
+import ReceiveModal from './ReceiveModal';
+import SendModal from './SendModal';
+import { WalletAssets } from './WalletAssets';
 
 /**
  * WalletHome 组件 - 主钱包界面
@@ -36,6 +43,7 @@ export default function WalletHome() {
   const [balanceUSD, setBalanceUSD] = useState<string>("0.00");
   const [activeTab, setActiveTab] = useState("home");
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showReceiveModal, setShowReceiveModal] = useState(false);
   const { addNotification } = useNotification();
   const fetchBalanceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -160,7 +168,7 @@ export default function WalletHome() {
               <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Copy</span>
             </button>
 
-            <button className="flex flex-col items-center gap-2 group">
+            <button onClick={() => setShowReceiveModal(true)} className="flex flex-col items-center gap-2 group">
               <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
                 <GiReceiveMoney className="w-6 h-6 text-gray-900" />
               </div>
@@ -339,6 +347,14 @@ export default function WalletHome() {
             // Refresh balance after transaction
             fetchBalance(currentNetwork);
           }}
+        />
+
+        {/* Receive Modal */}
+        <ReceiveModal
+          isOpen={showReceiveModal}
+          onClose={() => setShowReceiveModal(false)}
+          currentAccount={currentAccount}
+          currentNetwork={currentNetwork}
         />
 
         {/* Import Wallet Modal */}
