@@ -36,7 +36,7 @@
 
   
 
-## 📖 Overview
+## 📖 0x01 Overview
 
   
 
@@ -48,17 +48,17 @@ Unicorn Wallet is a **non-custodial Ethereum wallet** that provides a secure and
 
   
 
-- 🔐 **Security First**: BIP39 mnemonic generation, AES-256-CBC encryption, PBKDF2 key derivation
+- Security First: BIP39 mnemonic generation, AES-256-CBC encryption, PBKDF2 key derivation
 
-- 🌐 **Multi-Network**: Ethereum, Sepolia, Goerli, BSC, and custom network support
+- Multi-Network: Ethereum, Sepolia, Goerli, BSC, and custom network support
 
-- 🎨 **Modern UI**: Beautiful, responsive design with dark mode
+- Modern UI: Beautiful, responsive design with dark mode
 
-- 🌍 **i18n Ready**: Multi-language support (English, Chinese)
+- i18n Ready: Multi-language support (English, Chinese)
 
-- ⚡ **Fast & Lightweight**: Built with Next.js 15 and React 19
+- Fast & Lightweight: Built with Next.js 15 and React 19
 
-- 🔓 **Non-Custodial**: Your keys, your crypto - we never store your private keys
+- Non-Custodial: Your keys, your crypto - we never store your private keys
 
   
 
@@ -66,81 +66,81 @@ Unicorn Wallet is a **non-custodial Ethereum wallet** that provides a secure and
 
   
 
-## ✨ Features
+## ✨ 0x02 Features
 
   
 
 ### Core Wallet Features
 
-- ✅ Create new HD wallet with BIP39 mnemonic (12 words)
+- Create new HD wallet with BIP39 mnemonic (12 words)
 
-- ✅ Import existing wallet from mnemonic phrase
+- Import existing wallet from mnemonic phrase
 
-- ✅ Multi-account support (HD derivation path: m/44'/60'/0'/0/n)
+- Multi-account support (HD derivation path: m/44'/60'/0'/0/n)
 
-- ✅ Secure local storage with encrypted vault
+- Secure local storage with encrypted vault
 
-- ✅ Lock/Unlock wallet functionality
+- Lock/Unlock wallet functionality
 
-- ✅ Send ETH/BNB transactions
+- Send ETH/BNB transactions
 
-- ✅ Real-time balance updates
+- Real-time balance updates
 
-- ✅ Transaction history tracking
+- Transaction history tracking
 
   
 
 ### Network Support
 
-- 🌐 Ethereum Mainnet
+- Ethereum Mainnet
 
-- 🧪 Sepolia Testnet
+- Sepolia Testnet
 
-- 🧪 Goerli Testnet
+- Goerli Testnet
 
-- 💎 BNB Smart Chain (BSC)
+- BNB Smart Chain (BSC)
 
-- 🧪 BSC Testnet
+- BSC Testnet
 
-- 🏠 Localhost (for development)
+- Localhost (for development)
 
-- ➕ Custom network configuration
+- Custom network configuration
 
   
 
 ### User Experience
 
-- 🎨 Beautiful gradient UI with glassmorphism effects
+- Beautiful gradient UI with glassmorphism effects
 
-- 📱 Responsive design (mobile & desktop)
+- Responsive design (mobile & desktop)
 
-- 🌙 Dark mode by default
+- Dark mode by default
 
-- 🌍 Language switcher (EN/中文)
+- Language switcher (EN/中文)
 
-- 📊 Market data visualization with Recharts
+- Market data visualization with Recharts
 
-- 🔔 Toast notifications for actions
+- Toast notifications for actions
 
-- 👤 Avatar generation for accounts
+- Avatar generation for accounts
 
-- 📋 Copy addresses with one click
+- Copy addresses with one click
 
   
 
 ### Security Features
 
-- 🔐 Client-side encryption (AES-256-CBC)
+- Client-side encryption (AES-256-CBC)
 
-- 🔑 PBKDF2 key derivation (100,000 iterations)
+- PBKDF2 key derivation (100,000 iterations)
 
-- 🛡️ No password requirement for import (optional)
+- No password requirement for import (optional)
 
-- 🔒 Auto-lock on refresh (vault encrypted in localStorage)
+- Auto-lock on refresh (vault encrypted in localStorage)
 
-- ✅ Signature verification for transactions
+- Signature verification for transactions
 
-- 🚫 No server-side key storage
+- No server-side key storage
 
   
 
@@ -148,7 +148,7 @@ Unicorn Wallet is a **non-custodial Ethereum wallet** that provides a secure and
 
   
 
-## 🚀 Installation
+## 🚀 0x03 Installation
 
   
 
@@ -232,7 +232,7 @@ npm start
 
   
 
-## 📱 Usage
+## 📱 0x04 Usage
 
   
 
@@ -298,7 +298,7 @@ npm start
 
   
 
-## 🏗️ Architecture
+## 🏗️ 0x05 Architecture
 
   
 
@@ -502,7 +502,7 @@ unicorn-wallet-next/
 
   
 
-## 🔐 Security
+## 🔐 0x06 Security
 
   
 
@@ -530,31 +530,31 @@ IV: 16 bytes (random)
 
   
 
-✅ **Do's**
+**Do's**
 
-- ✅ Save your mnemonic phrase securely offline
+- Save your mnemonic phrase securely offline
 
-- ✅ Use a strong password for wallet encryption
+- Use a strong password for wallet encryption
 
-- ✅ Verify recipient addresses before sending
+- Verify recipient addresses before sending
 
-- ✅ Keep your browser and dependencies updated
+- Keep your browser and dependencies updated
 
-- ✅ Only use trusted RPC endpoints
+- Only use trusted RPC endpoints
 
   
 
-❌ **Don'ts**
+**Don'ts**
 
-- ❌ Never share your mnemonic phrase or private keys
+- Never share your mnemonic phrase or private keys
 
-- ❌ Don't store mnemonic in screenshots or cloud storage
+- Don't store mnemonic in screenshots or cloud storage
 
-- ❌ Don't use the wallet on public/shared computers
+- Don't use the wallet on public/shared computers
 
-- ❌ Don't trust browser extensions requesting your mnemonic
+- Don't trust browser extensions requesting your mnemonic
 
-- ❌ Don't send transactions to unverified addresses
+- Don't send transactions to unverified addresses
 
   
 
@@ -574,7 +574,7 @@ gitleaks detect --source . --verbose
 
   
 
-**Last Scan:** ✅ No sensitive information found
+**Last Scan:** No sensitive information found
 
   
 
@@ -582,7 +582,7 @@ gitleaks detect --source . --verbose
 
   
 
-## 🧪 Development
+## 🧪 0x07 Development
 
   
 
@@ -666,7 +666,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   
 
-## 📚 API Reference
+## 📚 0x08 API Reference
 
   
 
@@ -752,7 +752,7 @@ class NetworkController {
 
   
 
-## 🌍 Internationalization
+## 🌍 0x09 Internationalization
 
   
 
@@ -760,9 +760,9 @@ class NetworkController {
 
   
 
-- 🇺🇸 English (en-US)
+- English (en-US)
 
-- 🇨🇳 中文 (zh-CN)
+- 中文 (zh-CN)
 
   
 
@@ -782,7 +782,7 @@ class NetworkController {
 
   
 
-## 🤝 Contributing
+## 🤝 0x0A Contributing
 
   
 
@@ -852,27 +852,27 @@ chore: maintenance tasks
 
   
 
-## 📝 Roadmap
+## 📝 0x0B Roadmap
 
   
 
-- [ ] Token support (ERC-20)
+- Token support (ERC-20)
 
-- [ ] NFT gallery (ERC-721/1155)
+- NFT gallery (ERC-721/1155)
 
-- [ ] Hardware wallet integration
+- Hardware wallet integration
 
-- [ ] WalletConnect support
+- WalletConnect support
 
-- [ ] ENS name resolution
+- ENS name resolution
 
-- [ ] Gas price estimation
+- Gas price estimation
 
-- [ ] Multi-signature wallets
+- Multi-signature wallets
 
-- [ ] Mobile app (React Native)
+- Mobile app (React Native)
 
-- [ ] Browser extension
+- Browser extension
 
   
 
@@ -880,7 +880,7 @@ chore: maintenance tasks
 
   
 
-## 📄 License
+## 📄 0x0C License
 
   
 
@@ -892,7 +892,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
   
 
-## 🙏 Acknowledgments
+## 🙏 0x0D Acknowledgments
 
   
 
@@ -912,7 +912,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
   
 
-## 📧 Contact
+## 📧 0x0E Contact
 
   
 
@@ -932,7 +932,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
   
 
-**⭐ Star this repo if you find it helpful!**
+**Star this repo if you find it helpful!**
 
   
 
