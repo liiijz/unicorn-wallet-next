@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 
 /**
  * Market API - 使用 CoinGecko 获取加密货币市场数据
+ * 包含缓存机制，减少 API 调用
  */
 
 interface CoinGeckoMarketData {
@@ -30,10 +31,34 @@ interface MarketData {
   priceHistory: number[];
 }
 
+interface CacheEntry {
+  data: MarketData[];
+  timestamp: number;
+}
+
+// 内存缓存
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL = 60 * 1000; // 60秒缓存时间
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const sortBy = searchParams.get('sortBy') || 'hot';
+    
+    // 检查缓存
+    const cacheKey = `market_${sortBy}`;
+    const cachedEntry = cache.get(cacheKey);
+    const now = Date.now();
+    
+    if (cachedEntry && (now - cachedEntry.timestamp) < CACHE_TTL) {
+      console.log(`[Market API] 使用缓存数据 (${sortBy})`);
+      return NextResponse.json({
+        code: 200,
+        message: 'success',
+        data: cachedEntry.data,
+        cached: true,
+      });
+    }
     
     // CoinGecko API 参数映射
     const sortMapping: Record<string, string> = {
@@ -88,12 +113,19 @@ export async function GET(request: NextRequest) {
       priceHistory: coin.sparkline_in_7d?.price?.slice(-24) || [], // 最近24小时数据
     }));
     
-    console.log(`[Market API] 成功获取 ${marketData.length} 条市场数据`);
+    // 更新缓存
+    cache.set(cacheKey, {
+      data: marketData,
+      timestamp: now,
+    });
+    
+    console.log(`[Market API] 成功获取 ${marketData.length} 条市场数据并缓存`);
     
     return NextResponse.json({
       code: 200,
       message: 'success',
       data: marketData,
+      cached: false,
     });
   } catch (error) {
     console.error('[Market API] 请求失败:', error);
