@@ -25,8 +25,6 @@ export interface Account {
   /** 账户余额（可选，由外部更新） */
   balance?: string;
 
-  /** 创建时间戳 */
-  createdAt: number;
 }
 
 /**
@@ -38,12 +36,9 @@ export type AccountType = 'mnemonic' | 'privateKey' | 'hardware';
  * AccountMetadata - 账户元数据（用于持久化）
  */
 export interface AccountMetadata {
-  /** 账户地址 */
   address: string;
 
   /** 自定义名称 */
   name: string;
 
-  /** 其他自定义数据 */
-  customData?: Record<string, any>;
 }

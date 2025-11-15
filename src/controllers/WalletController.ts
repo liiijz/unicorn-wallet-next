@@ -10,12 +10,12 @@ import type { Network } from "@/types/Network";
 import { networkManager } from "@/services/NetworkManager";
 import { tokenService } from "@/services/TokenService";
 import type { TokenListResponse } from "@/types/Token";
+import { formatAddress } from "@/utils";
 
 class WalletController {
-
   /**
    * 设置钱包状态（增强版）
-   * 
+   *
    * 特性：
    * - 状态变更日志（包含调用栈，仅开发环境）
    * - 事件通知
@@ -85,6 +85,13 @@ class WalletController {
     // 创建初始账户
     const initialAccount = this.createNewAccount(keyring, 0);
 
+    // 更新账户元数据映射（默认名 Account + 序号）
+    const { accountMetadataMap, setAccountMetadata } = useWalletStore.getState();
+    setAccountMetadata(initialAccount.address, {
+      address: initialAccount.address,
+      name: initialAccount.address,
+    });
+
     // 更新 Store (追加到 accounts)
     const { accounts: existingAccounts } = useWalletStore.getState();
     const accounts = [...existingAccounts, initialAccount];
@@ -135,6 +142,29 @@ class WalletController {
     walletEventBus.emit("keyring:imported", { keyrings: allKeyrings });
   }
 
+  private generateAccountsFromKeyrings(keyrings: IKeyring[]): Account[] {
+    // 根据 keyring 地址自动生成 accounts
+    const { accountMetadataMap } = useWalletStore.getState();
+    const accounts: Account[] = [];
+    keyrings.forEach((keyring) => {
+      if (keyring instanceof HDKeyring) {
+        const hdKeyring = keyring as HDKeyring;
+        hdKeyring.wallets.forEach((wallet, idx) => {
+          const name = accountMetadataMap[wallet.address]?.name || "Account";
+          accounts.push({
+            id: wallet.address,
+            address: wallet.address,
+            name: name,
+            type: this.mapKeyringTypeToAccountType(keyring.type),
+            derivationPath: wallet.path,
+            accountIndex: idx,
+          });
+        });
+      }
+    });
+    return accounts;
+  }
+
   /**
    * 解锁钱包
    */
@@ -149,14 +179,8 @@ class WalletController {
       return false;
     }
 
-    // 根据 keyring 地址自动生成 accounts
-    const accounts: Account[] = [];
-    keyrings.forEach((keyring) => {
-      const addresses = keyring.getAddresses();
-      addresses.forEach((address, idx) => {
-        accounts.push(this.createNewAccount(keyring, idx));
-      });
-    });
+    // 根据 keyrings 生成 accounts
+    const accounts = this.generateAccountsFromKeyrings(keyrings);
 
     // 默认选中第一个账户
     const currentAccount = accounts[0] || null;
@@ -208,7 +232,6 @@ class WalletController {
       type: this.mapKeyringTypeToAccountType(keyring.type),
       derivationPath: keyringData.hdPath ? `${keyringData.hdPath}/${accountIndex}` : null,
       accountIndex,
-      createdAt: Date.now(),
     };
   }
 
@@ -267,9 +290,9 @@ class WalletController {
    */
   renameAccount(accountId: string, newName: string): void {
     const { accounts, currentAccount } = useWalletStore.getState();
-    
+
     // 查找账户
-    const accountIndex = accounts.findIndex(acc => acc.id === accountId);
+    const accountIndex = accounts.findIndex((acc) => acc.id === accountId);
     if (accountIndex === -1) {
       throw new Error("Account not found");
     }
@@ -278,7 +301,7 @@ class WalletController {
     const updatedAccounts = [...accounts];
     updatedAccounts[accountIndex] = {
       ...updatedAccounts[accountIndex],
-      name: newName
+      name: newName,
     };
 
     // 更新 Store
@@ -290,10 +313,10 @@ class WalletController {
     }
 
     // 发布事件
-    walletEventBus.emit("account:renamed", { 
-      accountId, 
+    walletEventBus.emit("account:renamed", {
+      accountId,
       newName,
-      account: updatedAccounts[accountIndex]
+      account: updatedAccounts[accountIndex],
     });
   }
 
@@ -332,14 +355,14 @@ class WalletController {
       // 使用 NetworkManager 的 getBalance 方法
       const balanceWei = await networkManager.getBalance(address);
       const balanceEth = ethers.formatEther(balanceWei);
-      
+
       // 格式化为4位小数
       const formattedBalance = parseFloat(balanceEth).toFixed(4);
-      
+
       // 简单的USD估算（TODO: 接入真实价格API）
       const ethPriceUSD = 2000;
       const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
-      
+
       return {
         balance: formattedBalance,
         balanceUSD: usdValue,
@@ -363,7 +386,7 @@ class WalletController {
     try {
       // 获取当前网络的 chainId
       const chainId = await networkManager.getChainId();
-      
+
       // 使用 TokenService 获取 token 列表
       return await tokenService.getTokenList(address, chainId);
     } catch (error) {

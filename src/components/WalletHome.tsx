@@ -25,6 +25,7 @@ import PixelAvatar from './PixelAvatar';
 import ReceiveModal from './ReceiveModal';
 import SendModal from './SendModal';
 import { WalletAssets } from './WalletAssets';
+import { formatAddress } from '@/utils';
 
 /**
  * WalletHome 组件 - 主钱包界面
@@ -50,11 +51,7 @@ export default function WalletHome() {
   const { addNotification } = useNotification();
   const fetchBalanceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 格式化地址显示（显示前6位和后4位）
-  const formatAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+  
 
   // 复制地址到剪贴板
   const copyAddress = async () => {
@@ -197,6 +194,24 @@ export default function WalletHome() {
               <span className="text-lg">${balanceUSD}</span>
               <span className="text-green-400 text-sm">+0.7%</span>
             </div>
+            {/* 地址显示区域 */}
+            {currentAccount?.address && (
+              <div className="flex items-center justify-center mt-4 gap-2">
+                <span className="px-3 py-1 rounded-lg bg-gray-800 text-primary text-base font-mono select-all">
+                  {formatAddress(currentAccount.address)}
+                </span>
+                <span
+                  onClick={copyAddress}
+                  className="bg-gray-700 hover:bg-primary text-white rounded-full px-2 py-1 transition-colors cursor-pointer"
+                  title="复制地址"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="复制地址"
+                >
+                  <IoCopy className="w-4 h-4" />
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons - Send, Receive, Buy, Copy */}
@@ -260,7 +275,7 @@ export default function WalletHome() {
                           </div>
                           <PixelAvatar address={account?.address || ""} size={42} />
                           <div className="text-left">
-                            <div className="font-medium">{account.name}</div>
+                            <div className="font-medium">{account.name.startsWith("0x") ? formatAddress(account.name) : account.name}</div>
                             <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
                           </div>
                         </div>

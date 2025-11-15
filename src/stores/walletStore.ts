@@ -8,6 +8,8 @@ import type { Network } from "@/types/Network";
 import { PRESET_NETWORKS } from "@/types/Network";
 
 interface WalletState {
+    // 账户元数据映射（address -> AccountMetadata）
+    accountMetadataMap: Record<string, import("@/types/Account").AccountMetadata>;
   // 钱包状态（替代 isUnlocked 和 isInitialized）
   walletStatus: WalletStatus;
 
@@ -23,6 +25,8 @@ interface WalletState {
 }
 
 interface WalletActions {
+  setAccountMetadata: (address: string, metadata: import("@/types/Account").AccountMetadata) => void;
+  setAccountMetadataMap: (map: Record<string, import("@/types/Account").AccountMetadata>) => void;
 
   setKeyrings: (keyrings: IKeyring[]) => void;
   setAccounts: (accounts: Account[]) => void;
@@ -47,6 +51,7 @@ export const useWalletStore = create<WalletStore>()(
         password: null,
         currentNetwork: PRESET_NETWORKS[0], // 默认以太坊主网
         customNetworks: [],
+        accountMetadataMap: {},
 
         // setters
         setKeyrings: (keyrings) => set({ keyrings }),
@@ -56,13 +61,19 @@ export const useWalletStore = create<WalletStore>()(
         setWalletStatus: (status) => set({ walletStatus: status }),
         setCurrentNetwork: (network) => set({ currentNetwork: network }),
         setCustomNetworks: (networks) => set({ customNetworks: networks }),
+        setAccountMetadata: (address, metadata) => set((state) => ({
+          accountMetadataMap: {
+            ...state.accountMetadataMap,
+            [address]: metadata,
+          },
+        })),
+        setAccountMetadataMap: (map) => set({ accountMetadataMap: map }),
       }),
       {
         name: "wallet-storage",
         partialize: (state) => ({
           walletStatus: state.walletStatus,
-          accounts: state.accounts,
-          currentAccount: state.currentAccount,
+          accountMetadataMap: state.accountMetadataMap,
         }),
       }
     ),
