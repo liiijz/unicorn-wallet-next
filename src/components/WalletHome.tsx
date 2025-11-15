@@ -82,7 +82,7 @@ export default function WalletHome() {
   const openRenameDialog = (account: Account) => {
     setNewAccountName(account.name);
     setShowRenameDialog(true);
-    setContextMenuAccount(null);
+    // 不立即清空 contextMenuAccount，保证弹窗能正常显示
   };
 
   // 重命名账户
