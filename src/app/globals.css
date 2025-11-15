@@ -14,6 +14,33 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* 自定义动画 */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

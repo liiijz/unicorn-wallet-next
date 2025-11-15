@@ -6,6 +6,7 @@ import { walletController } from "@/controllers/WalletController";
 import Welcome from "@/components/Welcome";
 import Unlock from "@/components/Unlock";
 import WalletHome from "@/components/WalletHome";
+import Splash from "@/components/Splash";
 
 /**
  * 主页面路由逻辑
@@ -19,6 +20,7 @@ import WalletHome from "@/components/WalletHome";
 export default function Home() {
   const { walletStatus } = useWalletStore();
   const [mounted, setMounted] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   // 等待客户端挂载，避免 i18n SSR hydration mismatch
   useEffect(() => {
@@ -36,6 +38,11 @@ export default function Home() {
         </div>
       </div>
     );
+  }
+
+  // Splash 启动动画
+  if (showSplash) {
+    return <Splash onFinish={() => setShowSplash(false)} duration={2000} />;
   }
 
   // 路由逻辑
