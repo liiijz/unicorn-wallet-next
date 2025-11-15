@@ -189,7 +189,7 @@ export default function SendModal({
               <div>
                 <label className="block text-sm text-gray-400 mb-2">From</label>
                 <div className="bg-gray-800 p-4 rounded-lg">
-                  <div className="font-medium text-white">{currentAccount?.name}</div>
+                  <div className="font-medium text-white">{currentAccount?.displayName}</div>
                   <div className="text-sm text-gray-400 mt-1">
                     {currentAccount?.address}
                   </div>
@@ -276,7 +276,7 @@ export default function SendModal({
                 <div className="bg-gray-800 rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">From</span>
-                    <span className="text-white text-sm font-medium">{currentAccount?.name}</span>
+                    <span className="text-white text-sm font-medium">{currentAccount?.displayName}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">To</span>

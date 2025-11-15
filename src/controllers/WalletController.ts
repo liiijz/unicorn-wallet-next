@@ -89,7 +89,7 @@ class WalletController {
     const { accountMetadataMap, setAccountMetadata } = useWalletStore.getState();
     setAccountMetadata(initialAccount.address, {
       address: initialAccount.address,
-      name: initialAccount.address,
+      name: initialAccount.address, // 这里如果 AccountMetadata 需要 name 字段则保留，否则可删
     });
 
     // 更新 Store (追加到 accounts)
@@ -150,11 +150,9 @@ class WalletController {
       if (keyring instanceof HDKeyring) {
         const hdKeyring = keyring as HDKeyring;
         hdKeyring.wallets.forEach((wallet, idx) => {
-          const name = accountMetadataMap[wallet.address]?.name || "Account";
           accounts.push({
             id: wallet.address,
             address: wallet.address,
-            name: name,
             type: this.mapKeyringTypeToAccountType(keyring.type),
             derivationPath: wallet.path,
             accountIndex: idx,
@@ -228,7 +226,6 @@ class WalletController {
     return {
       id: `${keyring.type}-${address}`,
       address,
-      name: `Account ${accountCount + 1}`,
       type: this.mapKeyringTypeToAccountType(keyring.type),
       derivationPath: keyringData.hdPath ? `${keyringData.hdPath}/${accountIndex}` : null,
       accountIndex,
