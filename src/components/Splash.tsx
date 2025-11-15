@@ -55,14 +55,14 @@ const Splash = ({ onFinish, duration = 2000 }: SplashProps) => {
           }`}
         >
           <div className="relative w-32 h-32 mb-4">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-3xl blur-xl opacity-50"></div>
-            <div className="relative w-full h-full bg-[#1a1a2e] rounded-3xl p-4 border border-gray-700/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full blur-2xl opacity-40"></div>
+            <div className="relative w-full h-full flex items-center justify-center">
               <Image
                 src="/images/ic_logo.png"
                 alt="Unicorn Wallet"
                 width={128}
                 height={128}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain drop-shadow-2xl"
                 priority
               />
             </div>
