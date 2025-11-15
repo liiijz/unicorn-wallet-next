@@ -149,14 +149,23 @@ class WalletController {
       return false;
     }
 
-    // 直接使用 Store 中持久化的 accounts (不再重新生成)
-    const { accounts, currentAccount } = useWalletStore.getState();
+    // 根据 keyring 地址自动生成 accounts
+    const accounts: Account[] = [];
+    keyrings.forEach((keyring) => {
+      const addresses = keyring.getAddresses();
+      addresses.forEach((address, idx) => {
+        accounts.push(this.createNewAccount(keyring, idx));
+      });
+    });
 
-    // 更新 Store (恢复 keyrings,保持 accounts 不变)
+    // 默认选中第一个账户
+    const currentAccount = accounts[0] || null;
+
     this.setWalletStatus("unlocked");
     useWalletStore.setState({
       keyrings,
-      currentAccount: currentAccount || accounts[0],
+      accounts,
+      currentAccount,
     });
 
     walletEventBus.emit("keyring:restored", { keyrings });
@@ -251,6 +260,41 @@ class WalletController {
 
     // 返回新创建的账户
     return newAccount;
+  }
+
+  /**
+   * 重命名账户
+   */
+  renameAccount(accountId: string, newName: string): void {
+    const { accounts, currentAccount } = useWalletStore.getState();
+    
+    // 查找账户
+    const accountIndex = accounts.findIndex(acc => acc.id === accountId);
+    if (accountIndex === -1) {
+      throw new Error("Account not found");
+    }
+
+    // 更新账户名称
+    const updatedAccounts = [...accounts];
+    updatedAccounts[accountIndex] = {
+      ...updatedAccounts[accountIndex],
+      name: newName
+    };
+
+    // 更新 Store
+    useWalletStore.setState({ accounts: updatedAccounts });
+
+    // 如果是当前账户，也更新当前账户
+    if (currentAccount?.id === accountId) {
+      useWalletStore.setState({ currentAccount: updatedAccounts[accountIndex] });
+    }
+
+    // 发布事件
+    walletEventBus.emit("account:renamed", { 
+      accountId, 
+      newName,
+      account: updatedAccounts[accountIndex]
+    });
   }
 
   /**

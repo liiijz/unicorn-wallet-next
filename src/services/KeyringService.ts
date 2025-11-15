@@ -4,8 +4,10 @@ import { HDKeyring, HDKeyringOptions } from "@/types/HDKeyring";
 import { IKeyring, KeyringType } from "@/types/Keyring";
 
 export const keyringService = {
-  persistVault(serialized: any[], password: string): void {
-    const encrypted = EncryptionHelper.encrypt(serialized, password);
+  persistVault(keyrings: any[], password: string): void {
+    // 持久化时自动调用 serialize，保证 numberOfAccounts 与实际钱包数量一致
+    const serializedKeyrings = keyrings.map(kr => typeof kr.serialize === 'function' ? kr.serialize() : kr);
+    const encrypted = EncryptionHelper.encrypt(serializedKeyrings, password);
     localStorage.setItem("vault", encrypted);
   },
 
@@ -17,9 +19,8 @@ export const keyringService = {
     }
     // 使用 EncryptionHelper 解密
     try {
-      const decrypted = EncryptionHelper.decrypt(encrypted, password);
-      const krs = JSON.parse(decrypted);
-      console.log("keyrings:", krs);
+      const decryptedJson = EncryptionHelper.decrypt(encrypted, password);
+      const krs = JSON.parse(decryptedJson);
       
       krs.forEach((kr: any) => {
         // 根据 type 创建对应的 Keyring 实例

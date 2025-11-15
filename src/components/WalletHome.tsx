@@ -44,6 +44,9 @@ export default function WalletHome() {
   const [activeTab, setActiveTab] = useState("home");
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [contextMenuAccount, setContextMenuAccount] = useState<Account | null>(null);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [newAccountName, setNewAccountName] = useState("");
   const { addNotification } = useNotification();
   const fetchBalanceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -66,15 +69,52 @@ export default function WalletHome() {
     }
   };
 
+  // 复制指定账户地址
+  const copyAccountAddress = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      addNotification("success", "地址已复制到剪贴板");
+      setContextMenuAccount(null);
+    } catch (error) {
+      console.error("Failed to copy address:", error);
+      addNotification("error", "复制失败");
+    }
+  };
+
+  // 打开重命名对话框
+  const openRenameDialog = (account: Account) => {
+    setNewAccountName(account.name);
+    setShowRenameDialog(true);
+    setContextMenuAccount(null);
+  };
+
+  // 重命名账户
+  const handleRenameAccount = () => {
+    if (contextMenuAccount && newAccountName.trim()) {
+      try {
+        walletController.renameAccount(contextMenuAccount.id, newAccountName.trim());
+        addNotification("success", "账户已重命名");
+        setShowRenameDialog(false);
+        setNewAccountName("");
+      } catch (error) {
+        console.error("Failed to rename account:", error);
+        addNotification("error", "重命名失败");
+      }
+    }
+  };
+
   // 处理添加以太坊账户
   const handleAddEthereumAccount = () => {
+    console.log("🎯 handleAddEthereumAccount called");
     setShowAddAccountModal(false);
     try {
       const newAccount = walletController.addAccount();
       setCurrentAccount(newAccount);
-      console.log("New account created:", newAccount);
+      console.log("✅ New account created:", newAccount);
+      addNotification("success", `账户 ${newAccount.name} 已创建`);
     } catch (error) {
-      console.error("Failed to add account:", error);
+      console.error("❌ Failed to add account:", error);
+      addNotification("error", "创建账户失败");
     }
   };
 
@@ -194,31 +234,73 @@ export default function WalletHome() {
           {showAccountSelector && (
             <>
               {/* Backdrop */}
-              <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowAccountSelector(false)} />
+              <div className="fixed inset-0 bg-black/50 z-50" onClick={() => {
+                setShowAccountSelector(false);
+                setContextMenuAccount(null);
+              }} />
               {/* Dropdown */}
               <div className="absolute top-20 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
                 <div className="p-4 space-y-2">
                   {allAccounts.map((account: Account) => (
-                    <button
-                      key={account.id}
-                      onClick={() => {
-                        setCurrentAccount(account);
-                        setShowAccountSelector(false);
-                      }}
-                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${currentAccount?.id === account.id ? "bg-[#00F4C8]/20 border border-[#00F4C8]/50" : "bg-gray-800 hover:bg-gray-700"}`}>
-                      <div className="flex items-center gap-3">
-                        <PixelAvatar address={account?.address || ""} size={42} />
-                        <div className="text-left">
-                          <div className="font-medium">{account.name}</div>
-                          <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
+                    <div key={account.id} className="relative">
+                      <button
+                        onClick={() => {
+                          setCurrentAccount(account);
+                          setShowAccountSelector(false);
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-gray-700">
+                        <div className="flex items-center gap-3">
+                          {/* 选中指示器 */}
+                          <div className="w-5 flex items-center justify-center">
+                            {currentAccount?.id === account.id && (
+                              <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                          <PixelAvatar address={account?.address || ""} size={42} />
+                          <div className="text-left">
+                            <div className="font-medium">{account.name}</div>
+                            <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
+                          </div>
                         </div>
-                      </div>
-                      {currentAccount?.id === account.id && (
-                        <svg className="w-5 h-5 text-[#00F4C8]" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setContextMenuAccount(contextMenuAccount?.id === account.id ? null : account);
+                            }}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-full transition-all hover:scale-110 active:scale-95">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </button>
+                      
+                      {/* Context Menu */}
+                      {contextMenuAccount?.id === account.id && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 border border-gray-700 rounded-xl shadow-xl z-[70] overflow-hidden">
+                          <button
+                            onClick={() => openRenameDialog(account)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Rename Wallet</span>
+                          </button>
+                          <button
+                            onClick={() => copyAccountAddress(account.address)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left">
+                            <IoCopy className="w-5 h-5" />
+                            <div>
+                              <div>Copy Address</div>
+                              <div className="text-xs text-gray-400">{formatAddress(account.address)}</div>
+                            </div>
+                          </button>
+                        </div>
                       )}
-                    </button>
+                    </div>
                   ))}
                 </div>
                 <div className="border-t border-gray-800 p-4">
@@ -356,6 +438,52 @@ export default function WalletHome() {
           currentAccount={currentAccount}
           currentNetwork={currentNetwork}
         />
+
+        {/* Rename Account Dialog */}
+        {showRenameDialog && contextMenuAccount && (
+          <>
+            <div className="fixed inset-0 bg-black/70 z-50 backdrop-blur-sm" onClick={() => setShowRenameDialog(false)} />
+            <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-gray-900 rounded-2xl shadow-2xl z-50 border border-gray-800">
+              <div className="flex items-center justify-between p-6 border-b border-gray-800">
+                <h2 className="text-lg font-semibold">重命名账户</h2>
+                <button
+                  onClick={() => setShowRenameDialog(false)}
+                  className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">账户名称</label>
+                  <input
+                    type="text"
+                    value={newAccountName}
+                    onChange={(e) => setNewAccountName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRenameAccount()}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
+                    placeholder="输入新的账户名称"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowRenameDialog(false)}
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">
+                    取消
+                  </button>
+                  <button
+                    onClick={handleRenameAccount}
+                    disabled={!newAccountName.trim()}
+                    className="flex-1 bg-primary hover:bg-primary/80 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    确认
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Import Wallet Modal */}
         {showImportWalletModal && <ImportWalletModal onClose={() => setShowImportWalletModal(false)} />}

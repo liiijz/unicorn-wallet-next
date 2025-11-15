@@ -69,6 +69,13 @@ export type WalletEvents = {
     account: Account;
   };
 
+  /** 账户重命名事件 */
+  "account:renamed": {
+    accountId: string;
+    newName: string;
+    account: Account;
+  };
+
   "network:changed": { network: Network };
   "keyring:providerUpdated": { network: Network; provider: ethers.JsonRpcProvider };
 
