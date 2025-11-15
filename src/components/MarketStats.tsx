@@ -111,24 +111,25 @@ const MarketStats = () => {
             const { data, yDomain } = prepareChartData(item.priceHistory);
 
             return (
-              <div key={item.code} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div key={item.code} className="flex items-center justify-between gap-2">
+                {/* 图标和名称 */}
+                <div className="flex items-center gap-2 min-w-0" style={{ width: '140px' }}>
                   {item.icon ? (
-                    <div className="w-10 h-10 overflow-hidden flex items-center justify-center">
-                      <img src={item.icon} alt={item.code} className="w-full h-full object-cover" />
+                    <div className="w-8 h-8 flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gray-800">
+                      <img src={item.icon} alt={item.code} className="w-8 h-8 object-contain" />
                     </div>
                   ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-sm">{item.code.charAt(0).toUpperCase()}</div>
+                    <div className="w-8 h-8 flex-shrink-0 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-xs">{item.code.charAt(0).toUpperCase()}</div>
                   )}
-                  <div>
-                    <div className="text-white font-medium">{item.name}</div>
-                    <div className="text-gray-400 text-xs">{item.code.toUpperCase()}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-white font-medium text-sm truncate" title={item.name}>{item.name}</div>
+                    <div className="text-gray-400 text-xs truncate">{item.code.toUpperCase()}</div>
                   </div>
                 </div>
 
-                {/* Mini chart - Recharts version */}
-                <div className="flex-1 mx-4 h-8">
-                  <ResponsiveContainer width="100%" height={32}>
+                {/* K线图 */}
+                <div className="flex-shrink-0" style={{ width: '80px' }}>
+                  <ResponsiveContainer width={80} height={32}>
                     <LineChart data={data} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
                       <YAxis domain={yDomain} hide />
                       <Line type="monotone" dataKey="price" stroke={chartColor} strokeWidth={1.5} dot={false} isAnimationActive={false} />
@@ -136,13 +137,14 @@ const MarketStats = () => {
                   </ResponsiveContainer>
                 </div>
 
-                <div className="text-right">
-                  <div className="text-white font-medium">{formatPrice(item.price)}</div>
-                  <div className={`text-xs flex items-center gap-1 ${isPositive ? "text-green-400" : "text-red-400"}`}>
-                    <svg className={`w-3 h-3 ${!isPositive && "rotate-180"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {/* 价格和涨跌幅 */}
+                <div className="text-right flex-shrink-0" style={{ width: '100px' }}>
+                  <div className="text-white font-medium text-sm truncate">{formatPrice(item.price)}</div>
+                  <div className={`text-xs flex items-center justify-end gap-1 ${isPositive ? "text-green-400" : "text-red-400"}`}>
+                    <svg className={`w-3 h-3 flex-shrink-0 ${!isPositive && "rotate-180"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
-                    {Math.abs(item.changeRate).toFixed(2)}%
+                    <span className="truncate">{Math.abs(item.changeRate).toFixed(2)}%</span>
                   </div>
                 </div>
               </div>
