@@ -11,24 +11,33 @@ interface SplashProps {
 const Splash = ({ onFinish, duration = 2000 }: SplashProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [animate, setAnimate] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
     // 启动动画
     setTimeout(() => setAnimate(true), 100);
 
+    // 开始淡出
+    const fadeTimer = setTimeout(() => {
+      setFadeOut(true);
+    }, duration - 300);
+
     // 延迟后隐藏 splash
-    const timer = setTimeout(() => {
+    const hideTimer = setTimeout(() => {
       setIsVisible(false);
       onFinish?.();
     }, duration);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
   }, [duration, onFinish]);
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
       {/* 背景动画效果 */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
@@ -46,8 +55,8 @@ const Splash = ({ onFinish, duration = 2000 }: SplashProps) => {
           }`}
         >
           <div className="relative w-32 h-32 mb-4">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-3xl blur-xl opacity-50 animate-pulse"></div>
-            <div className="relative w-full h-full bg-gray-900/50 backdrop-blur-sm rounded-3xl p-4 border border-gray-800">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative w-full h-full bg-[#1a1a2e] rounded-3xl p-4 border border-gray-700/50">
               <Image
                 src="/images/ic_logo.png"
                 alt="Unicorn Wallet"
