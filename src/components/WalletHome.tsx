@@ -194,7 +194,6 @@ export default function WalletHome() {
             </div>
             <div className="flex items-center justify-center gap-2 text-gray-400">
               <span className="text-lg">${balanceUSD}</span>
-              <span className="text-green-400 text-sm">+0.7%</span>
             </div>
             {/* 地址显示区域 */}
             {currentAccount?.address && (
