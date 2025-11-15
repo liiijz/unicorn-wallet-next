@@ -33,7 +33,7 @@ import { formatAddress } from '@/utils';
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, setCurrentAccount, accounts } = useWalletStore();
+  const { currentAccount, setCurrentAccount, accounts, accountMetadataMap } = useWalletStore();
   const allAccounts = accounts;
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -275,7 +275,11 @@ export default function WalletHome() {
                           </div>
                           <PixelAvatar address={account?.address || ""} size={42} />
                           <div className="text-left">
-                            <div className="font-medium">{account.name.startsWith("0x") ? formatAddress(account.name) : account.name}</div>
+                            <div className="font-medium">
+                              {accountMetadataMap[account.address]?.name
+                                ? accountMetadataMap[account.address].name
+                                : (account.name.startsWith("0x") ? formatAddress(account.name) : account.name)}
+                            </div>
                             <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
                           </div>
                         </div>

@@ -10,9 +10,6 @@ export interface Account {
   /** 以太坊地址 (checksummed) */
   address: string;
 
-  /** 账户昵称（用户可自定义） */
-  name: string;
-
   /** 账户类型 */
   type: AccountType;
 
@@ -24,13 +21,12 @@ export interface Account {
 
   /** 账户余额（可选，由外部更新） */
   balance?: string;
-
 }
 
 /**
  * AccountType - 账户类型枚举
  */
-export type AccountType = 'mnemonic' | 'privateKey' | 'hardware';
+export type AccountType = "mnemonic" | "privateKey" | "hardware";
 
 /**
  * AccountMetadata - 账户元数据（用于持久化）
@@ -40,5 +36,4 @@ export interface AccountMetadata {
 
   /** 自定义名称 */
   name: string;
-
 }

@@ -289,34 +289,26 @@ class WalletController {
    * 重命名账户
    */
   renameAccount(accountId: string, newName: string): void {
-    const { accounts, currentAccount } = useWalletStore.getState();
+    const { accounts, accountMetadataMap, setAccountMetadata } = useWalletStore.getState();
 
     // 查找账户
-    const accountIndex = accounts.findIndex((acc) => acc.id === accountId);
-    if (accountIndex === -1) {
+    const account = accounts.find((acc) => acc.id === accountId);
+    if (!account) {
       throw new Error("Account not found");
     }
 
-    // 更新账户名称
-    const updatedAccounts = [...accounts];
-    updatedAccounts[accountIndex] = {
-      ...updatedAccounts[accountIndex],
+    // 更新账户元数据映射
+    const oldMeta = accountMetadataMap[account.address] || {};
+    setAccountMetadata(account.address, {
+      ...oldMeta,
       name: newName,
-    };
-
-    // 更新 Store
-    useWalletStore.setState({ accounts: updatedAccounts });
-
-    // 如果是当前账户，也更新当前账户
-    if (currentAccount?.id === accountId) {
-      useWalletStore.setState({ currentAccount: updatedAccounts[accountIndex] });
-    }
+    });
 
     // 发布事件
     walletEventBus.emit("account:renamed", {
       accountId,
       newName,
-      account: updatedAccounts[accountIndex],
+      account: { ...account, name: newName },
     });
   }
 
