@@ -62,6 +62,8 @@
     "title": "Backup Recovery Phrase",
     "backupTitle": "Write Down Your Recovery Phrase",
     "warning": "Please write down the following words in order and keep them safe. Never share your recovery phrase with anyone, or you may lose all your assets.",
+    "copyToClipboard": "Copy to clipboard",
+    "copied": "Copied",
     "confirmButton": "I Have Written It Down"
   },
   "unlock": {

@@ -1,5 +1,6 @@
 import { useWalletStore } from "@/stores";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 interface WalletCreatedProps {
   mnemonic: string;
@@ -9,6 +10,17 @@ interface WalletCreatedProps {
 const MnemonicModal = ({ mnemonic, onClose }: WalletCreatedProps) => {
 
   const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(mnemonic);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
   
   // 判断 mnemonic 是否为空或空字符串
   if (!mnemonic || mnemonic.trim() === "") {
@@ -51,6 +63,19 @@ const MnemonicModal = ({ mnemonic, onClose }: WalletCreatedProps) => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Copy to Clipboard Link */}
+        <div className="flex items-center justify-center mb-6">
+          <button
+            onClick={handleCopyToClipboard}
+            className="flex items-center gap-2 text-blue-500 hover:text-blue-400 transition-colors font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            {copied ? t("mnemonicModal.copied") : t("mnemonicModal.copyToClipboard")}
+          </button>
         </div>
 
         {/* Confirm Button */}
