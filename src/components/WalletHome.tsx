@@ -8,6 +8,7 @@ import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 import { GiReceiveMoney } from "react-icons/gi";
 import { IoIosSend } from "react-icons/io";
 import { MdShoppingCart } from "react-icons/md";
+import { IoCopy } from "react-icons/io5";
 import { useNotification } from "./Notification";
 import { WalletAssets } from "./WalletAssets";
 import { walletEventBus } from "@/events/WalletEvents";
@@ -41,15 +42,19 @@ export default function WalletHome() {
   // 格式化地址显示（显示前6位和后4位）
   const formatAddress = (address: string) => {
     if (!address) return "";
-    return `${address.slice(0, 20)}...${address.slice(-4)}`;
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   // 复制地址到剪贴板
-  const copyAddress = () => {
+  const copyAddress = async () => {
     if (currentAccount?.address) {
-      navigator.clipboard.writeText(currentAccount.address);
-      // TODO: 显示提示消息
-      alert("地址已复制到剪贴板");
+      try {
+        await navigator.clipboard.writeText(currentAccount.address);
+        addNotification("success", "地址已复制到剪贴板");
+      } catch (error) {
+        console.error("Failed to copy address:", error);
+        addNotification("error", "复制失败");
+      }
     }
   };
 
@@ -146,21 +151,34 @@ export default function WalletHome() {
             </div>
           </div>
 
-          {/* Action Buttons - Send, Receive, Buy */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <button onClick={() => setShowSendModal(true)} className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
-              <IoIosSend className="w-5 h-5" />
-              <span className="font-medium">Send</span>
+          {/* Action Buttons - Send, Receive, Buy, Copy */}
+          <div className="flex items-center justify-center gap-6 mb-8">
+            <button onClick={copyAddress} className="flex flex-col items-center gap-2 group">
+              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
+                <IoCopy className="w-6 h-6 text-gray-900" />
+              </div>
+              <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Copy</span>
             </button>
 
-            <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
-              <GiReceiveMoney className="w-5 h-5" />
-              <span className="font-medium">Receive</span>
+            <button className="flex flex-col items-center gap-2 group">
+              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
+                <GiReceiveMoney className="w-6 h-6 text-gray-900" />
+              </div>
+              <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Receive</span>
             </button>
 
-            <button className="flex items-center gap-2 bg-gray-800/60 hover:bg-gray-800 px-6 py-3 rounded-xl transition-colors">
-              <MdShoppingCart className="w-5 h-5" />
-              <span className="font-medium">Buy</span>
+            <button onClick={() => setShowSendModal(true)} className="flex flex-col items-center gap-2 group">
+              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
+                <IoIosSend className="w-6 h-6 text-gray-900" />
+              </div>
+              <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Send</span>
+            </button>
+
+            <button className="flex flex-col items-center gap-2 group">
+              <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
+                <MdShoppingCart className="w-6 h-6 text-gray-900" />
+              </div>
+              <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Buy</span>
             </button>
           </div>
 
