@@ -239,14 +239,7 @@ class WalletController {
    * 更新账户名称
    */
   updateAccountName(address: string, name: string): void {
-    const { accounts } = useWalletStore.getState();
-    const account = accounts.find((acc) => acc.address.toLowerCase() === address.toLowerCase());
-
-    if (account) {
-      account.name = name;
-      useWalletStore.setState({ accounts: [...accounts] });
-      // 账户已通过 Zustand persist 自动持久化,无需手动保存
-    }
+    // 账户名已统一走 accountMetadataMap，无需直接修改 Account 对象
   }
 
   /**
@@ -304,11 +297,10 @@ class WalletController {
       name: newName,
     });
 
-    // 发布事件
+    // 发布事件（不再传递 name 字段，前端应从 accountMetadataMap 获取最新名称）
     walletEventBus.emit("account:renamed", {
       accountId,
       newName,
-      account: { ...account, name: newName },
     });
   }
 

@@ -108,8 +108,9 @@ export default function WalletHome() {
     try {
       const newAccount = walletController.addAccount();
       setCurrentAccount(newAccount);
+      const newName = accountMetadataMap[newAccount.address]?.name || formatAddress(newAccount.address);
       console.log("✅ New account created:", newAccount);
-      addNotification("success", `账户 ${newAccount.name} 已创建`);
+      addNotification("success", `账户 ${newName} 已创建`);
     } catch (error) {
       console.error("❌ Failed to add account:", error);
       addNotification("error", "创建账户失败");
@@ -279,7 +280,7 @@ export default function WalletHome() {
                             <div className="font-medium">
                               {accountMetadataMap[account.address]?.name
                                 ? accountMetadataMap[account.address].name
-                                : (account.name.startsWith("0x") ? formatAddress(account.name) : account.name)}
+                                : formatAddress(account.address)}
                             </div>
                             <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
                           </div>

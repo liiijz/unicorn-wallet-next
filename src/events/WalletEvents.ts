@@ -73,7 +73,6 @@ export type WalletEvents = {
   "account:renamed": {
     accountId: string;
     newName: string;
-    account: Account;
   };
 
   "network:changed": { network: Network };

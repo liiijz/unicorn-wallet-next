@@ -10,7 +10,7 @@ interface ReceiveModalProps {
   onClose: () => void;
   currentAccount: {
     address: string;
-    name: string;
+    displayName?: string;
   } | null;
   currentNetwork: {
     name: string;
@@ -69,7 +69,7 @@ export default function ReceiveModal({
       if (navigator.share) {
         await navigator.share({
           title: "我的钱包地址",
-          text: `${currentAccount.name}\n${currentAccount.address}`,
+          text: `${currentAccount.displayName || ''}\n${currentAccount.address}`,
         });
       } else {
         // 如果不支持分享，则复制地址
@@ -96,7 +96,7 @@ export default function ReceiveModal({
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
           <div>
             <h2 className="text-xl font-semibold">接收 {currentNetwork.symbol}</h2>
-            <p className="text-sm text-gray-400 mt-1">{currentAccount.name}</p>
+            <p className="text-sm text-gray-400 mt-1">{currentAccount.displayName || ''}</p>
           </div>
           <button
             onClick={onClose}
