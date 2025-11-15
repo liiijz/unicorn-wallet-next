@@ -444,7 +444,7 @@ export default function WalletHome() {
           onClose={() => setShowSendModal(false)}
           currentAccount={currentAccount ? {
             address: currentAccount.address,
-            displayName: accountMetadataMap[currentAccount.address]?.name || undefined
+            displayName: accountMetadataMap[currentAccount.address]?.name || currentAccount.address
           } : null}
           currentNetwork={currentNetwork}
           balance={balance}
