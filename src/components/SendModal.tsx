@@ -4,29 +4,17 @@ import React, { useState } from "react";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/walletStore";
 import { transactionController } from "@/controllers";
+import { Account } from "@/types/Account";
+import { Network } from "@/types/Network";
 
 interface SendModalProps {
-  isOpen: boolean;
   onClose: () => void;
-  currentAccount: {
-    address: string;
-    displayName?: string;
-  } | null;
-  currentNetwork: {
-    name: string;
-    symbol: string;
-    rpcUrl: string;
-    chainId: number;
-  };
   balance: string;
   onTransactionComplete?: (txHash: string) => void;
 }
 
 export default function SendModal({
-  isOpen,
   onClose,
-  currentAccount,
-  currentNetwork,
   balance,
   onTransactionComplete,
 }: SendModalProps) {
@@ -37,8 +25,9 @@ export default function SendModal({
   const [txHash, setTxHash] = useState("");
   const [step, setStep] = useState<"input" | "confirm" | "processing" | "success">("input");
   const [estimatedGas, setEstimatedGas] = useState("0.000021");
+  const { currentAccount, currentNetwork, accountMetadataMap } = useWalletStore();
 
-  if (!isOpen) return null;
+  const displayName = accountMetadataMap[currentAccount?.address || ""]?.name || "Unnamed Account";
 
   // Validate Ethereum address
   const isValidAddress = (address: string): boolean => {
@@ -189,7 +178,7 @@ export default function SendModal({
               <div>
                 <label className="block text-sm text-gray-400 mb-2">From</label>
                 <div className="bg-gray-800 p-4 rounded-lg">
-                  <div className="font-medium text-white">{currentAccount?.displayName}</div>
+                  <div className="font-medium text-white text-ellipsis overflow-hidden whitespace-nowrap">{displayName}</div>
                   <div className="text-sm text-gray-400 mt-1">
                     {currentAccount?.address}
                   </div>
@@ -276,7 +265,7 @@ export default function SendModal({
                 <div className="bg-gray-800 rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">From</span>
-                    <span className="text-white text-sm font-medium">{currentAccount?.displayName}</span>
+                    <span className="text-white text-sm font-medium">{displayName}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400 text-sm">To</span>

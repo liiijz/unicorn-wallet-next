@@ -439,21 +439,15 @@ export default function WalletHome() {
         </main>
 
         {/* Send Modal */}
-        <SendModal
-          isOpen={showSendModal}
+        {showSendModal && (<SendModal
           onClose={() => setShowSendModal(false)}
-          currentAccount={currentAccount ? {
-            address: currentAccount.address,
-            displayName: accountMetadataMap[currentAccount.address]?.name || currentAccount.address
-          } : null}
-          currentNetwork={currentNetwork}
           balance={balance}
           onTransactionComplete={(txHash) => {
             console.log("Transaction completed:", txHash);
             // Refresh balance after transaction
             fetchBalance(currentNetwork);
           }}
-        />
+        />)}
 
         {/* Receive Modal */}
         <ReceiveModal
