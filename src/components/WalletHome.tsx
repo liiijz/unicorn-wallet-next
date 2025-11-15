@@ -442,7 +442,10 @@ export default function WalletHome() {
         <SendModal
           isOpen={showSendModal}
           onClose={() => setShowSendModal(false)}
-          currentAccount={currentAccount}
+          currentAccount={currentAccount ? {
+            address: currentAccount.address,
+            displayName: accountMetadataMap[currentAccount.address]?.name || undefined
+          } : null}
           currentNetwork={currentNetwork}
           balance={balance}
           onTransactionComplete={(txHash) => {

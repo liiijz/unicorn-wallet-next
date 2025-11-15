@@ -10,7 +10,7 @@ interface SendModalProps {
   onClose: () => void;
   currentAccount: {
     address: string;
-    name: string;
+    displayName?: string;
   } | null;
   currentNetwork: {
     name: string;
