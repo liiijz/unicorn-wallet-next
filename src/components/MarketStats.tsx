@@ -53,8 +53,6 @@ const MarketStats = () => {
 
   // 处理市场标签切换
   const handleMarketTabChange = (tab: string) => {
-    setSelectedMarketTab(tab);
-
     const sortByMap: Record<string, string> = {
       "24 hrs": "24hrs",
       Hot: "hot",
@@ -63,7 +61,9 @@ const MarketStats = () => {
       Loss: "loss",
       "Top Gain": "topGain",
     };
-    fetchMarketData(sortByMap[tab] || tab.toLowerCase());
+    const sortBy = sortByMap[tab] || tab.toLowerCase();
+    setSelectedMarketTab(sortBy);
+    fetchMarketData(sortBy);
   };
 
   // 获取市场数据
@@ -89,11 +89,30 @@ const MarketStats = () => {
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-4 overflow-x-auto">
-        {["24 hrs", "Hot", "Profit", "Rising", "Loss", "Top Gain"].map((tab) => (
-          <button key={tab} onClick={() => handleMarketTabChange(tab)} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedMarketTab === tab.toLowerCase() || (tab === "Hot" && selectedMarketTab === "hot") ? "bg-gray-800 text-white" : "bg-transparent text-gray-400 hover:bg-gray-800/50"}`}>
-            {tab}
-          </button>
-        ))}
+        {["24 hrs", "Hot", "Profit", "Rising", "Loss", "Top Gain"].map((tab) => {
+          const sortByMap: Record<string, string> = {
+            "24 hrs": "24hrs",
+            Hot: "hot",
+            Profit: "profit",
+            Rising: "rising",
+            Loss: "loss",
+            "Top Gain": "topGain",
+          };
+          const tabValue = sortByMap[tab] || tab.toLowerCase();
+          const isActive = selectedMarketTab === tabValue;
+          
+          return (
+            <button 
+              key={tab} 
+              onClick={() => handleMarketTabChange(tab)} 
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                isActive ? "bg-gray-800 text-white" : "bg-transparent text-gray-400 hover:bg-gray-800/50"
+              }`}
+            >
+              {tab}
+            </button>
+          );
+        })}
       </div>
 
       {/* Market Items - Responsive Grid */}
