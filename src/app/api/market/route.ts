@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fetch from 'node-fetch';
 
 /**
  * Market API - 使用 CoinGecko 获取加密货币市场数据
@@ -77,22 +76,13 @@ export async function GET(request: NextRequest) {
     
     console.log(`[Market API] 请求 CoinGecko: ${coingeckoUrl}`);
     
-    // 代理支持（如果需要）
-    const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-    const fetchOptions: any = {
+    // 调用 CoinGecko API
+    const response = await fetch(coingeckoUrl, {
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0',
       },
-    };
-    
-    if (proxyUrl) {
-      const { HttpsProxyAgent } = await import('https-proxy-agent');
-      fetchOptions.agent = new HttpsProxyAgent(proxyUrl);
-      console.log(`[Market API] 使用代理: ${proxyUrl}`);
-    }
-    
-    const response = await fetch(coingeckoUrl, fetchOptions);
+    });
     
     if (!response.ok) {
       throw new Error(`CoinGecko API error: ${response.status}`);
