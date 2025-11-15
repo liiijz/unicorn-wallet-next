@@ -91,17 +91,27 @@ export async function GET(request: NextRequest) {
     const data = await response.json() as CoinGeckoMarketData[];
     
     // 转换为我们的数据格式
-    const marketData: MarketData[] = data.map(coin => ({
-      symbol: coin.symbol,
-      name: coin.name,
-      code: coin.symbol,
-      icon: coin.image,
-      price: coin.current_price,
-      change24h: coin.current_price * (coin.price_change_percentage_24h / 100),
-      changeRate: coin.price_change_percentage_24h,
-      volume: coin.total_volume,
-      priceHistory: coin.sparkline_in_7d?.price?.slice(-24) || [], // 最近24小时数据
-    }));
+    const marketData: MarketData[] = data.map(coin => {
+      // 从7天数据中采样8-10个点，让曲线更平滑
+      const fullHistory = coin.sparkline_in_7d?.price || [];
+      const sampleSize = 12;
+      const step = Math.floor(fullHistory.length / sampleSize);
+      const priceHistory = step > 0 
+        ? Array.from({ length: sampleSize }, (_, i) => fullHistory[i * step])
+        : fullHistory.slice(-sampleSize);
+      
+      return {
+        symbol: coin.symbol,
+        name: coin.name,
+        code: coin.symbol,
+        icon: coin.image,
+        price: coin.current_price,
+        change24h: coin.current_price * (coin.price_change_percentage_24h / 100),
+        changeRate: coin.price_change_percentage_24h,
+        volume: coin.total_volume,
+        priceHistory,
+      };
+    });
     
     // 更新缓存
     cache.set(cacheKey, {

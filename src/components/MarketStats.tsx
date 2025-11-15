@@ -151,7 +151,16 @@ const MarketStats = () => {
                   <ResponsiveContainer width={80} height={32}>
                     <LineChart data={data} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
                       <YAxis domain={yDomain} hide />
-                      <Line type="monotone" dataKey="price" stroke={chartColor} strokeWidth={1.5} dot={false} isAnimationActive={false} />
+                      <Line 
+                        type="monotoneX" 
+                        dataKey="price" 
+                        stroke={chartColor} 
+                        strokeWidth={2} 
+                        dot={false} 
+                        isAnimationActive={false}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
