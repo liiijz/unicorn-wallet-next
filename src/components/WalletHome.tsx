@@ -433,8 +433,8 @@ export default function WalletHome() {
                           </svg>
                         </div>
                         <div className="flex flex-col items-start">
-                          <span className="text-white font-medium">{t("home.createNewAccountTitle")}</span>
-                          <span className="text-xs text-gray-400 mt-1">{t("home.createNewAccountSubtitle")}</span>
+                          <span className="text-white font-medium text-left">{t("home.createNewAccountTitle")}</span>
+                          <span className="text-xs text-gray-400 mt-1 text-left">{t("home.createNewAccountSubtitle")}</span>
                         </div>
                       </button>
                       {/* Keyring Selector 弹窗 */}
@@ -490,7 +490,7 @@ export default function WalletHome() {
                       </svg>
                     </div>
                     <div className="flex flex-col items-start">
-                      <span className="text-white font-medium">{t("home.importWalletFromPhraseTitle")}</span>
+                      <span className="text-white font-medium text-left">{t("home.importWalletFromPhraseTitle")}</span>
                       <span className="text-xs text-gray-400 mt-1 text-left">{t("home.importWalletFromPhraseSubtitle")}</span>
                     </div>
                   </button>
