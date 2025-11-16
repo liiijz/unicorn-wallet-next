@@ -73,7 +73,7 @@ class WalletController {
   /**
    * 创建新钱包
    */
-  createNewWallet(password: string): string {
+  createNewAccount(password: string): string {
     useWalletStore.setState({ password });
 
     // 创建 HD Keyring (默认创建 1 个地址)

@@ -35,7 +35,7 @@ i18n
       },
     },
     // 默认语言
-    fallbackLng: 'zh-CN',
+    fallbackLng: 'en-US',
     // 支持的语言
     supportedLngs: Object.keys(SUPPORTED_LANGUAGES),
     // 调试模式（开发环境）

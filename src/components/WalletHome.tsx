@@ -396,7 +396,7 @@ export default function WalletHome() {
                       setShowAddAccountModal(true);
                     }}
                     className="base-button">
-                    Add Wallet
+                    {t("home.addWalletTitle")}
                   </button>
                 </div>
               </div>
@@ -433,8 +433,8 @@ export default function WalletHome() {
                           </svg>
                         </div>
                         <div className="flex flex-col items-start">
-                          <span className="text-white font-medium">{t("home.createNewWalletTitle")}</span>
-                          <span className="text-xs text-gray-400 mt-1">{t("home.createNewWalletSubtitle")}</span>
+                          <span className="text-white font-medium">{t("home.createNewAccountTitle")}</span>
+                          <span className="text-xs text-gray-400 mt-1">{t("home.createNewAccountSubtitle")}</span>
                         </div>
                       </button>
                       {/* Keyring Selector 弹窗 */}
@@ -446,7 +446,7 @@ export default function WalletHome() {
                             <div className="space-y-2">
                               {keyrings.map((kr, idx) => (
                                 <button key={idx} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${selectedKeyringIndex === idx ? "bg-primary text-black" : "hover:bg-gray-800"}`} onClick={() => setSelectedKeyringIndex(idx)}>
-                                  <span className="font-medium">{kr.type}</span>
+                                  <span className="font-medium">{kr.type} {idx+1}</span>
                                   <span className="text-xs text-gray-400 ml-2">{kr.getAddresses().length} accounts</span>
                                 </button>
                               ))}
@@ -471,8 +471,8 @@ export default function WalletHome() {
                         </svg>
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="text-white font-medium">{t("home.createNewWalletTitle")}</span>
-                        <span className="text-xs text-gray-400 mt-1">{t("home.createNewWalletSubtitle")}</span>
+                        <span className="text-white font-medium">{t("home.createNewAccountTitle")}</span>
+                        <span className="text-xs text-gray-400 mt-1">{t("home.createNewAccountSubtitle")}</span>
                       </div>
                     </button>
                   )}

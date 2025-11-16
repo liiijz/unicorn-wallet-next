@@ -96,11 +96,7 @@
     "viewAll": "查看全部",
     "noAssets": "暂无其他资产",
     "noActivity": "暂无交易记录",
-    "addressCopied": "地址已复制到剪贴板",
-    "createNewWalletTitle": "Create a new wallet",
-    "createNewWalletSubtitle": "Create a new wallet base on your seed phrases",
-    "importWalletFromPhraseTitle": "Import a new wallet using a mnemonic phrase",
-    "importWalletFromPhraseSubtitle": "Enter your 12 or 24-word mnemonic phrase to recover your wallet"
+    "addressCopied": "地址已复制到剪贴板"
   },
   "settings": {
     "title": "设置",

@@ -97,8 +97,12 @@
     "noAssets": "No other assets",
     "noActivity": "No transaction history",
     "addressCopied": "Address copied to clipboard",
-    "createNewWalletTitle": "Create a New Wallet",
-    "createNewWalletSubtitle": "Create a New Wallet Based on One of Your Seed Phrases"
+    "createNewAccountTitle": "Create a new wallet account",
+    "createNewAccountSubtitle": "Create a new account based on one of your wallet seed phrases",
+    "importWalletFromPhraseTitle": "Import a new wallet using a mnemonic phrase",
+    "importWalletFromPhraseSubtitle": "Enter your 12 or 24-word mnemonic phrase to recover your wallet",
+    "addWalletTitle": "Add Wallet",
+    "selectKeyringTitle": "Select a Wallet"
   },
   "settings": {
     "title": "Settings",

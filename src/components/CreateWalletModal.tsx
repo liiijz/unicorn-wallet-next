@@ -25,7 +25,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
     setLocalError(null);
 
     try {
-      const mnemonic = walletController.createNewWallet(password);
+      const mnemonic = walletController.createNewAccount(password);
       return mnemonic;
     } catch (error) {
       console.error("Failed to create wallet:", error);
@@ -62,7 +62,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
 
     const mnemonic = createWallet(password);
     if (mnemonic) {
-      // walletStatus 已经在 walletController.createNewWallet() 内部设置为 "showing-mnemonic"
+      // walletStatus 已经在 walletController.createNewAccount() 内部设置为 "showing-mnemonic"
       if (onCreated) {
         onCreated(mnemonic);
       }
