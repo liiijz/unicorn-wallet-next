@@ -24,6 +24,7 @@ import SendModal from "./SendModal";
 import { WalletAssets } from "./WalletAssets";
 import { formatAddress } from "@/utils";
 import { useTranslation } from "react-i18next";
+import { MdOutlineMoreHoriz } from "react-icons/md";
 
 // 计算当前账户所属 keyring 及序号
 function getKeyringLabel(account: Account | null, keyrings: IKeyring[]): { label: string; color: string } {
@@ -197,10 +198,7 @@ export default function WalletHome() {
               <div className="relative inline-block">
                 {/* Keyring 标签 */}
                 {currentAccount && (
-                  <span
-                    className="absolute left-0 top-0 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow"
-                    style={{ zIndex: 2, transform: 'translate(-40%, -40%)', backgroundColor: getKeyringLabel(currentAccount, keyrings).color }}
-                  >
+                  <span className="absolute left-0 top-0 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow" style={{ zIndex: 2, transform: "translate(-40%, -40%)", backgroundColor: getKeyringLabel(currentAccount, keyrings).color }}>
                     {getKeyringLabel(currentAccount, keyrings).label}
                   </span>
                 )}
@@ -208,13 +206,18 @@ export default function WalletHome() {
               </div>
             </button>
 
-            {/* Network Dropdown */}
-            <button onClick={() => setShowNetworkSelector(!showNetworkSelector)} className="relative flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
-              <span className="text-sm font-medium">{currentNetwork.name}</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+            <div className="flex gap-2 items-center">
+              {/* Network Dropdown */}
+              <button onClick={() => setShowNetworkSelector(!showNetworkSelector)} className="relative flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
+                <span className="text-sm font-medium">{currentNetwork.name}</span>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button className="w-8 h-8 relative flex items-center bg-gray-800/50 hover:bg-gray-800 px-2 py-2 rounded-full transition-colors">
+                <MdOutlineMoreHoriz/>
+              </button>
+            </div>
           </div>
 
           {/* Balance Display - Centered */}
@@ -300,10 +303,7 @@ export default function WalletHome() {
                           </div>
                           <div className="relative inline-block">
                             {/* Keyring 标签 */}
-                            <span
-                              className="absolute left-0 top-0 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow"
-                              style={{ zIndex: 2, transform: 'translate(-40%, -40%)', backgroundColor: getKeyringLabel(account, keyrings).color }}
-                            >
+                            <span className="absolute left-0 top-0 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow" style={{ zIndex: 2, transform: "translate(-40%, -40%)", backgroundColor: getKeyringLabel(account, keyrings).color }}>
                               {getKeyringLabel(account, keyrings).label}
                             </span>
                             <PixelAvatar address={account?.address || ""} size={42} />
