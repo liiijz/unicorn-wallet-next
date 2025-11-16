@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { GiReceiveMoney } from "react-icons/gi";
-import { IoIosSend } from "react-icons/io";
+import { IoIosSend, IoMdLock, IoMdSettings } from "react-icons/io";
 import { IoCopy } from "react-icons/io5";
 import { MdShoppingCart } from "react-icons/md";
 
@@ -50,6 +50,8 @@ function getKeyringLabel(account: Account | null, keyrings: IKeyring[]): { label
  */
 export default function WalletHome() {
   const { currentAccount, setCurrentAccount, accounts, accountMetadataMap, keyrings } = useWalletStore();
+  // 系统菜单弹窗 state
+  const [showSystemMenu, setShowSystemMenu] = useState(false);
   // 新增：keyring 选择弹窗相关 state
   const [showKeyringSelector, setShowKeyringSelector] = useState(false);
   const [selectedKeyringIndex, setSelectedKeyringIndex] = useState<number>(0);
@@ -214,9 +216,49 @@ export default function WalletHome() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <button className="w-8 h-8 relative flex items-center bg-gray-800/50 hover:bg-gray-800 px-2 py-2 rounded-full transition-colors">
-                <MdOutlineMoreHoriz/>
-              </button>
+              <div className="relative">
+                <button
+                  className="w-8 h-8 relative flex items-center bg-gray-800/50 hover:bg-gray-800 px-2 py-2 rounded-full transition-colors"
+                  onClick={() => setShowSystemMenu((prev) => !prev)}
+                  aria-label="更多操作"
+                >
+                  <MdOutlineMoreHoriz />
+                </button>
+                {showSystemMenu && (
+                  <>
+                  {/* Backdrop for closing SystemMenu when clicking outside */}
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowSystemMenu(false)}
+                  />
+                  <div className="absolute right-0 top-12 w-56 bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                    <button
+                    className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-800 transition-colors text-left text-white font-medium"
+                    onClick={() => {
+                      setShowSystemMenu(false);
+                    }}
+                    >
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-700 rounded-full mr-2">
+                      <IoMdSettings />
+                    </span>
+                    Settings
+                    </button>
+                    <button
+                    className="w-full flex items-center gap-3 px-4 py-4 hover:bg-gray-800 transition-colors text-left text-white font-medium"
+                    onClick={() => {
+                      setShowSystemMenu(false);
+                      walletController.lock();
+                    }}
+                    >
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-700 rounded-full mr-2">
+                      <IoMdLock />
+                    </span>
+                    Lock Wallet
+                    </button>
+                  </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
