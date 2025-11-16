@@ -25,7 +25,7 @@ function CreateWalletModal({ onClose, onCreated }: CreateWalletModalProps) {
     setLocalError(null);
 
     try {
-      const mnemonic = walletController.createNewAccount(password);
+      const mnemonic = walletController.createNewWallet(password);
       return mnemonic;
     } catch (error) {
       console.error("Failed to create wallet:", error);

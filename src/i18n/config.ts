@@ -11,7 +11,7 @@ import enUS from './locales/en-US.json';
  */
 export const SUPPORTED_LANGUAGES = {
   'zh-CN': '简体中文',
-  'en-US': 'English',
+  'en-US': 'English', 
 } as const;
 
 export type SupportedLanguage = keyof typeof SUPPORTED_LANGUAGES;
@@ -37,7 +37,7 @@ i18n
     // 默认语言
     fallbackLng: 'en-US',
     // 支持的语言
-    supportedLngs: Object.keys(SUPPORTED_LANGUAGES),
+    supportedLngs: [...Object.keys(SUPPORTED_LANGUAGES), 'zh'],
     // 调试模式（开发环境）
     debug: process.env.NODE_ENV === 'development',
 
