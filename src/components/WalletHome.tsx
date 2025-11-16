@@ -25,6 +25,8 @@ import { WalletAssets } from "./WalletAssets";
 import { formatAddress } from "@/utils";
 import { useTranslation } from "react-i18next";
 import { MdOutlineMoreHoriz } from "react-icons/md";
+import { FaGlobe, FaGlobeAmericas } from "react-icons/fa";
+import { PiGlobe } from "react-icons/pi";
 
 // 计算当前账户所属 keyring 及序号
 function getKeyringLabel(account: Account | null, keyrings: IKeyring[]): { label: string; color: string } {
@@ -210,11 +212,8 @@ export default function WalletHome() {
 
             <div className="flex gap-2 items-center">
               {/* Network Dropdown */}
-              <button onClick={() => setShowNetworkSelector(!showNetworkSelector)} className="relative flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
-                <span className="text-sm font-medium">{currentNetwork.name}</span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+              <button onClick={() => setShowNetworkSelector(!showNetworkSelector)} className="relative flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 px-2 py-2 rounded-full transition-colors">
+                <FaGlobeAmericas />
               </button>
               <div className="relative">
                 <button
