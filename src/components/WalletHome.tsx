@@ -25,6 +25,23 @@ import { WalletAssets } from "./WalletAssets";
 import { formatAddress } from "@/utils";
 import { useTranslation } from "react-i18next";
 
+// 计算当前账户所属 keyring 及序号
+function getKeyringLabel(account: Account | null, keyrings: IKeyring[]): { label: string; color: string } {
+  if (!account || !keyrings || keyrings.length === 0) return { label: "", color: "#00F4C8" };
+  // 撞色列表，可扩展
+  const colors = ["#00F4C8", "#A259FF", "#FFB443", "#FF4F7A", "#2DCE89", "#FF7F50"];
+  for (let i = 0; i < keyrings.length; i++) {
+    const kr = keyrings[i];
+    if (kr.getAddresses().some((addr: string) => addr.toLowerCase() === account.address.toLowerCase())) {
+      // 类型如 HD、Simple、Hardware，序号从 1 开始
+      const label = `${kr.type}${i + 1}`;
+      const color = colors[i % colors.length];
+      return { label, color };
+    }
+  }
+  return { label: "", color: "#00F4C8" };
+}
+
 /**
  * WalletHome 组件 - 主钱包界面
  *
@@ -32,9 +49,9 @@ import { useTranslation } from "react-i18next";
  */
 export default function WalletHome() {
   const { currentAccount, setCurrentAccount, accounts, accountMetadataMap, keyrings } = useWalletStore();
-    // 新增：keyring 选择弹窗相关 state
-    const [showKeyringSelector, setShowKeyringSelector] = useState(false);
-    const [selectedKeyringIndex, setSelectedKeyringIndex] = useState<number>(0);
+  // 新增：keyring 选择弹窗相关 state
+  const [showKeyringSelector, setShowKeyringSelector] = useState(false);
+  const [selectedKeyringIndex, setSelectedKeyringIndex] = useState<number>(0);
   const allAccounts = accounts;
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -175,9 +192,20 @@ export default function WalletHome() {
         {/* Top Bar */}
         <header className="px-8 pt-8 pb-6 relative">
           <div className="flex items-center justify-between mb-8">
-            {/* Avatar - Square with rounded corners */}
+            {/* Avatar - Square with rounded corners + Keyring 标签 */}
             <button onClick={() => setShowAccountSelector(!showAccountSelector)} className="relative">
-              <PixelAvatar address={currentAccount?.address || ""} size={42} />
+              <div className="relative inline-block">
+                {/* Keyring 标签 */}
+                {currentAccount && (
+                  <span
+                    className="absolute left-0 top-0 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow"
+                    style={{ zIndex: 2, transform: 'translate(-40%, -40%)', backgroundColor: getKeyringLabel(currentAccount, keyrings).color }}
+                  >
+                    {getKeyringLabel(currentAccount, keyrings).label}
+                  </span>
+                )}
+                <PixelAvatar address={currentAccount?.address || ""} size={42} />
+              </div>
             </button>
 
             {/* Network Dropdown */}
@@ -261,7 +289,7 @@ export default function WalletHome() {
                           setShowAccountSelector(false);
                         }}
                         className="w-full flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-gray-700">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 relative">
                           {/* 选中指示器 */}
                           <div className="w-5 flex items-center justify-center">
                             {currentAccount?.id === account.id && (
@@ -270,7 +298,16 @@ export default function WalletHome() {
                               </svg>
                             )}
                           </div>
-                          <PixelAvatar address={account?.address || ""} size={42} />
+                          <div className="relative inline-block">
+                            {/* Keyring 标签 */}
+                            <span
+                              className="absolute left-0 top-0 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow"
+                              style={{ zIndex: 2, transform: 'translate(-40%, -40%)', backgroundColor: getKeyringLabel(account, keyrings).color }}
+                            >
+                              {getKeyringLabel(account, keyrings).label}
+                            </span>
+                            <PixelAvatar address={account?.address || ""} size={42} />
+                          </div>
                           <div className="text-left">
                             <div className="font-medium">{accountMetadataMap[account.address]?.name ? accountMetadataMap[account.address].name : formatAddress(account.address)}</div>
                             <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
@@ -348,9 +385,7 @@ export default function WalletHome() {
                   {/* 以太坊账户：多 keyring 选择 */}
                   {keyrings.length > 1 ? (
                     <>
-                      <button
-                        onClick={() => setShowKeyringSelector(true)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => setShowKeyringSelector(true)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
                         <div className="w-6 h-6 flex items-center justify-center text-[#00F4C8]">
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -369,19 +404,19 @@ export default function WalletHome() {
                             <h3 className="text-lg font-semibold mb-4">{t("home.selectKeyringTitle")}</h3>
                             <div className="space-y-2">
                               {keyrings.map((kr, idx) => (
-                                <button
-                                  key={idx}
-                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${selectedKeyringIndex === idx ? "bg-primary text-black" : "hover:bg-gray-800"}`}
-                                  onClick={() => setSelectedKeyringIndex(idx)}
-                                >
+                                <button key={idx} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${selectedKeyringIndex === idx ? "bg-primary text-black" : "hover:bg-gray-800"}`} onClick={() => setSelectedKeyringIndex(idx)}>
                                   <span className="font-medium">{kr.type}</span>
                                   <span className="text-xs text-gray-400 ml-2">{kr.getAddresses().length} accounts</span>
                                 </button>
                               ))}
                             </div>
                             <div className="mt-6 flex justify-end gap-2">
-                              <button className="px-4 py-2 rounded-lg bg-gray-700 text-white" onClick={() => setShowKeyringSelector(false)}>{t("common.cancel")}</button>
-                              <button className="px-4 py-2 rounded-lg bg-primary text-black font-bold" onClick={() => handleAddEthereumAccount(keyrings[selectedKeyringIndex])}>{t("common.confirm")}</button>
+                              <button className="px-4 py-2 rounded-lg bg-gray-700 text-white" onClick={() => setShowKeyringSelector(false)}>
+                                {t("common.cancel")}
+                              </button>
+                              <button className="px-4 py-2 rounded-lg bg-primary text-black font-bold" onClick={() => handleAddEthereumAccount(keyrings[selectedKeyringIndex])}>
+                                {t("common.confirm")}
+                              </button>
                             </div>
                           </div>
                         </div>
