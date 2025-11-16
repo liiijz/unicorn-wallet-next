@@ -249,24 +249,26 @@ class WalletController {
 
   /**
    * 添加新账户
+   * @param keyring 可选，指定在哪个 keyring 上添加账户
    */
-  addAccount(): Account {
+  addAccount(keyring?: IKeyring): Account {
     const { keyrings, password, accounts: existingAccounts } = useWalletStore.getState();
     if (!password) throw new Error("No password set");
 
-    const keyring = keyrings[0];
-    if (!keyring) throw new Error("No keyring found");
+    // 如果未指定 keyring，则默认第一个
+    const targetKeyring = keyring || keyrings[0];
+    if (!targetKeyring) throw new Error("No keyring found");
 
-    const oldAddressCount = keyring.getAddresses().length;
+    const oldAddressCount = targetKeyring.getAddresses().length;
 
     // 派生新地址 (同步操作)
-    keyring.addAddresses(1);
+    targetKeyring.addAddresses(1);
 
     // 持久化 Keyring (同步操作)
     keyringService.persistVault(keyrings, password);
 
     // 创建新账户并追加到 Store
-    const newAccount = this.createNewAccount(keyring, oldAddressCount);
+    const newAccount = this.createNewAccount(targetKeyring, oldAddressCount);
     const accounts = [...existingAccounts, newAccount];
 
     useWalletStore.setState({ keyrings: [...keyrings], accounts });

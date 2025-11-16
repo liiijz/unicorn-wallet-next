@@ -8,6 +8,7 @@ import { IoCopy } from "react-icons/io5";
 import { MdShoppingCart } from "react-icons/md";
 
 import { walletController } from "@/controllers";
+import type { IKeyring } from "@/types/Keyring";
 import { networkController } from "@/controllers/NetworkController";
 import { walletEventBus } from "@/events/WalletEvents";
 import { useWalletStore } from "@/stores/walletStore";
@@ -30,7 +31,10 @@ import { useTranslation } from "react-i18next";
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, setCurrentAccount, accounts, accountMetadataMap } = useWalletStore();
+  const { currentAccount, setCurrentAccount, accounts, accountMetadataMap, keyrings } = useWalletStore();
+    // 新增：keyring 选择弹窗相关 state
+    const [showKeyringSelector, setShowKeyringSelector] = useState(false);
+    const [selectedKeyringIndex, setSelectedKeyringIndex] = useState<number>(0);
   const allAccounts = accounts;
   const [showAccountSelector, setShowAccountSelector] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -98,11 +102,13 @@ export default function WalletHome() {
   };
 
   // 处理添加以太坊账户
-  const handleAddEthereumAccount = () => {
+  // 支持传入 keyring
+  const handleAddEthereumAccount = (keyring?: IKeyring) => {
     console.log("🎯 handleAddEthereumAccount called");
     setShowAddAccountModal(false);
+    setShowKeyringSelector(false);
     try {
-      const newAccount = walletController.addAccount();
+      const newAccount = walletController.addAccount(keyring);
       setCurrentAccount(newAccount);
       const newName = accountMetadataMap[newAccount.address]?.name || formatAddress(newAccount.address);
       console.log("✅ New account created:", newAccount);
@@ -329,7 +335,7 @@ export default function WalletHome() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-800">
                   <div></div>
-                  <h2 className="text-lg font-medium">添加钱包</h2>
+                  <h2 className="text-lg font-medium">{t("home.addWalletTitle")}</h2>
                   <button onClick={() => setShowAddAccountModal(false)} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -339,18 +345,61 @@ export default function WalletHome() {
 
                 {/* Menu Options */}
                 <div className="p-4 space-y-2">
-                  {/* 以太坊账户 */}
-                  <button onClick={handleAddEthereumAccount} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
-                    <div className="w-6 h-6 flex items-center justify-center text-[#00F4C8]">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-white font-medium">{t("home.createNewWalletTitle")}</span>
-                      <span className="text-xs text-gray-400 mt-1">{t("home.createNewWalletSubtitle")}</span>
-                    </div>
-                  </button>
+                  {/* 以太坊账户：多 keyring 选择 */}
+                  {keyrings.length > 1 ? (
+                    <>
+                      <button
+                        onClick={() => setShowKeyringSelector(true)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
+                        <div className="w-6 h-6 flex items-center justify-center text-[#00F4C8]">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <span className="text-white font-medium">{t("home.createNewWalletTitle")}</span>
+                          <span className="text-xs text-gray-400 mt-1">{t("home.createNewWalletSubtitle")}</span>
+                        </div>
+                      </button>
+                      {/* Keyring Selector 弹窗 */}
+                      {showKeyringSelector && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black/60" onClick={() => setShowKeyringSelector(false)} />
+                          <div className="relative bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 max-w-sm w-full mx-auto p-6 z-70">
+                            <h3 className="text-lg font-semibold mb-4">{t("home.selectKeyringTitle")}</h3>
+                            <div className="space-y-2">
+                              {keyrings.map((kr, idx) => (
+                                <button
+                                  key={idx}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${selectedKeyringIndex === idx ? "bg-primary text-black" : "hover:bg-gray-800"}`}
+                                  onClick={() => setSelectedKeyringIndex(idx)}
+                                >
+                                  <span className="font-medium">{kr.type}</span>
+                                  <span className="text-xs text-gray-400 ml-2">{kr.getAddresses().length} accounts</span>
+                                </button>
+                              ))}
+                            </div>
+                            <div className="mt-6 flex justify-end gap-2">
+                              <button className="px-4 py-2 rounded-lg bg-gray-700 text-white" onClick={() => setShowKeyringSelector(false)}>{t("common.cancel")}</button>
+                              <button className="px-4 py-2 rounded-lg bg-primary text-black font-bold" onClick={() => handleAddEthereumAccount(keyrings[selectedKeyringIndex])}>{t("common.confirm")}</button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <button onClick={() => handleAddEthereumAccount(keyrings[0])} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
+                      <div className="w-6 h-6 flex items-center justify-center text-[#00F4C8]">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="text-white font-medium">{t("home.createNewWalletTitle")}</span>
+                        <span className="text-xs text-gray-400 mt-1">{t("home.createNewWalletSubtitle")}</span>
+                      </div>
+                    </button>
+                  )}
 
                   {/* 私钥助记词 */}
                   <button
