@@ -1,31 +1,28 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
-import { GiReceiveMoney } from 'react-icons/gi';
-import { IoIosSend } from 'react-icons/io';
-import { IoCopy } from 'react-icons/io5';
-import { MdShoppingCart } from 'react-icons/md';
+import { GiReceiveMoney } from "react-icons/gi";
+import { IoIosSend } from "react-icons/io";
+import { IoCopy } from "react-icons/io5";
+import { MdShoppingCart } from "react-icons/md";
 
-import { walletController } from '@/controllers';
-import { networkController } from '@/controllers/NetworkController';
-import { walletEventBus } from '@/events/WalletEvents';
-import { useWalletStore } from '@/stores/walletStore';
-import type { Account } from '@/types/Account';
-import { Network } from '@/types/Network';
+import { walletController } from "@/controllers";
+import { networkController } from "@/controllers/NetworkController";
+import { walletEventBus } from "@/events/WalletEvents";
+import { useWalletStore } from "@/stores/walletStore";
+import type { Account } from "@/types/Account";
+import { Network } from "@/types/Network";
 
-import ImportWalletModal from './ImportWalletModal';
-import MarketStats from './MarketStats';
-import { useNotification } from './Notification';
-import PixelAvatar from './PixelAvatar';
-import ReceiveModal from './ReceiveModal';
-import SendModal from './SendModal';
-import { WalletAssets } from './WalletAssets';
-import { formatAddress } from '@/utils';
+import ImportWalletModal from "./ImportWalletModal";
+import MarketStats from "./MarketStats";
+import { useNotification } from "./Notification";
+import PixelAvatar from "./PixelAvatar";
+import ReceiveModal from "./ReceiveModal";
+import SendModal from "./SendModal";
+import { WalletAssets } from "./WalletAssets";
+import { formatAddress } from "@/utils";
+import { useTranslation } from "react-i18next";
 
 /**
  * WalletHome 组件 - 主钱包界面
@@ -50,8 +47,7 @@ export default function WalletHome() {
   const [newAccountName, setNewAccountName] = useState("");
   const { addNotification } = useNotification();
   const fetchBalanceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  
+  const { t } = useTranslation();
 
   // 复制地址到剪贴板
   const copyAddress = async () => {
@@ -80,7 +76,7 @@ export default function WalletHome() {
 
   // 打开重命名对话框
   const openRenameDialog = (account: Account) => {
-    const name = accountMetadataMap[account.address]?.name || '';
+    const name = accountMetadataMap[account.address]?.name || "";
     setNewAccountName(name);
     setShowRenameDialog(true);
     // 不立即清空 contextMenuAccount，保证弹窗能正常显示
@@ -198,17 +194,8 @@ export default function WalletHome() {
             {/* 地址显示区域 */}
             {currentAccount?.address && (
               <div className="flex items-center justify-center mt-4 gap-2">
-                <span className="px-3 py-1 rounded-lg bg-gray-800 text-primary text-base font-mono select-all">
-                  {formatAddress(currentAccount.address)}
-                </span>
-                <span
-                  onClick={copyAddress}
-                  className="bg-gray-700 hover:bg-primary text-white rounded-full px-2 py-1 transition-colors cursor-pointer"
-                  title="复制地址"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="复制地址"
-                >
+                <span className="px-3 py-1 rounded-lg bg-gray-800 text-primary text-base font-mono select-all">{formatAddress(currentAccount.address)}</span>
+                <span onClick={copyAddress} className="bg-gray-700 hover:bg-primary text-white rounded-full px-2 py-1 transition-colors cursor-pointer" title="复制地址" role="button" tabIndex={0} aria-label="复制地址">
                   <IoCopy className="w-4 h-4" />
                 </span>
               </div>
@@ -250,10 +237,13 @@ export default function WalletHome() {
           {showAccountSelector && (
             <>
               {/* Backdrop */}
-              <div className="fixed inset-0 bg-black/50 z-50" onClick={() => {
-                setShowAccountSelector(false);
-                setContextMenuAccount(null);
-              }} />
+              <div
+                className="fixed inset-0 bg-black/50 z-50"
+                onClick={() => {
+                  setShowAccountSelector(false);
+                  setContextMenuAccount(null);
+                }}
+              />
               {/* Dropdown */}
               <div className="absolute top-20 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-2xl shadow-2xl z-50">
                 <div className="p-4 space-y-2">
@@ -276,11 +266,7 @@ export default function WalletHome() {
                           </div>
                           <PixelAvatar address={account?.address || ""} size={42} />
                           <div className="text-left">
-                            <div className="font-medium">
-                              {accountMetadataMap[account.address]?.name
-                                ? accountMetadataMap[account.address].name
-                                : formatAddress(account.address)}
-                            </div>
+                            <div className="font-medium">{accountMetadataMap[account.address]?.name ? accountMetadataMap[account.address].name : formatAddress(account.address)}</div>
                             <div className="text-sm text-gray-400">{formatAddress(account.address)}</div>
                           </div>
                         </div>
@@ -297,21 +283,17 @@ export default function WalletHome() {
                           </button>
                         </div>
                       </button>
-                      
+
                       {/* Context Menu */}
                       {contextMenuAccount?.id === account.id && (
                         <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 border border-gray-700 rounded-xl shadow-xl z-[70] overflow-hidden">
-                          <button
-                            onClick={() => openRenameDialog(account)}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left">
+                          <button onClick={() => openRenameDialog(account)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             <span>Rename Wallet</span>
                           </button>
-                          <button
-                            onClick={() => copyAccountAddress(account.address)}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left">
+                          <button onClick={() => copyAccountAddress(account.address)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left">
                             <IoCopy className="w-5 h-5" />
                             <div>
                               <div>Copy Address</div>
@@ -330,7 +312,7 @@ export default function WalletHome() {
                       setShowAddAccountModal(true);
                     }}
                     className="base-button">
-                    Add Account
+                    Add Wallet
                   </button>
                 </div>
               </div>
@@ -347,7 +329,7 @@ export default function WalletHome() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-800">
                   <div></div>
-                  <h2 className="text-lg font-medium">添加账户</h2>
+                  <h2 className="text-lg font-medium">添加钱包</h2>
                   <button onClick={() => setShowAddAccountModal(false)} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -357,11 +339,6 @@ export default function WalletHome() {
 
                 {/* Menu Options */}
                 <div className="p-4 space-y-2">
-                  {/* 创建新账户 */}
-                  <button className="w-full text-left px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
-                    <div className="text-white font-medium">创建新账户</div>
-                  </button>
-
                   {/* 以太坊账户 */}
                   <button onClick={handleAddEthereumAccount} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
                     <div className="w-6 h-6 flex items-center justify-center text-[#00F4C8]">
@@ -369,12 +346,10 @@ export default function WalletHome() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
-                    <div className="text-white font-medium">以太坊账户</div>
-                  </button>
-
-                  {/* 导入钱包或账户 */}
-                  <button className="w-full text-left px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
-                    <div className="text-white font-medium">导入钱包或账户</div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-white font-medium">{t("home.createNewWalletTitle")}</span>
+                      <span className="text-xs text-gray-400 mt-1">{t("home.createNewWalletSubtitle")}</span>
+                    </div>
                   </button>
 
                   {/* 私钥助记词 */}
@@ -389,7 +364,10 @@ export default function WalletHome() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                       </svg>
                     </div>
-                    <div className="text-white font-medium">私钥助记词</div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-white font-medium">{t("home.importWalletFromPhraseTitle")}</span>
+                      <span className="text-xs text-gray-400 mt-1 text-left">{t("home.importWalletFromPhraseSubtitle")}</span>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -438,23 +416,20 @@ export default function WalletHome() {
         </main>
 
         {/* Send Modal */}
-        {showSendModal && (<SendModal
-          onClose={() => setShowSendModal(false)}
-          balance={balance}
-          onTransactionComplete={(txHash) => {
-            console.log("Transaction completed:", txHash);
-            // Refresh balance after transaction
-            fetchBalance(currentNetwork);
-          }}
-        />)}
+        {showSendModal && (
+          <SendModal
+            onClose={() => setShowSendModal(false)}
+            balance={balance}
+            onTransactionComplete={(txHash) => {
+              console.log("Transaction completed:", txHash);
+              // Refresh balance after transaction
+              fetchBalance(currentNetwork);
+            }}
+          />
+        )}
 
         {/* Receive Modal */}
-        <ReceiveModal
-          isOpen={showReceiveModal}
-          onClose={() => setShowReceiveModal(false)}
-          currentAccount={currentAccount}
-          currentNetwork={currentNetwork}
-        />
+        <ReceiveModal isOpen={showReceiveModal} onClose={() => setShowReceiveModal(false)} currentAccount={currentAccount} currentNetwork={currentNetwork} />
 
         {/* Rename Account Dialog */}
         {showRenameDialog && contextMenuAccount && (
@@ -463,9 +438,7 @@ export default function WalletHome() {
             <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-gray-900 rounded-2xl shadow-2xl z-50 border border-gray-800">
               <div className="flex items-center justify-between p-6 border-b border-gray-800">
                 <h2 className="text-lg font-semibold">重命名账户</h2>
-                <button
-                  onClick={() => setShowRenameDialog(false)}
-                  className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
+                <button onClick={() => setShowRenameDialog(false)} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -474,26 +447,13 @@ export default function WalletHome() {
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">账户名称</label>
-                  <input
-                    type="text"
-                    value={newAccountName}
-                    onChange={(e) => setNewAccountName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleRenameAccount()}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors"
-                    placeholder="输入新的账户名称"
-                    autoFocus
-                  />
+                  <input type="text" value={newAccountName} onChange={(e) => setNewAccountName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleRenameAccount()} className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors" placeholder="输入新的账户名称" autoFocus />
                 </div>
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowRenameDialog(false)}
-                    className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">
+                  <button onClick={() => setShowRenameDialog(false)} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-xl transition-colors">
                     取消
                   </button>
-                  <button
-                    onClick={handleRenameAccount}
-                    disabled={!newAccountName.trim()}
-                    className="flex-1 bg-primary hover:bg-primary/80 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  <button onClick={handleRenameAccount} disabled={!newAccountName.trim()} className="flex-1 bg-primary hover:bg-primary/80 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     确认
                   </button>
                 </div>

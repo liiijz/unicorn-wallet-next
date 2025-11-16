@@ -85,7 +85,7 @@
   },
   "home": {
     "lockWallet": "Lock Wallet",
-    "addAccount": "Add Account",
+    "addAccount": "Add Wallet",
     "addAccountDev": "Add account feature is under development...",
     "send": "Send",
     "receive": "Receive",
@@ -96,7 +96,9 @@
     "viewAll": "View All",
     "noAssets": "No other assets",
     "noActivity": "No transaction history",
-    "addressCopied": "Address copied to clipboard"
+    "addressCopied": "Address copied to clipboard",
+    "createNewWalletTitle": "Create a New Wallet",
+    "createNewWalletSubtitle": "Create a New Wallet Based on One of Your Seed Phrases"
   },
   "settings": {
     "title": "Settings",

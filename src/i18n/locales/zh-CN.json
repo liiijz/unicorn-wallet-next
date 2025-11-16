@@ -85,7 +85,7 @@
   },
   "home": {
     "lockWallet": "锁定钱包",
-    "addAccount": "添加账户",
+    "addAccount": "添加钱包",
     "addAccountDev": "添加账户功能开发中...",
     "send": "发送",
     "receive": "接收",
@@ -96,7 +96,11 @@
     "viewAll": "查看全部",
     "noAssets": "暂无其他资产",
     "noActivity": "暂无交易记录",
-    "addressCopied": "地址已复制到剪贴板"
+    "addressCopied": "地址已复制到剪贴板",
+    "createNewWalletTitle": "Create a new wallet",
+    "createNewWalletSubtitle": "Create a new wallet base on your seed phrases",
+    "importWalletFromPhraseTitle": "Import a new wallet using a mnemonic phrase",
+    "importWalletFromPhraseSubtitle": "Enter your 12 or 24-word mnemonic phrase to recover your wallet"
   },
   "settings": {
     "title": "设置",
