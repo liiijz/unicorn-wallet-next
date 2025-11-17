@@ -36,12 +36,6 @@ class TokenService {
    */
   async getTokenList(address: string, chainId: number): Promise<TokenListResponse> {
     try {
-      // 优先使用 Etherscan API
-      if (this.supportsEtherscanAPI(chainId)) {
-        return await this.getTokenListFromEtherscan(address, chainId);
-      }
-
-      // 降级：使用预定义 token 列表查询
       return await this.getTokenListFromRPC(address, chainId);
     } catch (error) {
       console.error("[TokenService] 获取 Token 列表失败:", error);
