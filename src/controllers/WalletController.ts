@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 import type { Network } from "@/types/Network";
 import { networkManager } from "@/services/NetworkManager";
 import { tokenService } from "@/services/TokenService";
-import type { TokenListResponse } from "@/types/Token";
+import type { TokenList } from "@/types/Token";
 import { formatAddress } from "@/utils";
 
 class WalletController {
@@ -361,7 +361,7 @@ class WalletController {
    * @param address 账户地址
    * @returns Token 列表响应
    */
-  async getTokenList(address: string): Promise<TokenListResponse> {
+  async getTokenList(address: string): Promise<TokenList> {
     if (!address) {
       return { tokens: [], timestamp: Date.now() };
     }

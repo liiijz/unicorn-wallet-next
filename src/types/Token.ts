@@ -33,7 +33,7 @@ export interface Token {
 /**
  * Token 列表响应
  */
-export interface TokenListResponse {
+export interface TokenList {
   /** Token 列表 */
   tokens: Token[];
   

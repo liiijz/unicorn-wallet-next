@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import type { Token, TokenListResponse } from "@/types/Token";
+import type { Token, TokenList } from "@/types/Token";
 import { networkManager } from "./NetworkManager";
 
 /**
@@ -34,22 +34,89 @@ class TokenService {
    * @param chainId 链 ID
    * @returns Token 列表
    */
-  async getTokenList(address: string, chainId: number): Promise<TokenListResponse> {
+  async getTokenList(address: string, chainId: number): Promise<TokenList> {
     try {
-      return await this.getTokenListFromRPC(address, chainId);
+      // 优先使用 Alchemy Portfolio API
+      return await this.getTokenListFromAlchemy(address, chainId);
     } catch (error) {
-      console.error("[TokenService] 获取 Token 列表失败:", error);
+      console.warn("[TokenService] Alchemy API 失败，降级到 Etherscan:", error);
+      try {
+        return await this.getTokenListFromEtherscan(address, chainId);
+      } catch (error) {
+        console.warn("[TokenService] Etherscan API 失败，降级到 RPC:", error);
+        return await this.getTokenListFromRPC(address, chainId);
+      }
+    }
+  }
+
+  /**
+   * 从 Alchemy Portfolio API 获取 Token 列表
+   */
+  private async getTokenListFromAlchemy(address: string, chainId: number): Promise<TokenList> {
+    try {
+      // 调用本地 Portfolio API 路由
+      const response = await fetch(
+        `/api/portfolio?chainid=${chainId}&address=${address}`
+      );
+
+      const data = await response.json();
+
+      // 处理错误响应
+      if (data.error) {
+        console.warn("[TokenService] Alchemy Portfolio API 错误:", data.error);
+        throw new Error(data.error);
+      }
+
+      if (!data.data || !data.data.tokens) {
+        console.warn("[TokenService] Alchemy Portfolio API 返回空结果");
+        return { tokens: [], timestamp: Date.now() };
+      }
+
+      // 转换 Alchemy 响应为 Token 格式
+      const tokens: Token[] = data.data.tokens
+        // .filter((token: any) => {
+        //   // 过滤掉原生代币（tokenAddress 为 null）或余额为 0 的代币
+        //   return token.tokenAddress !== null && BigInt(token.tokenBalance) > 0n;
+        // })
+        .map((token: any) => {
+          const decimals = token.tokenMetadata?.decimals || 18;
+          const balance = BigInt(token.tokenBalance).toString();
+          const balanceFormatted = ethers.formatUnits(balance, decimals);
+          const priceUSD = token.tokenPrices?.[0]?.value || "0";
+
+          return {
+            contractAddress: token.tokenAddress,
+            name: token.tokenMetadata?.name || "Unknown Token",
+            symbol: token.tokenMetadata?.symbol || "UNK",
+            decimals,
+            balance,
+            balanceFormatted,
+            logoURI: token.tokenMetadata?.logo,
+            priceUSD,
+            valueUSD: (parseFloat(balanceFormatted) * parseFloat(priceUSD)).toString(),
+          };
+        });
+
+      // 计算总价值
+      const totalValueUSD = tokens
+        .reduce((total, token) => total + parseFloat(token.valueUSD || "0"), 0)
+        .toString();
+
       return {
-        tokens: [],
+        tokens,
+        totalValueUSD,
         timestamp: Date.now(),
       };
+    } catch (error) {
+      console.error("[TokenService] Alchemy Portfolio API 请求失败:", error);
+      throw error;
     }
   }
 
   /**
    * 从 Etherscan API 获取 Token 列表（通过后端代理）
    */
-  private async getTokenListFromEtherscan(address: string, chainId: number): Promise<TokenListResponse> {
+  private async getTokenListFromEtherscan(address: string, chainId: number): Promise<TokenList> {
     try {
       // 调用本地 API 路由，只传 chainId 和 address，后端自动补全参数
       const response = await fetch(
@@ -95,7 +162,7 @@ class TokenService {
   /**
    * 从 RPC 获取 Token 列表（使用预定义列表）
    */
-  private async getTokenListFromRPC(address: string, chainId: number): Promise<TokenListResponse> {
+  private async getTokenListFromRPC(address: string, chainId: number): Promise<TokenList> {
     // 获取预定义的热门 token 列表
     const popularTokens = this.getPopularTokens(chainId);
 
