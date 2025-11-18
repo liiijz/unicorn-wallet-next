@@ -326,17 +326,15 @@ class WalletController {
   /**
    * 获取账户的所有 ERC-20 Token 列表
    * @param address 账户地址
+   * @param chainId 网络 Chain ID
    * @returns Token 列表响应
    */
-  async getTokenList(address: string): Promise<TokenList> {
+  async getTokenList(address: string, chainId: number): Promise<TokenList> {
     if (!address) {
       return { tokens: [], timestamp: Date.now() };
     }
 
     try {
-      // 获取当前网络的 chainId
-      const chainId = await networkManager.getChainId();
-
       // 使用 TokenService 获取 token 列表
       return await tokenService.getTokenList(address, chainId);
     } catch (error) {
@@ -348,9 +346,10 @@ class WalletController {
   /**
    * 获取账户的完整 Portfolio（原生代币 + Tokens）
    * @param address 账户地址
+   * @param chainId 网络 Chain ID
    * @returns Portfolio 响应
    */
-  async getPortfolio(address: string): Promise<Portfolio> {
+  async getPortfolio(address: string, chainId: number): Promise<Portfolio> {
     if (!address) {
       return {
         balance: "0.0000",
@@ -362,9 +361,6 @@ class WalletController {
     }
 
     try {
-      // 获取当前网络的 chainId
-      const chainId = await networkManager.getChainId();
-
       // 使用 TokenService 获取完整的 token 列表（包含原生代币和 ERC20 代币）
       const tokenList = await tokenService.getTokenList(address, chainId);
 

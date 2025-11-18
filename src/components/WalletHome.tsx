@@ -52,7 +52,7 @@ function getKeyringLabel(account: Account | null, keyrings: IKeyring[]): { label
  * 当用户已解锁钱包后显示的主界面
  */
 export default function WalletHome() {
-  const { currentAccount, setCurrentAccount, accounts, accountMetadataMap, keyrings } = useWalletStore();
+  const { currentAccount, setCurrentAccount, accounts, accountMetadataMap, keyrings, currentNetwork } = useWalletStore();
   // 系统菜单弹窗 state
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   // 新增：keyring 选择弹窗相关 state
@@ -63,7 +63,6 @@ export default function WalletHome() {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
   const [showImportWalletModal, setShowImportWalletModal] = useState(false);
-  const [currentNetwork, setCurrentNetwork] = useState(networkController.getCurrentNetwork());
   const [balance, setBalance] = useState<string>("0.0000");
   const [balanceUSD, setBalanceUSD] = useState<string>("0.00");
   const [totalValue, setTotalValue] = useState<string>("0.00");
@@ -157,14 +156,17 @@ export default function WalletHome() {
 
   // 获取账户 Portfolio（原生余额 + tokens）
   const fetchPortfolio = async () => {
-    if (!currentAccount?.address) {
+    if (!currentAccount?.address || !currentNetwork?.chainId) {
       return;
     }
 
     setIsLoadingTokens(true);
 
     try {
-      const portfolio: Portfolio = await walletController.getPortfolio(currentAccount.address);
+      const portfolio: Portfolio = await walletController.getPortfolio(
+        currentAccount.address, 
+        currentNetwork.chainId
+      );
       setBalance(portfolio.balance);
       setBalanceUSD(portfolio.balanceUSD);
       setTokens(portfolio.tokens);
@@ -178,31 +180,9 @@ export default function WalletHome() {
     }
   };
 
-  const startFetchPortfolio = () => {
-    fetchPortfolio();
-    if (fetchBalanceTimerRef.current) {
-      clearInterval(fetchBalanceTimerRef.current);
-    }
-    fetchBalanceTimerRef.current = setInterval(() => {
-      console.log("Fetching portfolio...");
-      fetchPortfolio();
-    }, 10000);
-  };
-
   useEffect(() => {
     console.log("WalletHome mounted");
     fetchPortfolio();
-    walletEventBus.on("network:changed", ({ network }) => {
-      console.log("Current network:", network);
-      // 切换网络后重新获取 portfolio
-      setCurrentNetwork(network);
-      addNotification("success", "网络切换成功");
-      startFetchPortfolio();
-    });
-
-    return () => {
-      walletEventBus.off("network:changed");
-    };
   }, [currentAccount, currentNetwork]);
 
   return (
@@ -279,10 +259,11 @@ export default function WalletHome() {
           {/* Balance Display - Centered */}
           <div className="text-center mb-8">
             <div className="text-5xl font-bold mb-2 bg-gradient-to-r text-primary">
-              ${totalValue}
+              {isLoadingTokens ? "LOADING..." : `$ ${totalValue}`}
+             
             </div>
             <div className="flex items-center justify-center gap-2 text-gray-400">
-              <span className="text-lg">{balance} {currentNetwork.symbol}</span>
+              <span className="text-lg">{isLoadingTokens?"...": `${balance} ${currentNetwork.symbol}`}</span>
             </div>
             {/* 地址显示区域 */}
             {currentAccount?.address && (
