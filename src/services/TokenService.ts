@@ -97,14 +97,8 @@ class TokenService {
           };
         });
 
-      // 计算总价值
-      const totalValueUSD = tokens
-        .reduce((total, token) => total + parseFloat(token.valueUSD || "0"), 0)
-        .toString();
-
       return {
         tokens,
-        totalValueUSD,
         timestamp: Date.now(),
       };
     } catch (error) {

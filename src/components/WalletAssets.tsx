@@ -1,14 +1,14 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useEffect, useState } from "react";
 import { walletController } from "@/controllers";
-import type { Token } from "@/types/Token";
+import type { Token, Portfolio } from "@/types/Token";
 
-export const WalletAssets = () => {
+export const WalletAssets = ({ portfolio: propPortfolio, isLoading: propIsLoading }: { portfolio?: Portfolio, isLoading?: boolean }) => {
   const { currentAccount } = useWalletStore();
 
   const [activeTab, setActiveTab] = useState<string>("tokens");
-  const [tokens, setTokens] = useState<Token[]>([]);
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(propPortfolio || null);
+  const [isLoading, setIsLoading] = useState(propIsLoading || false);
   
   const tabs = [
     {
@@ -21,32 +21,37 @@ export const WalletAssets = () => {
     },
   ];
 
-  // 获取 Token 列表
-  const fetchTokens = async () => {
+  // 获取 Portfolio 数据
+  const fetchPortfolio = async () => {
     if (!currentAccount?.address) {
-      setTokens([]);
+      setPortfolio(null);
       return;
     }
 
-    setIsLoadingTokens(true);
+    setIsLoading(true);
     try {
-      const response = await walletController.getTokenList(currentAccount.address);
-      setTokens(response.tokens);
+      const portfolioData = await walletController.getPortfolio(currentAccount.address);
+      setPortfolio(portfolioData);
     } catch (error) {
-      console.error("Failed to fetch tokens:", error);
-      setTokens([]);
+      console.error("Failed to fetch portfolio:", error);
+      setPortfolio(null);
     } finally {
-      setIsLoadingTokens(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === "tokens") {
-      fetchTokens();
-    } else if (activeTab === "nfts") {
-      // NFTs 功能待实现
+    if (propPortfolio !== undefined) {
+      setPortfolio(propPortfolio);
+      setIsLoading(propIsLoading || false);
+    } else {
+      if (activeTab === "tokens") {
+        fetchPortfolio();
+      } else if (activeTab === "nfts") {
+        // NFTs 功能待实现
+      }
     }
-  }, [activeTab, currentAccount?.address]);
+  }, [activeTab, currentAccount?.address, propPortfolio, propIsLoading]);
 
   return (
     <section>
@@ -71,11 +76,11 @@ export const WalletAssets = () => {
         {/* Tokens Tab Content */}
         {activeTab === "tokens" && (
           <div className="mt-4 space-y-3">
-            {isLoadingTokens ? (
+            {isLoading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="w-8 h-8 border-4 border-gray-600 border-t-cyan-400 rounded-full animate-spin"></div>
               </div>
-            ) : tokens.length === 0 ? (
+            ) : !portfolio || portfolio.tokens.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <p>No tokens found</p>
                 <p className="text-sm text-gray-500 mt-2">
@@ -83,7 +88,7 @@ export const WalletAssets = () => {
                 </p>
               </div>
             ) : (
-              tokens.map((token) => (
+              portfolio.tokens.map((token) => (
                 <div
                   key={token.contractAddress}
                   className="flex items-center justify-between p-4 bg-gray-800/30 hover:bg-gray-800/50 rounded-lg transition-colors cursor-pointer"

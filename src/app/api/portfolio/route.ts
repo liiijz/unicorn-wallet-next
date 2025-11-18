@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ethers } from "ethers";
 
 /**
  * Portfolio API 代理端点
  *
  * @description
- * 使用 Alchemy Portfolio API 获取地址的代币信息
+ * 使用 Alchemy Token Balances API 获取地址的代币信息
  */
 
 // Alchemy API 配置
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 构建 Alchemy API 请求
+    // 构建 Alchemy Portfolio API 请求
     const apiUrl = `https://api.g.alchemy.com/data/v1/${ALCHEMY_API_KEY}/assets/tokens/by-address`;
 
     const payload = {
@@ -94,8 +95,21 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    // 返回结果
-    return NextResponse.json(data);
+    // 处理错误响应
+    if (data.error) {
+      console.error("[Portfolio API] Alchemy Portfolio API 错误:", data.error);
+      return NextResponse.json(
+        { error: "Portfolio API 错误", details: data.error },
+        { status: 500 }
+      );
+    }
+
+    // 直接返回 Alchemy 的原始数据，不进行任何修改
+    return NextResponse.json({
+      data: data.data || {
+        addresses: []
+      }
+    });
   } catch (error) {
     console.error("[Portfolio API] 请求失败:", error);
     return NextResponse.json(

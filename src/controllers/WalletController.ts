@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 import type { Network } from "@/types/Network";
 import { networkManager } from "@/services/NetworkManager";
 import { tokenService } from "@/services/TokenService";
-import type { TokenList } from "@/types/Token";
+import type { TokenList, Portfolio } from "@/types/Token";
 import { formatAddress } from "@/utils";
 
 class WalletController {
@@ -324,39 +324,6 @@ class WalletController {
   // ========== Balance ==========
 
   /**
-   * 获取账户余额（原生代币，如 ETH）
-   * @param address 账户地址
-   * @param network 网络配置（可选，用于日志输出）
-   * @returns 余额对象 { balance: "0.0000", balanceUSD: "0.00" }
-   */
-  async getBalance(address: string, network?: Network): Promise<{ balance: string; balanceUSD: string }> {
-    if (!address) {
-      return { balance: "0.0000", balanceUSD: "0.00" };
-    }
-
-    try {
-      // 使用 NetworkManager 的 getBalance 方法
-      const balanceWei = await networkManager.getBalance(address);
-      const balanceEth = ethers.formatEther(balanceWei);
-
-      // 格式化为4位小数
-      const formattedBalance = parseFloat(balanceEth).toFixed(4);
-
-      // 简单的USD估算（TODO: 接入真实价格API）
-      const ethPriceUSD = 2000;
-      const usdValue = (parseFloat(balanceEth) * ethPriceUSD).toFixed(2);
-
-      return {
-        balance: formattedBalance,
-        balanceUSD: usdValue,
-      };
-    } catch (error) {
-      console.error("Failed to fetch balance:", error);
-      return { balance: "0.0000", balanceUSD: "0.00" };
-    }
-  }
-
-  /**
    * 获取账户的所有 ERC-20 Token 列表
    * @param address 账户地址
    * @returns Token 列表响应
@@ -375,6 +342,68 @@ class WalletController {
     } catch (error) {
       console.error("Failed to fetch token list:", error);
       return { tokens: [], timestamp: Date.now() };
+    }
+  }
+
+  /**
+   * 获取账户的完整 Portfolio（原生代币 + Tokens）
+   * @param address 账户地址
+   * @returns Portfolio 响应
+   */
+  async getPortfolio(address: string): Promise<Portfolio> {
+    if (!address) {
+      return {
+        balance: "0.0000",
+        balanceUSD: "0.00",
+        tokens: [],
+        totalValue: "0.00",
+        timestamp: Date.now()
+      };
+    }
+
+    try {
+      // 获取当前网络的 chainId
+      const chainId = await networkManager.getChainId();
+
+      // 使用 TokenService 获取完整的 token 列表（包含原生代币和 ERC20 代币）
+      const tokenList = await tokenService.getTokenList(address, chainId);
+
+      // 分离原生代币和 ERC20 代币
+      const nativeToken = tokenList.tokens.find((token: any) => token.contractAddress === null);
+      const erc20Tokens = tokenList.tokens.filter((token: any) => token.contractAddress !== null);
+
+      // 处理原生代币
+      let balance = "0.0000";
+      let balanceUSD = "0.00";
+
+      if (nativeToken) {
+        balance = nativeToken.balanceFormatted;
+        balanceUSD = (parseFloat(balance) * parseFloat(nativeToken.priceUSD || "0")).toFixed(2);
+      }
+
+      // 计算 ERC20 代币总价值
+      const tokenTotalValue = erc20Tokens.reduce((total: number, token: any) => 
+        total + parseFloat(token.valueUSD || "0"), 0);
+
+      // 计算总价值
+      const totalValue = (parseFloat(balanceUSD) + tokenTotalValue).toFixed(2);
+
+      return {
+        balance,
+        balanceUSD,
+        tokens: erc20Tokens,
+        totalValue,
+        timestamp: tokenList.timestamp
+      };
+    } catch (error) {
+      console.error("Failed to fetch portfolio:", error);
+      return {
+        balance: "0.0000",  
+        balanceUSD: "0.00",
+        tokens: [],
+        totalValue: "0.00",
+        timestamp: Date.now()
+      };
     }
   }
 

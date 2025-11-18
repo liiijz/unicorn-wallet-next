@@ -43,3 +43,23 @@ export interface TokenList {
   /** 数据获取时间戳 */
   timestamp: number;
 }
+
+/**
+ * Portfolio 响应（包含原生代币和 tokens）
+ */
+export interface Portfolio {
+  /** 原生代币余额 */
+  balance: string;
+  
+  /** 原生代币USD价值 */
+  balanceUSD: string;
+  
+  /** 代币资产列表 */
+  tokens: Token[];
+  
+  /** 总价值(USD) */
+  totalValue: string;
+  
+  /** 数据更新时间戳 */
+  timestamp: number;
+}

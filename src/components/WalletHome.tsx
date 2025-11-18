@@ -14,6 +14,7 @@ import { walletEventBus } from "@/events/WalletEvents";
 import { useWalletStore } from "@/stores/walletStore";
 import type { Account } from "@/types/Account";
 import { Network } from "@/types/Network";
+import type { Token, Portfolio } from "@/types/Token";
 
 import ImportWalletModal from "./ImportWalletModal";
 import MarketStats from "./MarketStats";
@@ -65,6 +66,9 @@ export default function WalletHome() {
   const [currentNetwork, setCurrentNetwork] = useState(networkController.getCurrentNetwork());
   const [balance, setBalance] = useState<string>("0.0000");
   const [balanceUSD, setBalanceUSD] = useState<string>("0.00");
+  const [totalValue, setTotalValue] = useState<string>("0.00");
+  const [tokens, setTokens] = useState<Token[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [showSendModal, setShowSendModal] = useState(false);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
@@ -151,38 +155,49 @@ export default function WalletHome() {
     }
   };
 
-  // 获取账户余额
-  const fetchBalance = async (network: Network) => {
+  // 获取账户 Portfolio（原生余额 + tokens）
+  const fetchPortfolio = async () => {
     if (!currentAccount?.address) {
       return;
     }
 
-    const { balance: newBalance, balanceUSD: newBalanceUSD } = await walletController.getBalance(currentAccount.address, network);
+    setIsLoadingTokens(true);
 
-    setBalance(newBalance);
-    setBalanceUSD(newBalanceUSD);
+    try {
+      const portfolio: Portfolio = await walletController.getPortfolio(currentAccount.address);
+      setBalance(portfolio.balance);
+      setBalanceUSD(portfolio.balanceUSD);
+      setTokens(portfolio.tokens);
+      setTotalValue(portfolio.totalValue);
+    } catch (error) {
+      console.error("Failed to fetch portfolio:", error);
+      setTokens([]);
+      setTotalValue("0.00");
+    } finally {
+      setIsLoadingTokens(false);
+    }
   };
 
-  const startFetchBalance = (network: Network) => {
-    fetchBalance(network);
+  const startFetchPortfolio = () => {
+    fetchPortfolio();
     if (fetchBalanceTimerRef.current) {
       clearInterval(fetchBalanceTimerRef.current);
     }
     fetchBalanceTimerRef.current = setInterval(() => {
-      console.log("Fetching balance...");
-      fetchBalance(network);
+      console.log("Fetching portfolio...");
+      fetchPortfolio();
     }, 10000);
   };
 
   useEffect(() => {
     console.log("WalletHome mounted");
-    fetchBalance(currentNetwork);
+    fetchPortfolio();
     walletEventBus.on("network:changed", ({ network }) => {
       console.log("Current network:", network);
-      // 切换网络后重新获取余额
+      // 切换网络后重新获取 portfolio
       setCurrentNetwork(network);
       addNotification("success", "网络切换成功");
-      startFetchBalance(network);
+      startFetchPortfolio();
     });
 
     return () => {
@@ -264,10 +279,10 @@ export default function WalletHome() {
           {/* Balance Display - Centered */}
           <div className="text-center mb-8">
             <div className="text-5xl font-bold mb-2 bg-gradient-to-r text-primary">
-              {balance} {currentNetwork.symbol}
+              ${totalValue}
             </div>
             <div className="flex items-center justify-center gap-2 text-gray-400">
-              <span className="text-lg">${balanceUSD}</span>
+              <span className="text-lg">{balance} {currentNetwork.symbol}</span>
             </div>
             {/* 地址显示区域 */}
             {currentAccount?.address && (
@@ -532,7 +547,7 @@ export default function WalletHome() {
         {/* Main Content */}
         <main className="px-8 space-y-8">
           {/* 资产展示区域 */}
-          <WalletAssets></WalletAssets>
+          <WalletAssets portfolio={{ balance, balanceUSD, tokens, totalValue, timestamp: Date.now() }} isLoading={isLoadingTokens} />
 
           {/* Market Statistics */}
           <section>
@@ -548,7 +563,7 @@ export default function WalletHome() {
             onTransactionComplete={(txHash) => {
               console.log("Transaction completed:", txHash);
               // Refresh balance after transaction
-              fetchBalance(currentNetwork);
+              fetchPortfolio();
             }}
           />
         )}
