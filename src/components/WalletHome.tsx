@@ -146,6 +146,10 @@ export default function WalletHome() {
 
   // 处理网络切换
   const handleNetworkSwitch = async (networkId: string) => {
+    if (isLoadingTokens) {
+      setShowNetworkSelector(false);
+      return;
+    }
     try {
       await networkController.switchNetwork(networkId);
       setShowNetworkSelector(false);
@@ -184,6 +188,9 @@ export default function WalletHome() {
     console.log("WalletHome mounted");
     fetchPortfolio();
   }, [currentAccount, currentNetwork]);
+
+  const onWalletAssetsTabClick = (tab: string) => {
+  }
 
   return (
     <div className="min-h-screen bg-black text-white pb-24">
@@ -528,7 +535,7 @@ export default function WalletHome() {
         {/* Main Content */}
         <main className="px-8 space-y-8">
           {/* 资产展示区域 */}
-          <WalletAssets portfolio={{ balance, balanceUSD, tokens, totalValue, timestamp: Date.now() }} isLoading={isLoadingTokens} />
+          <WalletAssets portfolio={{ balance, balanceUSD, tokens, totalValue, timestamp: Date.now() }} isLoading={isLoadingTokens} onTabClick={onWalletAssetsTabClick} />
 
           {/* Market Statistics */}
           <section>

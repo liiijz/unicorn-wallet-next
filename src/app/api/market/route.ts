@@ -74,8 +74,6 @@ export async function GET(request: NextRequest) {
     // 调用 CoinGecko API
     const coingeckoUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=${order}&per_page=10&page=1&sparkline=true&price_change_percentage=24h`;
     
-    console.log(`[Market API] 请求 CoinGecko: ${coingeckoUrl}`);
-    
     // 调用 CoinGecko API
     const response = await fetch(coingeckoUrl, {
       headers: {
