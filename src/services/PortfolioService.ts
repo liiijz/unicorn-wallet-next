@@ -3,6 +3,12 @@ import type { Token } from "@/types/Token";
 import { networkManager } from "./NetworkManager";
 
 class PortfolioService {
+  private nativeTokens: Record<number, { name: string; symbol: string; decimals: number }> = {
+    1: { name: "Ethereum", symbol: "ETH", decimals: 18 },
+    56: { name: "BNB", symbol: "BNB", decimals: 18 },
+    137: { name: "Polygon", symbol: "MATIC", decimals: 18 },
+    // 可以根据需要添加更多网络
+  };
   /**
    * 获取地址的所有 ERC-20 Token 列表
    * @param address 钱包地址
@@ -39,10 +45,16 @@ class PortfolioService {
           const balanceFormatted = ethers.formatUnits(balance, decimals);
           const priceUSD = token.tokenPrices?.[0]?.value || "0";
 
+          // 处理原生代币
+          const nativeInfo = this.nativeTokens[chainId];
+          const isNative = !token.tokenAddress && nativeInfo;
+          const name = isNative ? nativeInfo.name : (token.tokenMetadata?.name || "Unknown Token");
+          const symbol = isNative ? nativeInfo.symbol : (token.tokenMetadata?.symbol || "UNK");
+
           return {
             contractAddress: token.tokenAddress,
-            name: token.tokenMetadata?.name || "Unknown Token",
-            symbol: token.tokenMetadata?.symbol || "UNK",
+            name,
+            symbol,
             decimals,
             balance,
             balanceFormatted,
