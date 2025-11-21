@@ -2,14 +2,14 @@ import { ethers } from "ethers";
 import type { Token, TokenList } from "@/types/Token";
 import { networkManager } from "./NetworkManager";
 
-class TokenService {
+class PortfolioService {
   /**
    * 获取地址的所有 ERC-20 Token 列表
    * @param address 钱包地址
    * @param chainId 链 ID
    * @returns Token 列表
    */
-  async getTokenList(address: string, chainId: number): Promise<TokenList> {
+  async getTokenBalances(address: string, chainId: number): Promise<TokenList> {
     try {
       // 调用本地 Portfolio API 路由
       const response = await fetch(`/api/portfolio?chainid=${chainId}&address=${address}`);
@@ -63,4 +63,4 @@ class TokenService {
   }
 }
 
-export const tokenService = new TokenService();
+export const portfolioService = new PortfolioService();

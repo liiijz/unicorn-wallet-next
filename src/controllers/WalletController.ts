@@ -8,7 +8,7 @@ import { WalletStatus } from "@/types/WalletStatus";
 import { ethers } from "ethers";
 import type { Network } from "@/types/Network";
 import { networkManager } from "@/services/NetworkManager";
-import { tokenService } from "@/services/TokenService";
+import { portfolioService } from "@/services/PortfolioService";
 import type { TokenList, Portfolio } from "@/types/Token";
 import { formatAddress } from "@/utils";
 
@@ -340,7 +340,7 @@ class WalletController {
 
     try {
       // 使用 TokenService 获取完整的 token 列表（包含原生代币和 ERC20 代币）
-      const tokenList = await tokenService.getTokenList(address, chainId);
+      const tokenList = await portfolioService.getTokenBalances(address, chainId);
 
       // 分离原生代币和 ERC20 代币
       const nativeToken = tokenList.tokens.find((token: any) => token.contractAddress === null);
