@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import type { Token, TokenList } from "@/types/Token";
+import type { Token } from "@/types/Token";
 import { networkManager } from "./NetworkManager";
 
 class PortfolioService {
@@ -9,7 +9,7 @@ class PortfolioService {
    * @param chainId 链 ID
    * @returns Token 列表
    */
-  async getTokenBalances(address: string, chainId: number): Promise<TokenList> {
+  async getTokens(address: string, chainId: number): Promise<Token[]> {
     try {
       // 调用本地 Portfolio API 路由
       const response = await fetch(`/api/portfolio?chainid=${chainId}&address=${address}`);
@@ -24,15 +24,15 @@ class PortfolioService {
 
       if (!data.data || !data.data.tokens) {
         console.warn("[TokenService] Alchemy Portfolio API 返回空结果");
-        return { tokens: [], timestamp: Date.now() };
+        return [];
       }
 
       // 转换 Alchemy 响应为 Token 格式
       const tokens: Token[] = data.data.tokens
-        // .filter((token: any) => {
-        //   // 过滤掉原生代币（tokenAddress 为 null）或余额为 0 的代币
-        //   return token.tokenAddress !== null && BigInt(token.tokenBalance) > 0n;
-        // })
+        .filter((token: any) => {
+          // 过滤掉余额为 0 的代币
+          return BigInt(token.tokenBalance) > 0n;
+        })
         .map((token: any) => {
           const decimals = token.tokenMetadata?.decimals || 18;
           const balance = BigInt(token.tokenBalance).toString();
@@ -52,10 +52,7 @@ class PortfolioService {
           };
         });
 
-      return {
-        tokens,
-        timestamp: Date.now(),
-      };
+      return tokens;
     } catch (error) {
       console.error("[TokenService] Alchemy Portfolio API 请求失败:", error);
       throw error;

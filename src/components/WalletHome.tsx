@@ -535,7 +535,7 @@ export default function WalletHome() {
         {/* Main Content */}
         <main className="px-8 space-y-8">
           {/* 资产展示区域 */}
-          <WalletAssets portfolio={{ balance, balanceUSD, tokens, totalValue, timestamp: Date.now() }} isLoading={isLoadingTokens} onTabClick={onWalletAssetsTabClick} />
+          <WalletAssets portfolio={{ balance, balanceUSD, tokens, totalValue }} isLoading={isLoadingTokens} onTabClick={onWalletAssetsTabClick} />
 
           {/* Market Statistics */}
           <section>

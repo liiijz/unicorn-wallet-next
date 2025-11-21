@@ -31,20 +31,6 @@ export interface Token {
 }
 
 /**
- * Token 列表响应
- */
-export interface TokenList {
-  /** Token 列表 */
-  tokens: Token[];
-  
-  /** 总价值（USD） */
-  totalValueUSD?: string;
-  
-  /** 数据获取时间戳 */
-  timestamp: number;
-}
-
-/**
  * Portfolio 响应（包含原生代币和 tokens）
  */
 export interface Portfolio {
@@ -59,7 +45,4 @@ export interface Portfolio {
   
   /** 总价值(USD) */
   totalValue: string;
-  
-  /** 数据更新时间戳 */
-  timestamp: number;
 }

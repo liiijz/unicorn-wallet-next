@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 import type { Network } from "@/types/Network";
 import { networkManager } from "@/services/NetworkManager";
 import { portfolioService } from "@/services/PortfolioService";
-import type { TokenList, Portfolio } from "@/types/Token";
+import type { Portfolio, Token } from "@/types/Token";
 import { formatAddress } from "@/utils";
 
 class WalletController {
@@ -334,17 +334,16 @@ class WalletController {
         balanceUSD: "0.00",
         tokens: [],
         totalValue: "0.00",
-        timestamp: Date.now()
       };
     }
 
     try {
       // 使用 TokenService 获取完整的 token 列表（包含原生代币和 ERC20 代币）
-      const tokenList = await portfolioService.getTokenBalances(address, chainId);
+      const tokenList: Token[] = await portfolioService.getTokens(address, chainId);
 
       // 分离原生代币和 ERC20 代币
-      const nativeToken = tokenList.tokens.find((token: any) => token.contractAddress === null);
-      const erc20Tokens = tokenList.tokens.filter((token: any) => token.contractAddress !== null);
+      const nativeToken = tokenList.find((token: any) => token.contractAddress === null);
+      const erc20Tokens = tokenList.filter((token: any) => token.contractAddress !== null);
 
       // 处理原生代币
       let balance = "0.0000";
@@ -367,7 +366,6 @@ class WalletController {
         balanceUSD,
         tokens: erc20Tokens,
         totalValue,
-        timestamp: tokenList.timestamp
       };
     } catch (error) {
       console.error("Failed to fetch portfolio:", error);
@@ -376,7 +374,6 @@ class WalletController {
         balanceUSD: "0.00",
         tokens: [],
         totalValue: "0.00",
-        timestamp: Date.now()
       };
     }
   }
