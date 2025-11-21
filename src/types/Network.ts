@@ -6,6 +6,7 @@ export interface Network {
   symbol: string;
   blockExplorerUrl?: string;
   isCustom?: boolean;
+  alchemyNetwork?: string;
 }
 
 export const PRESET_NETWORKS: Network[] = [
@@ -16,24 +17,17 @@ export const PRESET_NETWORKS: Network[] = [
     rpcUrl: "https://eth.llamarpc.com",
     symbol: "ETH",
     blockExplorerUrl: "https://etherscan.io",
-    isCustom: false,
-  },
-  {
-    id: "goerli",
-    name: "Goerli Testnet",
-    chainId: 5,
-    rpcUrl: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-    symbol: "GoerliETH",
-    blockExplorerUrl: "https://goerli.etherscan.io",
+    alchemyNetwork: "eth-mainnet",
     isCustom: false,
   },
   {
     id: "sepolia",
     name: "Sepolia Testnet",
     chainId: 11155111,
-    rpcUrl: "https://ethereum-sepolia-rpc.publicnode.com", // 公共免费 RPC
-    symbol: "ETH", // 标准符号
+    rpcUrl: "https://ethereum-sepolia-rpc.publicnode.com",
+    symbol: "ETH",
     blockExplorerUrl: "https://sepolia.etherscan.io",
+    alchemyNetwork: "eth-sepolia",
     isCustom: false,
   },
   {
@@ -43,6 +37,7 @@ export const PRESET_NETWORKS: Network[] = [
     rpcUrl: "https://bsc-dataseed.binance.org",
     symbol: "BNB",
     blockExplorerUrl: "https://bscscan.com",
+    alchemyNetwork: "bnb-mainnet",
     isCustom: false,
   },
   {
@@ -52,17 +47,11 @@ export const PRESET_NETWORKS: Network[] = [
     rpcUrl: "https://data-seed-prebsc-1-s1.binance.org:8545",
     symbol: "tBNB",
     blockExplorerUrl: "https://testnet.bscscan.com",
-    isCustom: false,
-  },
-  {
-    id: "localhost",
-    name: "Localhost",
-    chainId: 31337,
-    rpcUrl: "http://127.0.0.1:8545",
-    symbol: "ETH",
+    alchemyNetwork: "bnb-testnet",
     isCustom: false,
   },
 ];
+
 
 export interface CustomNetworkConfig {
   name: string;

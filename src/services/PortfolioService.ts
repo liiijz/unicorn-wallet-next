@@ -52,6 +52,8 @@ class PortfolioService {
           };
         });
 
+      console.log("[TokenService] 获取代币列表:", tokens);
+
       return tokens;
     } catch (error) {
       console.error("[TokenService] Alchemy Portfolio API 请求失败:", error);

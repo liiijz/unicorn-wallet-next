@@ -364,7 +364,7 @@ class WalletController {
       return {
         balance,
         balanceUSD,
-        tokens: erc20Tokens,
+        tokens: tokenList,
         totalValue,
       };
     } catch (error) {
