@@ -77,7 +77,7 @@ const Splash = ({ onFinish, duration = 2000 }: SplashProps) => {
               : "opacity-0 translate-y-10"
           }`}
         >
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-purple-400 animate-gradient">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text  bg-cyan-400">
             Unicorn Wallet
           </h1>
         </div>
@@ -89,9 +89,9 @@ const Splash = ({ onFinish, duration = 2000 }: SplashProps) => {
           }`}
         >
           <div className="flex gap-2">
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-100"></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-200"></div>
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-200"></div>
           </div>
         </div>
       </div>
