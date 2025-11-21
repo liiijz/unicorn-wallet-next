@@ -321,28 +321,6 @@ class WalletController {
     }
   }
 
-  // ========== Balance ==========
-
-  /**
-   * 获取账户的所有 ERC-20 Token 列表
-   * @param address 账户地址
-   * @param chainId 网络 Chain ID
-   * @returns Token 列表响应
-   */
-  async getTokenList(address: string, chainId: number): Promise<TokenList> {
-    if (!address) {
-      return { tokens: [], timestamp: Date.now() };
-    }
-
-    try {
-      // 使用 TokenService 获取 token 列表
-      return await tokenService.getTokenList(address, chainId);
-    } catch (error) {
-      console.error("Failed to fetch token list:", error);
-      return { tokens: [], timestamp: Date.now() };
-    }
-  }
-
   /**
    * 获取账户的完整 Portfolio（原生代币 + Tokens）
    * @param address 账户地址
@@ -402,6 +380,8 @@ class WalletController {
       };
     }
   }
+
+  
 
   // ========== Transaction ==========
   // Provider 管理已移至 NetworkManager
