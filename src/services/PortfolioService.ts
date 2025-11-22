@@ -46,6 +46,11 @@ class PortfolioService {
           const name = isNative ? nativeInfo.name : (token.tokenMetadata?.name || "Unknown Token");
           const symbol = isNative ? nativeInfo.symbol : (token.tokenMetadata?.symbol || "UNK");
 
+          let logoURI = token.tokenMetadata?.logo;
+          if (logoURI === null) {
+            logoURI = getCryptoIconSvgPath(symbol);
+          }
+
           return {
             contractAddress: token.tokenAddress,
             name,
@@ -53,7 +58,7 @@ class PortfolioService {
             decimals,
             balance,
             balanceFormatted,
-            logoURI: token.tokenMetadata?.logo,
+            logoURI: logoURI,
             priceUSD,
             valueUSD: (parseFloat(balanceFormatted) * parseFloat(priceUSD)).toString(),
           };
@@ -67,6 +72,13 @@ class PortfolioService {
       throw error;
     }
   }
+}
+
+function getCryptoIconSvgPath(symbol: string): string {
+  symbol = symbol.toLowerCase();
+  const path = "/icons/crypto/" + symbol + ".svg";
+  console.log("getCryptoIconSvgPath:", path);
+  return path;
 }
 
 export const portfolioService = new PortfolioService();
