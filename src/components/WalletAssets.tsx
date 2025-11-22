@@ -86,11 +86,11 @@ export const WalletAssets = ({ portfolio, isLoading, onTabClick }: { portfolio: 
 
                   {/* Token Balance & Value */}
                   <div className="text-right">
-                    <div className="text-white font-medium">
-                      {parseFloat(token.balanceFormatted).toFixed(4)}
+                    <div className="text-white font-medium"> 
+                      {token.balanceFormatted}
                     </div>
                     {token.valueUSD && (
-                      <div className="text-gray-400 text-xs">
+                      <div className="text-gray-400 ">
                         ${parseFloat(token.valueUSD).toFixed(2)}
                       </div>
                     )}
